@@ -37,7 +37,7 @@ export interface LinterService {
    * Check the `version` and qualitatively check if it is the desired result.
    */
   lint: (input: LintInput) => Promise<LinterServiceResult>;
-  /** Update dependency packages. */
+  /** Update package.json. */
   updatePackageJson: (pkg: any) => Promise<void>;
   /** Install dependencies. */
   install: () => Promise<void>;
@@ -77,11 +77,11 @@ export async function setupLintServer({
 
   await webContainer.mount(serverFiles);
 
-  let updatingDependencies = Promise.resolve();
+  let updatingPackageJson = Promise.resolve();
   const installer = new Installer({ webContainer, consoleOutput, outputTabs });
 
   async function installDeps() {
-    await updatingDependencies;
+    await updatingPackageJson;
 
     const exitCode = await installer.install();
 
@@ -137,11 +137,11 @@ export async function setupLintServer({
       return setLintProcess(() => lint(server, input));
     },
     async updatePackageJson(pkg) {
-      updatingDependencies = webContainer.fs.writeFile(
+      updatingPackageJson = webContainer.fs.writeFile(
         "/package.json",
         JSON.stringify(pkg, null, 2)
       );
-      await updatingDependencies;
+      await updatingPackageJson;
     },
     async install() {
       await installDeps();

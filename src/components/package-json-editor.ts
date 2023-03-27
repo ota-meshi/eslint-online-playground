@@ -2,21 +2,21 @@ import defaultPackageJson from "./defaults/package.json.js";
 import type { MonacoEditor } from "../monaco-editor/monaco-setup.js";
 import { setupMonacoEditor } from "../monaco-editor/monaco-setup.js";
 
-export type DepsEditorOptions = {
-  /** Specify a target element to set up the dependencies editor. */
+export type PackageJsonEditorOptions = {
+  /** Specify a target element to set up the package.json editor. */
   element: HTMLElement;
   /** Specify the initial values. */
   init: {
-    /** Dependency packages text. */
+    /** package.json text. */
     value?: string;
   };
   /** Event listeners. */
   listeners: {
-    /** Notifies that the dependency packages text have changed. */
+    /** Notifies that the package.json text have changed. */
     onChangeValue: (value: string) => void;
   };
 };
-export type DepsEditor = MonacoEditor & {
+export type PackageJsonEditor = MonacoEditor & {
   setPackages: (packages: PackageJsonData[]) => void;
 };
 export type PackageJsonData = {
@@ -24,17 +24,18 @@ export type PackageJsonData = {
   version: string;
   homepage?: string;
 };
-/** Setup a dependencies editor component. */
-export async function setupDepsEditor({
+/** Setup a package.json editor component. */
+export async function setupPackageJsonEditor({
   element,
   listeners,
   init,
-}: DepsEditorOptions): Promise<DepsEditor> {
-  const versionsPanel =
-    element.querySelector<HTMLUListElement>(".ep-deps-versions")!;
+}: PackageJsonEditorOptions): Promise<PackageJsonEditor> {
+  const versionsPanel = element.querySelector<HTMLUListElement>(
+    ".ep-package-json-versions"
+  )!;
 
   const monacoEditor = await setupMonacoEditor({
-    element: element.querySelector(".ep-deps-monaco")!,
+    element: element.querySelector(".ep-package-json-monaco")!,
     init: {
       language: "json",
       value: init?.value ?? JSON.stringify(defaultPackageJson, null, 2),
@@ -51,7 +52,7 @@ export async function setupDepsEditor({
       for (const pkg of packages) {
         const li = document.createElement("li");
 
-        li.classList.add("ep-deps-item");
+        li.classList.add("ep-package-json-item");
 
         const nameLink = document.createElement("a");
 

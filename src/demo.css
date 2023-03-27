@@ -36,12 +36,12 @@
   display: grid;
 }
 
-:is(.ep-code, .ep-config, .ep-deps) {
+:is(.ep-code, .ep-config, .ep-package-json) {
   display: grid;
   grid-template-rows: min-content 1fr;
 }
 
-:is(.ep-code, .ep-config, .ep-deps) > label {
+:is(.ep-code, .ep-config, .ep-package-json) > label {
   color: var(--ep-label-color);
   display: flex;
   gap: 0.25rem;
@@ -55,29 +55,29 @@
   border-radius: 2px;
 }
 
-.ep-deps {
+.ep-package-json {
   display: grid;
   grid:
-    "deps-label deps-label"
-    "deps-monaco deps-installed"
+    "package-json-label package-json-label"
+    "package-json-monaco package-json-installed"
     / 1fr 1fr;
   grid-template-rows: min-content 1fr;
 }
 
-.ep-deps > label {
-  grid-area: deps-label;
+.ep-package-json > label {
+  grid-area: package-json-label;
 }
 
-.ep-deps-monaco {
-  grid-area: deps-monaco;
+.ep-package-json-monaco {
+  grid-area: package-json-monaco;
 }
 
-.ep-deps-installed {
-  grid-area: deps-installed;
+.ep-package-json-installed {
+  grid-area: package-json-installed;
   padding-inline: 0.5rem;
 }
 
-.ep-deps-versions {
+.ep-package-json-versions {
   list-style: none;
   margin-block: 0;
   padding-inline-start: 0;
@@ -157,7 +157,7 @@
 
 .ep:not(:has(.ep-code-tab:checked)) .ep-code,
 .ep:not(:has(.ep-config-tab:checked)) .ep-config,
-.ep:not(:has(.ep-deps-tab:checked)) .ep-deps {
+.ep:not(:has(.ep-package-json-tab:checked)) .ep-package-json {
   display: none;
 }
 

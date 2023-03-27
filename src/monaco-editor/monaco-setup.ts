@@ -1,6 +1,18 @@
-import type { editor } from "monaco-editor";
+import type {
+  editor,
+  languages,
+  CancellationToken,
+  Range,
+  IDisposable,
+} from "monaco-editor";
 import { loadMonaco } from "./monaco-loader.js";
 
+export type ProvideCodeActions = (
+  model: editor.ITextModel,
+  range: Range,
+  context: languages.CodeActionContext,
+  token: CancellationToken
+) => languages.ProviderResult<languages.CodeActionList>;
 export type MonacoEditor = {
   /** Set the language. */
   setModelLanguage: (language: string) => void;
@@ -12,6 +24,8 @@ export type MonacoEditor = {
   setMarkers: (markers: editor.IMarkerData[]) => void;
   /** Gets the editor. */
   getEditor: () => editor.IStandaloneCodeEditor;
+  /** Register a code action provider. */
+  registerCodeActionProvider: (provideCodeActions: ProvideCodeActions) => void;
   /** Dispose the editor. */
   disposeEditor: () => void;
 };
@@ -32,6 +46,8 @@ export type MonacoDiffEditor = {
   getLeftEditor: () => editor.IStandaloneCodeEditor;
   /** Gets the modified editor. */
   getRightEditor: () => editor.IStandaloneCodeEditor;
+  /** Register a code action provider. */
+  registerCodeActionProvider: (provideCodeActions: ProvideCodeActions) => void;
   /** Dispose the all editors. */
   disposeEditor: () => void;
 };
@@ -122,6 +138,7 @@ export async function setupMonacoEditor({
       listeners?.onChangeValue?.(value);
     });
 
+    const codeActionProvider = buildCodeActionProviderContainer(leftEditor);
     const result: MonacoDiffEditor = {
       setModelLanguage: (lang) => {
         for (const model of [original, modified]) {
@@ -143,8 +160,10 @@ export async function setupMonacoEditor({
       },
       getLeftEditor: () => leftEditor,
       getRightEditor: () => rightEditor,
-
+      registerCodeActionProvider: (provideCodeActions) =>
+        codeActionProvider.register(provideCodeActions),
       disposeEditor: () => {
+        codeActionProvider.dispose();
         leftEditor.getModel()?.dispose();
         rightEditor.getModel()?.dispose();
         leftEditor.dispose();
@@ -164,6 +183,7 @@ export async function setupMonacoEditor({
     listeners?.onChangeValue?.(value);
   });
 
+  const codeActionProvider = buildCodeActionProviderContainer(standaloneEditor);
   const result: MonacoEditor = {
     setModelLanguage: (lang) => {
       const model = standaloneEditor.getModel();
@@ -180,8 +200,11 @@ export async function setupMonacoEditor({
       void updateMarkers(standaloneEditor, markers);
     },
     getEditor: () => standaloneEditor,
+    registerCodeActionProvider: (provideCodeActions) =>
+      codeActionProvider.register(provideCodeActions),
 
     disposeEditor: () => {
+      codeActionProvider.dispose();
       standaloneEditor.getModel()?.dispose();
       standaloneEditor.dispose();
     },
@@ -211,5 +234,45 @@ export async function setupMonacoEditor({
       id,
       JSON.parse(JSON.stringify(markers)) as editor.IMarkerData[]
     );
+  }
+
+  function buildCodeActionProviderContainer(
+    editor: editor.IStandaloneCodeEditor
+  ): {
+    register: (provideCodeActions: ProvideCodeActions) => void;
+    dispose: () => void;
+  } {
+    let codeActionProviderDisposable: IDisposable = {
+      dispose: () => {
+        // void
+      },
+    };
+
+    function updateCodeActionProvider(provideCodeActions: ProvideCodeActions) {
+      codeActionProviderDisposable.dispose();
+      codeActionProviderDisposable =
+        monaco.languages.registerCodeActionProvider("*", {
+          provideCodeActions(model, ...args) {
+            if (editor.getModel()!.uri !== model.uri) {
+              return {
+                actions: [],
+                dispose() {
+                  /* nop */
+                },
+              };
+            }
+            return provideCodeActions(model, ...args);
+          },
+        });
+    }
+
+    return {
+      register: (provideCodeActions) => {
+        updateCodeActionProvider(provideCodeActions);
+      },
+      dispose() {
+        codeActionProviderDisposable.dispose();
+      },
+    };
   }
 }

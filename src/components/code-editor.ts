@@ -85,10 +85,6 @@ export async function setupCodeEditor({
         lower.endsWith(".cts") ||
         lower.endsWith(".tsx")
       ? "typescript"
-      : lower.endsWith(".svelte")
-      ? "svelte"
-      : lower.endsWith(".astro")
-      ? "astro"
       : "javascript";
   }
 }

@@ -1,15 +1,15 @@
 import "./demo.css";
 import type { LinterServiceResultSuccess } from "./linter-service";
-import type { PackageJsonData } from "./components/deps-editor";
+import type { PackageJsonData } from "./components/package-json-editor";
 import type { Linter } from "eslint";
 import { debounce } from "./utils/debounce";
-import type { editor } from "monaco-editor";
+import type { editor, IRange, languages } from "monaco-editor";
 import html from "./demo.html?raw";
 import { loadMonaco } from "./monaco-editor";
 import { setupCodeEditor } from "./components/code-editor";
 import { setupConfigEditor } from "./components/config-editor";
 import { setupConsoleOutput } from "./components/console";
-import { setupDepsEditor } from "./components/deps-editor";
+import { setupPackageJsonEditor } from "./components/package-json-editor";
 import { setupLintServer } from "./linter-service";
 import { setupTabs } from "./components/output-tabs";
 import { setupWarningsPanel } from "./components/warnings";
@@ -21,8 +21,8 @@ export type InputValues = {
   fileName: string;
   /** Config text. */
   config: string;
-  /** Dependency packages text. */
-  deps: string;
+  /** package.json text. */
+  packageJson: string;
 };
 
 export type MountOptions = {
@@ -79,7 +79,7 @@ export async function mount({
       },
     },
   });
-  const [codeEditor, configEditor, depsEditor, lintServer, monaco] =
+  const [codeEditor, configEditor, packageJsonEditor, lintServer, monaco] =
     await Promise.all([
       setupCodeEditor({
         element: element.querySelector<HTMLDivElement>(".ep-code")!,
@@ -108,8 +108,8 @@ export async function mount({
         },
         init: { value: init?.config },
       }),
-      setupDepsEditor({
-        element: element.querySelector<HTMLDivElement>(".ep-deps")!,
+      setupPackageJsonEditor({
+        element: element.querySelector<HTMLDivElement>(".ep-package-json")!,
         listeners: {
           // eslint-disable-next-line @typescript-eslint/no-misused-promises -- ignore
           onChangeValue: debounce(async (value): Promise<void> => {
@@ -121,7 +121,7 @@ export async function mount({
               code: codeEditor.getLeftValue(),
               fileName: codeEditor.getFileName(),
               config: configEditor.getValue(),
-              deps: value,
+              packageJson: value,
             });
 
             consoleOutput.clear();
@@ -135,15 +135,18 @@ export async function mount({
             });
           }),
         },
-        init: { value: init?.deps },
+        init: { value: init?.packageJson },
       }),
       setupLintServer({ consoleOutput, outputTabs }),
       loadMonaco(),
     ]);
 
   let seq = 0;
+  const messageMap = new Map<string, Linter.LintMessage>();
 
-  if (await updatePackageJson(depsEditor.getValue())) {
+  setupCodeActionProvider();
+
+  if (await updatePackageJson(packageJsonEditor.getValue())) {
     await lintServer.install();
     await updateInstalledPackages();
     void lint({
@@ -157,15 +160,15 @@ export async function mount({
     async dispose() {
       codeEditor.disposeEditor();
       configEditor.disposeEditor();
-      depsEditor.disposeEditor();
+      packageJsonEditor.disposeEditor();
       await lintServer.teardown();
       element.innerHTML = "";
     },
   };
 
-  async function updatePackageJson(deps: string) {
+  async function updatePackageJson(packageJson: string) {
     try {
-      await lintServer.updatePackageJson(JSON.parse(deps));
+      await lintServer.updatePackageJson(JSON.parse(packageJson));
 
       return true;
     } catch (e) {
@@ -179,7 +182,7 @@ export async function mount({
 
   /** Read the actual installed packages and display version information. */
   async function updateInstalledPackages() {
-    const packageJsonText = depsEditor.getValue();
+    const packageJsonText = packageJsonEditor.getValue();
 
     let pkg: {
       dependencies?: Record<string, string>;
@@ -213,7 +216,7 @@ export async function mount({
       }
     }
 
-    depsEditor.setPackages(packages);
+    packageJsonEditor.setPackages(packages);
   }
 
   /** Handle input values change events. */
@@ -230,7 +233,7 @@ export async function mount({
       code,
       fileName,
       config,
-      deps: depsEditor.getValue(),
+      packageJson: packageJsonEditor.getValue(),
     });
     void lint({
       code,
@@ -254,6 +257,7 @@ export async function mount({
     codeEditor.setRightValue(code);
     codeEditor.setLeftMarkers([]);
     codeEditor.setRightMarkers([]);
+    messageMap.clear();
     const result = await lintServer.lint({
       version,
       code,
@@ -274,7 +278,11 @@ export async function mount({
     }
 
     codeEditor.setLeftMarkers(
-      result.result.messages.map((m) => messageToMarker(m, result.ruleMetadata))
+      result.result.messages.map((m) => {
+        const marker = messageToMarker(m, result.ruleMetadata);
+        messageMap.set(computeKey(marker), m);
+        return marker;
+      })
     );
     codeEditor.setRightMarkers(
       result.fixResult.messages.map((m) =>
@@ -282,6 +290,51 @@ export async function mount({
       )
     );
     codeEditor.setRightValue(result.output || "");
+  }
+
+  function setupCodeActionProvider() {
+    codeEditor.registerCodeActionProvider((model, _range, context) => {
+      if (context.only !== "quickfix") {
+        return undefined;
+      }
+
+      const actions: languages.CodeAction[] = [];
+      for (const marker of context.markers) {
+        const message = messageMap.get(computeKey(marker));
+        if (!message) {
+          continue;
+        }
+        if (message.fix) {
+          actions.push(
+            createQuickFixCodeAction(
+              `Fix this ${message.ruleId!} problem`,
+              marker,
+              model,
+              message.fix
+            )
+          );
+        }
+        if (message.suggestions) {
+          for (const suggestion of message.suggestions) {
+            actions.push(
+              createQuickFixCodeAction(
+                `${suggestion.desc} (${message.ruleId!})`,
+                marker,
+                model,
+                suggestion.fix
+              )
+            );
+          }
+        }
+      }
+
+      return {
+        actions,
+        dispose() {
+          /* noop */
+        },
+      };
+    });
   }
 
   function messageToMarker(
@@ -303,7 +356,7 @@ export async function mount({
         }
       : message.ruleId || "FATAL";
 
-    return {
+    const marker: editor.IMarkerData = {
       code,
       severity:
         message.severity === 1
@@ -316,5 +369,54 @@ export async function mount({
       endLineNumber,
       endColumn,
     };
+    return marker;
   }
+}
+
+/**
+ * Computes the key string from the given marker.
+ */
+function computeKey(marker: editor.IMarkerData) {
+  const code =
+    (typeof marker.code === "string"
+      ? marker.code
+      : marker.code && marker.code.value) || "";
+  return `[${marker.startLineNumber},${marker.startColumn},${marker.endLineNumber},${marker.endColumn}]-${code}`;
+}
+
+/**
+ * Create quick-fix code action.
+ */
+function createQuickFixCodeAction(
+  title: string,
+  marker: editor.IMarkerData,
+  model: editor.ITextModel,
+  fix: { range: [number, number]; text: string }
+): languages.CodeAction {
+  const start = model.getPositionAt(fix.range[0]);
+  const end = model.getPositionAt(fix.range[1]);
+
+  const editRange: IRange = {
+    startLineNumber: start.lineNumber,
+    startColumn: start.column,
+    endLineNumber: end.lineNumber,
+    endColumn: end.column,
+  };
+  return {
+    title,
+    diagnostics: [marker],
+    kind: "quickfix",
+    edit: {
+      edits: [
+        {
+          resource: model.uri,
+          textEdit: {
+            range: editRange,
+            text: fix.text,
+          },
+          versionId: model.getVersionId(),
+        },
+      ],
+    },
+  };
 }

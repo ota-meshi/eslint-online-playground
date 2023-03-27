@@ -17,8 +17,6 @@ export function loadMonaco(): Promise<Monaco> {
         validate: false, // Turn off CSS built-in validation.
       });
 
-      setupEnhancedLanguages(monaco);
-
       return monaco;
     })())
   );
@@ -81,24 +79,5 @@ async function appendMonacoEditorScript(): Promise<HTMLScriptElement> {
       }
     };
     document.head.append(script);
-  });
-}
-
-function setupEnhancedLanguages(monaco: Monaco) {
-  monaco.languages.register({ id: "astro" });
-  monaco.languages.registerTokensProviderFactory("astro", {
-    async create() {
-      const astro = await import("./monarch-syntaxes/astro");
-
-      return astro.language;
-    },
-  });
-  monaco.languages.register({ id: "svelte" });
-  monaco.languages.registerTokensProviderFactory("svelte", {
-    async create() {
-      const svelte = await import("./monarch-syntaxes/svelte");
-
-      return svelte.language;
-    },
   });
 }

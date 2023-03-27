@@ -44,7 +44,6 @@ export function setupWarningsPanel({
             a.endColumn - b.endColumn) ||
           0
       )) {
-        const ruleLinkText = `(${msg.ruleId})`;
         const ruleUrl = ruleMetadata[msg.ruleId!]?.docs?.url;
 
         const li = document.createElement("li");
@@ -58,50 +57,24 @@ export function setupWarningsPanel({
         li.appendChild(severity);
 
         const message = document.createElement("span");
-
+        message.textContent = `${msg.message.trim()}`;
         li.appendChild(message);
 
+        const ruleLinkText = `(${msg.ruleId})`;
         if (ruleUrl) {
-          const index = msg.message.lastIndexOf(ruleLinkText);
-
-          if (index >= 0) {
-            message.textContent = `${msg.message.slice(0, index).trim()}`;
-          } else {
-            message.textContent = `${msg.message.trim()}`;
-          }
-
           const ruleLink = document.createElement("a");
-
           ruleLink.textContent = ruleLinkText;
           ruleLink.href = ruleUrl;
           ruleLink.target = "_blank";
           li.appendChild(ruleLink);
-
-          // Add a span if the message is included after the rule name.
-          if (index >= 0) {
-            const afterMessage = msg.message
-              .slice(index + ruleLinkText.length)
-              .trim();
-
-            if (afterMessage) {
-              const afterSpan = document.createElement("span");
-
-              afterSpan.textContent = afterMessage;
-              li.appendChild(afterSpan);
-              afterSpan.addEventListener("click", () =>
-                listeners.onClickMessage(msg)
-              );
-            }
-          }
         } else {
-          message.textContent = `${msg.message.trim()}`;
+          message.textContent = ` ${ruleLinkText}`;
         }
 
         const lineNumbers = document.createElement("span");
-        const ln = formatPosition(msg.line, msg.endLine);
-        const col = formatPosition(msg.column, msg.endColumn);
+        const pos = formatPosition(msg);
 
-        lineNumbers.textContent = `[${ln}:${col}]`;
+        lineNumbers.textContent = `[${pos}]`;
         lineNumbers.classList.add("ep-line-numbers");
         li.appendChild(lineNumbers);
 
@@ -115,6 +88,13 @@ export function setupWarningsPanel({
   };
 }
 
-function formatPosition(start: number, end: number | undefined) {
-  return start === end || !end ? String(start) : [start, end].join("-");
+function formatPosition(message: Linter.LintMessage) {
+  const start = `${message.line}:${message.column}`;
+  if (message.endLine == null || message.endColumn == null) {
+    return start;
+  }
+  if (message.endLine === message.line) {
+    return `${start}-${message.endColumn}`;
+  }
+  return `${start}-${message.endLine}:${message.endColumn}`;
 }

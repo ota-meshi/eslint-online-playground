@@ -12,7 +12,7 @@ const {
   code: codeQueryParam,
   fileName: fileNameQueryParam,
   config: configQueryParam,
-  deps: depsQueryParam,
+  packageJson: packageJsonQueryParam,
 } = queryParam;
 
 void mount({
@@ -21,7 +21,7 @@ void mount({
     code: codeQueryParam,
     fileName: fileNameQueryParam,
     config: configQueryParam,
-    deps: depsQueryParam,
+    packageJson: packageJsonQueryParam,
   },
   listeners: {
     onChange: debounce(
@@ -29,7 +29,7 @@ void mount({
         code: string;
         fileName: string;
         config: string;
-        deps: string;
+        packageJson: string;
       }) => {
         const query = compress(values);
 
