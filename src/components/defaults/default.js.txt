@@ -1,7 +1,7 @@
 import fs from "fs";
 import { ESLint } from "eslint";
 
-fs.writeFileSync("foo.txt", "Hello!");
+fs.writeFileSync("foo.js", "require('foo')");
 
 const linter = new ESLint();
 

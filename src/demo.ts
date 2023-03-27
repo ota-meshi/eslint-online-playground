@@ -281,7 +281,7 @@ export async function mount({
         messageToMarker(m, result.ruleMetadata)
       )
     );
-    codeEditor.setRightValue(result.output);
+    codeEditor.setRightValue(result.output || "");
   }
 
   function messageToMarker(

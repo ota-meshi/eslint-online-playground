@@ -9,8 +9,6 @@ import { createJsonPayload, extractJson } from "./extract-json.mjs";
 import fs from "fs";
 import path from "path";
 import { ESLint } from "eslint";
-const eslintInstance = new ESLint();
-const eslintInstanceForFix = new ESLint({ fix: true });
 
 const rootDir = path.resolve();
 const SRC_DIR = path.join(rootDir, "src");
@@ -109,9 +107,11 @@ async function lint(input) {
     fs.writeFileSync(targetFile, input.code, "utf8");
     fs.writeFileSync(configFile, input.config, "utf8");
 
+    const eslintInstance = new ESLint();
+    const eslintInstanceForFix = new ESLint({ fix: true });
     const result = (await eslintInstance.lintFiles([targetFile]))[0];
     const fixResult = (await eslintInstanceForFix.lintFiles([targetFile]))[0];
-    const fixedFile = fixResult.output;
+    const fixedFile = fixResult.output ?? input.code;
 
     /** @type {LinterServiceResult} */
     const output = {

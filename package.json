@@ -42,6 +42,6 @@
   },
   "dependencies": {
     "@webcontainer/api": "^1.1.0",
-    "lz-string": "^1.5.0"
+    "fflate": "^0.7.4"
   }
 }
