@@ -1,0 +1,12 @@
+body {
+	background-color: whitesmoke;
+	margin: 0;
+	overscroll-behavior-y: none;
+}
+
+#app {
+	block-size: 100dvb;
+	display: grid;
+	min-inline-size: 48rem;
+	overflow-x: scroll;
+}

@@ -1,0 +1,11 @@
+import fs from "fs";
+import { ESLint } from "eslint";
+
+fs.writeFileSync("foo.txt", "Hello!");
+
+const linter = new ESLint();
+
+const result = await linter.lintFiles(["foo.js"]);
+console.log(result);
+
+process.exit();
