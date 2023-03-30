@@ -1,14 +1,14 @@
 import type { WebContainer, WebContainerProcess } from "@webcontainer/api";
 import { createJsonPayload, extractJson } from "./server/extract-json.mjs";
-import type { ConsoleOutput } from "../components/console";
-import type { Tabs } from "../components/output-tabs";
+import type ConsoleOutput from "../components/ConsoleOutput.vue";
+import type TabsPanel from "../components/TabsPanel.vue";
 
 export class Server {
   private readonly webContainer: WebContainer;
 
-  private readonly consoleOutput: ConsoleOutput;
+  private readonly consoleOutput: InstanceType<typeof ConsoleOutput>;
 
-  private readonly outputTabs: Tabs;
+  private readonly outputTabs: InstanceType<typeof TabsPanel>;
 
   private waitPromise: Promise<any>;
 
@@ -20,8 +20,8 @@ export class Server {
     webContainer,
   }: {
     webContainer: WebContainer;
-    consoleOutput: ConsoleOutput;
-    outputTabs: Tabs;
+    consoleOutput: InstanceType<typeof ConsoleOutput>;
+    outputTabs: InstanceType<typeof TabsPanel>;
   }) {
     this.webContainer = webContainer;
     this.consoleOutput = consoleOutput;

@@ -1,0 +1,64 @@
+<script setup lang="ts">
+import { nextTick, ref } from "vue";
+import ansiRegex from "ansi-regex";
+
+const CHA = "\u001b[1G";
+
+let nextCHA = false;
+
+const element = ref<HTMLDivElement>();
+const consoleText = ref("");
+
+function appendLine(string: string) {
+  const currContent = (consoleText.value = consoleText.value.trimEnd());
+
+  append(`${(currContent ? "\n" : "") + string}\n`);
+}
+
+function append(string: string) {
+  const ansiRe = ansiRegex();
+  let start = 0;
+
+  for (const match of string.matchAll(ansiRe)) {
+    if (match[0] === CHA) {
+      nextCHA = true;
+    }
+
+    append(string.slice(start, match.index));
+    start = match.index! + match[0].length;
+  }
+
+  append(string.slice(start));
+
+  nextTick().then(() => {
+    if (element.value) {
+      element.value.scrollTop = element.value.scrollHeight;
+    }
+  });
+
+  function append(s: string) {
+    if (!s) return;
+
+    if (nextCHA) {
+      const lastLinefeed = consoleText.value.lastIndexOf("\n");
+
+      if (lastLinefeed > -1)
+        consoleText.value = consoleText.value.slice(0, lastLinefeed + 1);
+
+      nextCHA = false;
+    }
+
+    consoleText.value += s;
+  }
+}
+
+function clear() {
+  consoleText.value = "";
+}
+
+defineExpose({ appendLine, append, clear });
+</script>
+
+<template>
+  <div ref="element" class="ep-console">{{ consoleText }}</div>
+</template>

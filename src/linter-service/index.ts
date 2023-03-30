@@ -1,9 +1,9 @@
 import type { ESLint } from "eslint";
-import type { ConsoleOutput } from "../components/console";
+import type ConsoleOutput from "../components/ConsoleOutput.vue";
+import type TabsPanel from "../components/TabsPanel.vue";
 import type { FileSystemTree } from "@webcontainer/api";
 import { Installer } from "./installer";
 import { Server } from "./server";
-import type { Tabs } from "../components/output-tabs";
 import { WebContainer } from "@webcontainer/api";
 
 export type LinterServiceResult =
@@ -54,8 +54,8 @@ export async function setupLintServer({
   consoleOutput,
   outputTabs,
 }: {
-  consoleOutput: ConsoleOutput;
-  outputTabs: Tabs;
+  consoleOutput: InstanceType<typeof ConsoleOutput>;
+  outputTabs: InstanceType<typeof TabsPanel>;
 }): Promise<LinterService> {
   outputTabs.setChecked("console");
   consoleOutput.appendLine("Starting WebContainer...");

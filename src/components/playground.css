@@ -161,11 +161,6 @@
   display: none;
 }
 
-.ep:not(:has(.ep-warning-tab:checked)) .ep-warnings,
-.ep:not(:has(.ep-console-tab:checked)) .ep-console {
-  display: none;
-}
-
 :is(.ep-input-tabs, .ep-output-tabs) label {
   color: var(--ep-inactive-tab-color);
   cursor: pointer;

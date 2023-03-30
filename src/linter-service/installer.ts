@@ -1,13 +1,14 @@
 import type { WebContainer, WebContainerProcess } from "@webcontainer/api";
-import type { ConsoleOutput } from "../components/console";
-import type { Tabs } from "../components/output-tabs";
+
+import type ConsoleOutput from "../components/ConsoleOutput.vue";
+import type TabsPanel from "../components/TabsPanel.vue";
 
 export class Installer {
   private readonly webContainer: WebContainer;
 
-  private readonly consoleOutput: ConsoleOutput;
+  private readonly consoleOutput: InstanceType<typeof ConsoleOutput>;
 
-  private readonly outputTabs: Tabs;
+  private readonly outputTabs: InstanceType<typeof TabsPanel>;
 
   private installProcess: Promise<WebContainerProcess> | undefined;
 
@@ -17,8 +18,8 @@ export class Installer {
     webContainer,
   }: {
     webContainer: WebContainer;
-    consoleOutput: ConsoleOutput;
-    outputTabs: Tabs;
+    consoleOutput: InstanceType<typeof ConsoleOutput>;
+    outputTabs: InstanceType<typeof TabsPanel>;
   }) {
     this.webContainer = webContainer;
     this.consoleOutput = consoleOutput;
@@ -50,7 +51,7 @@ export class Installer {
 
 async function installDependencies(
   webContainer: WebContainer,
-  consoleOutput: ConsoleOutput
+  consoleOutput: InstanceType<typeof ConsoleOutput>
 ) {
   const installProcess = await webContainer.spawn("npm", ["install"]);
 

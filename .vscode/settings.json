@@ -8,7 +8,8 @@
     "jsonc",
     "yaml",
     "markdown",
-    "toml"
+    "toml",
+    "vue"
   ],
   "editor.formatOnSave": true,
   "editor.defaultFormatter": "esbenp.prettier-vscode",

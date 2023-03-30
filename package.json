@@ -5,8 +5,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "vite dev",
-    "build": "vite build",
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
     "preview": "vite preview",
     "open-site": "npx http-server ./build",
     "lint": "eslint .",
@@ -22,11 +22,17 @@
     "url": "https://github.com/ota-meshi/eslint-plugin-n-playground/issues"
   },
   "homepage": "https://github.com/ota-meshi/eslint-plugin-n-playground#readme",
+  "dependencies": {
+    "@webcontainer/api": "^1.1.0",
+    "fflate": "^0.7.4",
+    "vue": "^3.2.47"
+  },
   "devDependencies": {
     "@ota-meshi/eslint-plugin": "^0.13.1",
     "@types/eslint": "^8.21.3",
     "@types/node": "^18.13.0",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
+    "@vitejs/plugin-vue": "^4.1.0",
     "eslint": "~8.34.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-json-schema-validator": "^4.0.2",
@@ -35,13 +41,12 @@
     "eslint-plugin-node-dependencies": "^0.10.0",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-toml": "^0.4.0",
+    "eslint-plugin-vue": "^9.10.0",
     "eslint-plugin-yml": "^1.2.0",
     "monaco-editor": "^0.35.0",
-    "typescript": "^4.7.4",
-    "vite": "^4.2.1"
-  },
-  "dependencies": {
-    "@webcontainer/api": "^1.1.0",
-    "fflate": "^0.7.4"
+    "typescript": "^4.9.3",
+    "vite": "^4.2.1",
+    "vue-eslint-parser": "^9.1.0",
+    "vue-tsc": "^1.2.0"
   }
 }

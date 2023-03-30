@@ -12,6 +12,7 @@ module.exports = {
   extends: [
     "eslint:recommended",
     "plugin:@ota-meshi/recommended",
+    "plugin:@ota-meshi/+vue3",
     "plugin:@ota-meshi/+package-json",
     "plugin:@ota-meshi/+json",
     "plugin:@ota-meshi/+yaml",
@@ -22,6 +23,7 @@ module.exports = {
   rules: {
     "require-jsdoc": "off",
     "no-shadow": "off",
+    "no-unused-vars": "off",
   },
   overrides: [
     {
@@ -32,6 +34,9 @@ module.exports = {
         "plugin:@ota-meshi/+typescript",
       ],
       parser: "@typescript-eslint/parser",
+      parserOptions: {
+        project: "./tsconfig.eslint.json",
+      },
       rules: {
         "@typescript-eslint/no-non-null-assertion": "off",
         "@typescript-eslint/no-explicit-any": "off",

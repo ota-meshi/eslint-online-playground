@@ -7,13 +7,14 @@ import type {
 } from "monaco-editor";
 import { loadMonaco } from "./monaco-loader.js";
 
-export type ProvideCodeActions = (
+export type CodeActionProvider = (
   model: editor.ITextModel,
   range: Range,
   context: languages.CodeActionContext,
   token: CancellationToken
 ) => languages.ProviderResult<languages.CodeActionList>;
 export type MonacoEditor = {
+  type: "standalone";
   /** Set the language. */
   setModelLanguage: (language: string) => void;
   /** Sets the value text of the editor. */
@@ -25,11 +26,12 @@ export type MonacoEditor = {
   /** Gets the editor. */
   getEditor: () => editor.IStandaloneCodeEditor;
   /** Register a code action provider. */
-  registerCodeActionProvider: (provideCodeActions: ProvideCodeActions) => void;
+  registerCodeActionProvider: (codeActionProvider: CodeActionProvider) => void;
   /** Dispose the editor. */
   disposeEditor: () => void;
 };
 export type MonacoDiffEditor = {
+  type: "diff";
   /** Set the language. */
   setModelLanguage: (language: string) => void;
   /** Sets the value text of the original editor. */
@@ -47,7 +49,7 @@ export type MonacoDiffEditor = {
   /** Gets the modified editor. */
   getRightEditor: () => editor.IStandaloneCodeEditor;
   /** Register a code action provider. */
-  registerCodeActionProvider: (provideCodeActions: ProvideCodeActions) => void;
+  registerCodeActionProvider: (codeActionProvider: CodeActionProvider) => void;
   /** Dispose the all editors. */
   disposeEditor: () => void;
 };
@@ -81,6 +83,9 @@ export async function setupMonacoEditor(
 export async function setupMonacoEditor(
   options: MonacoDiffEditorOptions
 ): Promise<MonacoDiffEditor>;
+export async function setupMonacoEditor(
+  options: BaseMonacoEditorOptions & { useDiffEditor: boolean }
+): Promise<MonacoEditor | MonacoDiffEditor>;
 
 export async function setupMonacoEditor({
   init,
@@ -140,6 +145,7 @@ export async function setupMonacoEditor({
 
     const codeActionProvider = buildCodeActionProviderContainer(leftEditor);
     const result: MonacoDiffEditor = {
+      type: "diff",
       setModelLanguage: (lang) => {
         for (const model of [original, modified]) {
           monaco.editor.setModelLanguage(model, lang);
@@ -185,6 +191,7 @@ export async function setupMonacoEditor({
 
   const codeActionProvider = buildCodeActionProviderContainer(standaloneEditor);
   const result: MonacoEditor = {
+    type: "standalone",
     setModelLanguage: (lang) => {
       const model = standaloneEditor.getModel();
 
@@ -239,7 +246,7 @@ export async function setupMonacoEditor({
   function buildCodeActionProviderContainer(
     editor: editor.IStandaloneCodeEditor
   ): {
-    register: (provideCodeActions: ProvideCodeActions) => void;
+    register: (codeActionProvider: CodeActionProvider) => void;
     dispose: () => void;
   } {
     let codeActionProviderDisposable: IDisposable = {
@@ -248,7 +255,7 @@ export async function setupMonacoEditor({
       },
     };
 
-    function updateCodeActionProvider(provideCodeActions: ProvideCodeActions) {
+    function updateCodeActionProvider(codeActionProvider: CodeActionProvider) {
       codeActionProviderDisposable.dispose();
       codeActionProviderDisposable =
         monaco.languages.registerCodeActionProvider("*", {
@@ -261,14 +268,14 @@ export async function setupMonacoEditor({
                 },
               };
             }
-            return provideCodeActions(model, ...args);
+            return codeActionProvider(model, ...args);
           },
         });
     }
 
     return {
-      register: (provideCodeActions) => {
-        updateCodeActionProvider(provideCodeActions);
+      register: (codeActionProvider) => {
+        updateCodeActionProvider(codeActionProvider);
       },
       dispose() {
         codeActionProviderDisposable.dispose();
