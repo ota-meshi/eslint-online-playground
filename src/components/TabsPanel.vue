@@ -1,5 +1,6 @@
 <script lang="ts">
-import { provide, ref, watch, Ref } from "vue";
+import type { Ref } from "vue";
+import { provide, ref, watch } from "vue";
 export type Tab = {
   readonly title: string;
   readonly name: string;

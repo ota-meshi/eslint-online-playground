@@ -28,7 +28,7 @@
     "vue": "^3.2.47"
   },
   "devDependencies": {
-    "@ota-meshi/eslint-plugin": "^0.13.1",
+    "@ota-meshi/eslint-plugin": "^0.13.3",
     "@types/eslint": "^8.21.3",
     "@types/node": "^18.13.0",
     "@typescript-eslint/eslint-plugin": "^5.56.0",

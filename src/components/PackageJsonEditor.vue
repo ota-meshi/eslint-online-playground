@@ -11,9 +11,8 @@ defineProps<{
   packageJson: string;
   installedPackages: PackageJsonData[];
 }>();
-const emit = defineEmits<{
-  (type: "update:packageJson", packageJson: string): void;
-}>();
+const emit =
+  defineEmits<(type: "update:packageJson", packageJson: string) => void>();
 
 function handleUpdateModelValue(packageJson: string) {
   emit("update:packageJson", packageJson);

@@ -12,7 +12,7 @@ module.exports = {
   extends: [
     "eslint:recommended",
     "plugin:@ota-meshi/recommended",
-    "plugin:@ota-meshi/+vue3",
+    "plugin:@ota-meshi/+vue3-with-ts",
     "plugin:@ota-meshi/+package-json",
     "plugin:@ota-meshi/+json",
     "plugin:@ota-meshi/+yaml",

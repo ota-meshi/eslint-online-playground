@@ -12,20 +12,22 @@ import type { editor, IRange, Range, languages } from "monaco-editor";
 import "./playground.css";
 import CodeEditor from "./CodeEditor.vue";
 import ConfigEditor from "./ConfigEditor.vue";
-import PackageJsonEditor, { PackageJsonData } from "./PackageJsonEditor.vue";
+import type { PackageJsonData } from "./PackageJsonEditor.vue";
+import PackageJsonEditor from "./PackageJsonEditor.vue";
 import ConsoleOutput from "./ConsoleOutput.vue";
 import TabsPanel from "./TabsPanel.vue";
 import TabPanel from "./TabPanel.vue";
 import WarningsPanel from "./WarningsPanel.vue";
-import {
-  setupLintServer,
+import type {
   LinterService,
   LinterServiceResultSuccess,
   LinterServiceResult,
 } from "../linter-service";
-import { Linter } from "eslint";
-import { loadMonaco, Monaco } from "../monaco-editor";
-import { CodeActionProvider } from "../monaco-editor/monaco-setup";
+import { setupLintServer } from "../linter-service";
+import type { Linter } from "eslint";
+import type { Monaco } from "../monaco-editor";
+import { loadMonaco } from "../monaco-editor";
+import type { CodeActionProvider } from "../monaco-editor/monaco-setup";
 
 const props = defineProps<{
   code: string;
@@ -33,20 +35,23 @@ const props = defineProps<{
   config: string;
   packageJson: string;
 }>();
-const emit = defineEmits<{
-  (type: "update:code", code: string): void;
-  (type: "update:fileName", fileName: string): void;
-  (type: "update:config", config: string): void;
-  (type: "update:packageJson", packageJson: string): void;
-}>();
+const emit =
+  defineEmits<
+    (
+      type:
+        | "update:code"
+        | "update:fileName"
+        | "update:config"
+        | "update:packageJson",
+      value: string
+    ) => void
+  >();
 
-type ConsoleOutputInstance = InstanceType<typeof ConsoleOutput>;
-type TabsPanelInstance = InstanceType<typeof TabsPanel>;
-const consoleOutput = ref<ConsoleOutputInstance | undefined>();
-const outputTabs = ref<TabsPanelInstance | undefined>();
+const consoleOutput = ref();
+const outputTabs = ref();
 const lintServerRef = shallowRef<LinterService>();
 const monacoRef = shallowRef<Monaco>();
-loadMonaco().then((monaco) => (monacoRef.value = monaco));
+void loadMonaco().then((monaco) => (monacoRef.value = monaco));
 
 const installedPackages = reactive<PackageJsonData[]>([]);
 const linterServiceResult = ref<LinterServiceResult>();
@@ -115,7 +120,7 @@ watch(inputData, (input, oldInput) => {
     input.fileName !== oldInput?.fileName ||
     input.config !== oldInput?.config
   ) {
-    lint(input);
+    void lint(input);
   }
 });
 
@@ -136,7 +141,7 @@ watch(
     }
     const lintServer = await getLintServer();
 
-    consoleOutput.value!.clear();
+    consoleOutput.value.clear();
     await lintServer.install();
     await updateInstalledPackages();
     await lintServer.restart();
@@ -151,9 +156,9 @@ async function updatePackageJson(packageJson: string) {
 
     return true;
   } catch (e) {
-    outputTabs.value!.setChecked("console");
-    consoleOutput.value!.clear();
-    consoleOutput.value!.appendLine((e as Error).message);
+    outputTabs.value.setChecked("console");
+    consoleOutput.value.clear();
+    consoleOutput.value.appendLine((e as Error).message);
 
     return false;
   }
@@ -225,7 +230,7 @@ async function lint({
 
   linterServiceResult.value = result;
 
-  outputTabs.value!.setChecked("warnings");
+  outputTabs.value.setChecked("warnings");
 }
 
 function provideCodeAction(
@@ -242,13 +247,13 @@ function provideCodeAction(
   const actions: languages.CodeAction[] = [];
   for (const marker of context.markers) {
     const message = messageMap.get(computeKey(marker));
-    if (!message) {
+    if (!message || !message.ruleId) {
       continue;
     }
     if (message.fix) {
       actions.push(
         createQuickFixCodeAction(
-          `Fix this ${message.ruleId!} problem`,
+          `Fix this ${message.ruleId} problem`,
           marker,
           model,
           message.fix
@@ -259,7 +264,7 @@ function provideCodeAction(
       for (const suggestion of message.suggestions) {
         actions.push(
           createQuickFixCodeAction(
-            `${suggestion.desc} (${message.ruleId!})`,
+            `${suggestion.desc} (${message.ruleId})`,
             marker,
             model,
             suggestion.fix
@@ -288,14 +293,15 @@ function messageToMarker(
   const endColumn = message.endColumn ?? startColumn;
   const meta = message.ruleId ? ruleMetadata[message.ruleId] : null;
   const docUrl = meta?.docs?.url;
-  const code = docUrl
-    ? {
-        value: message.ruleId!,
-        target:
-          // Maybe monaco type bug
-          docUrl as any,
-      }
-    : message.ruleId || "FATAL";
+  const code =
+    docUrl && message.ruleId
+      ? {
+          value: message.ruleId,
+          target:
+            // Maybe monaco type bug
+            docUrl as never,
+        }
+      : message.ruleId || "FATAL";
 
   const marker: editor.IMarkerData = {
     code,

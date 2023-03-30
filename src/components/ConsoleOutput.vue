@@ -25,12 +25,13 @@ function append(string: string) {
     }
 
     append(string.slice(start, match.index));
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- ok
     start = match.index! + match[0].length;
   }
 
   append(string.slice(start));
 
-  nextTick().then(() => {
+  void nextTick().then(() => {
     if (element.value) {
       element.value.scrollTop = element.value.scrollHeight;
     }

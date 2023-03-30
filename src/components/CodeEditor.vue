@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { editor } from "monaco-editor";
+import type { editor } from "monaco-editor";
 import { ref } from "vue";
-import { CodeActionProvider } from "../monaco-editor/monaco-setup";
+import type { CodeActionProvider } from "../monaco-editor/monaco-setup";
 import MonacoEditor from "./MonacoEditor.vue";
 defineProps<{
   code: string;
@@ -11,10 +11,10 @@ defineProps<{
   rightMarkers?: editor.IMarkerData[];
   codeActionProvider?: CodeActionProvider;
 }>();
-const emit = defineEmits<{
-  (type: "update:code", code: string): void;
-  (type: "update:fileName", fileName: string): void;
-}>();
+const emit =
+  defineEmits<
+    (type: "update:code" | "update:fileName", value: string) => void
+  >();
 const fileNameInput = ref<HTMLInputElement>();
 
 function handleUpdateModelValue(code: string) {

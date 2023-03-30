@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { editor } from "monaco-editor";
+import type { editor } from "monaco-editor";
 import { ref, watch } from "vue";
 import type {
   CodeActionProvider,
@@ -17,9 +17,8 @@ const props = defineProps<{
   rightMarkers?: editor.IMarkerData[];
   codeActionProvider?: CodeActionProvider;
 }>();
-const emit = defineEmits<{
-  (type: "update:modelValue", modelValue: string): void;
-}>();
+const emit =
+  defineEmits<(type: "update:modelValue", modelValue: string) => void>();
 
 const root = ref<HTMLDivElement>();
 const editorRef = ref<MonacoEditor | MonacoDiffEditor>();

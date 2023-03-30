@@ -1,15 +1,14 @@
 <script setup lang="ts">
-import { Linter } from "eslint";
+import type { Linter } from "eslint";
 import ansiRegex from "ansi-regex";
-import { computed, inject, nextTick, onMounted, onUnmounted, ref } from "vue";
-import { LinterServiceResult } from "../linter-service";
+import { computed } from "vue";
+import type { LinterServiceResult } from "../linter-service";
 
 const props = defineProps<{
   result?: LinterServiceResult;
 }>();
-const emit = defineEmits<{
-  (type: "clickMessage", message: Linter.LintMessage): void;
-}>();
+const emit =
+  defineEmits<(type: "clickMessage", message: Linter.LintMessage) => void>();
 const sortedMessage = computed(() => {
   if (!props.result || props.result.returnCode !== 0) {
     return [];

@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { inject, onMounted, onUnmounted, ref, Ref, computed } from "vue";
-import { Tab } from "./TabsPanel.vue";
+import type { Ref } from "vue";
+import { inject, onMounted, onUnmounted, ref, computed } from "vue";
+import type { Tab } from "./TabsPanel.vue";
 
 const props = defineProps<{
   title: string;
   name: string;
   active?: boolean;
 }>();
-const addTab: (tab: Ref<Tab>) => void = inject("addTab")!;
-const removeTab: (tab: Tab) => void = inject("removeTab")!;
+const addTab = inject<(tab: Ref<Tab>) => void>("addTab");
+const removeTab = inject<(tab: Tab) => void>("removeTab");
 
 const activeValue = ref(Boolean(props.active));
 
@@ -24,10 +25,10 @@ const data = computed(() => ({
 }));
 
 onMounted(() => {
-  addTab(data);
+  addTab?.(data);
 });
 onUnmounted(() => {
-  removeTab(data.value);
+  removeTab?.(data.value);
 });
 </script>
 

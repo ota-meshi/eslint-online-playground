@@ -3,9 +3,7 @@ import MonacoEditor from "./MonacoEditor.vue";
 defineProps<{
   config: string;
 }>();
-const emit = defineEmits<{
-  (type: "update:config", config: string): void;
-}>();
+const emit = defineEmits<(type: "update:config", config: string) => void>();
 
 function handleUpdateModelValue(config: string) {
   emit("update:config", config);
