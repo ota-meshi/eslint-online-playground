@@ -5,7 +5,7 @@ import { compress, decompress } from "./utils/compress";
 import { debounce } from "./utils/debounce";
 import defaultJs from "./defaults/src/example.js.txt?raw";
 import defaultJs2 from "./defaults/src/example2.js.txt?raw";
-import defaultConfig from "./defaults/config.json";
+import defaultConfig from "./defaults/eslintrc.json.js";
 import defaultPackageJson from "./defaults/package.json.js";
 
 const hashData = window.location.hash.slice(

@@ -1,6 +1,6 @@
 export default {
   engines: {
-    node: ">=14",
+    node: "^14.17.0 || >=16.0.0",
   },
   devDependencies: {
     eslint: "latest",
