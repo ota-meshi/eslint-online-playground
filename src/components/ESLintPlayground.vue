@@ -38,8 +38,9 @@ const emit =
     (type: "update:sources", value: Record<string, string>) => void
   >();
 
-const consoleOutput = ref();
-const outputTabs = ref();
+const consoleOutput = ref<InstanceType<typeof ConsoleOutput> | null>(null);
+const outputTabs = ref<InstanceType<typeof TabsPanel> | null>(null);
+const inputTabs = ref<InstanceType<typeof TreeTabs> | null>(null);
 const lintServerRef = shallowRef<LinterService>();
 const monacoRef = shallowRef<Monaco>();
 void loadMonaco().then((monaco) => (monacoRef.value = monaco));
@@ -47,6 +48,7 @@ void loadMonaco().then((monaco) => (monacoRef.value = monaco));
 const installedPackages = reactive<PackageJsonData[]>([]);
 
 const sourceDataList = reactive<SourceData[]>([]);
+const activeSource = shallowRef<SourceData | null>(null);
 
 const config = computed({
   get: () => props.sources[".eslintrc.json"] || "{}",
@@ -72,6 +74,7 @@ type SourceData = {
   code: string;
   linterServiceResult: LinterServiceResult | null;
   resultData: ResultData | null;
+  editor?: InstanceType<typeof CodeEditor>;
   provideCodeAction: (
     model: editor.ITextModel,
     _range: Range,
@@ -97,6 +100,9 @@ watch(
       }
     }
     sourceDataList.sort((a, b) => a.fileName.localeCompare(b.fileName));
+    if (!activeSource.value) {
+      activeSource.value = sourceDataList[0];
+    }
   },
   { immediate: true }
 );
@@ -104,14 +110,8 @@ watch(
 function createSourceData(initFileName: string, initCode: string): SourceData {
   const linterServiceResult = ref<LinterServiceResult | null>(null);
   const fileName = ref(initFileName);
+  let currFileName = initFileName;
   const code = ref(initCode);
-
-  watch([fileName, code], (newValues, oldValues) => {
-    if (newValues.every((newValue, i) => newValue === oldValues[i])) {
-      return;
-    }
-    update();
-  });
 
   const resultData = computed<ResultData | null>(() => {
     const monaco = monacoRef.value;
@@ -145,6 +145,32 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
     resultData,
     provideCodeAction,
   });
+
+  watch(fileName, async (newFileName) => {
+    if (newFileName === currFileName) {
+      return;
+    }
+    if (!newFileName || props.sources[newFileName]) {
+      // Empty or has duplicate file name
+      fileName.value = currFileName;
+      return;
+    }
+    const old = currFileName;
+    currFileName = newFileName;
+    const linterServer = await getLintServer();
+    await linterServer.removeFile(old);
+    update();
+    await nextTick();
+    inputTabs.value?.setChecked(newFileName);
+    activeSource.value = sourceData;
+  });
+  watch(code, (code, old) => {
+    if (code === old) {
+      return;
+    }
+    update();
+  });
+
   return sourceData;
 
   function update() {
@@ -215,8 +241,6 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
   }
 }
 
-const activeSource = shallowRef(sourceDataList[0]);
-
 function handleActiveName(name: string) {
   const a = sourceDataList.find((source) => source.fileName === name);
   if (a) {
@@ -250,10 +274,11 @@ watch([consoleOutput, outputTabs], async ([consoleOutput, outputTabs]) => {
 });
 
 watch(config, async (config, oldConfig) => {
-  if (config !== oldConfig) {
-    for (const source of sourceDataList) {
-      await lint({ source, config });
-    }
+  if (config === oldConfig) {
+    return;
+  }
+  for (const source of sourceDataList) {
+    await lint({ source, config });
   }
 });
 
@@ -276,7 +301,7 @@ watch(packageJson, async (packageJson, old) => {
   }
   const lintServer = await getLintServer();
 
-  consoleOutput.value.clear();
+  consoleOutput.value?.clear();
   await lintServer.install();
   await updateInstalledPackages();
   await lintServer.restart();
@@ -292,9 +317,9 @@ async function updatePackageJson(packageJson: string) {
 
     return true;
   } catch (e) {
-    outputTabs.value.setChecked("console");
-    consoleOutput.value.clear();
-    consoleOutput.value.appendLine((e as Error).message);
+    outputTabs.value?.setChecked("console");
+    consoleOutput.value?.clear();
+    consoleOutput.value?.appendLine((e as Error).message);
 
     return false;
   }
@@ -365,7 +390,7 @@ async function lint({
   // eslint-disable-next-line require-atomic-updates -- OK
   source.linterServiceResult = result;
 
-  outputTabs.value.setChecked("warnings");
+  outputTabs.value?.setChecked("warnings");
 }
 
 function messageToMarker(
@@ -452,11 +477,30 @@ function createQuickFixCodeAction(
     },
   };
 }
+
+function handleClickMessage(message: Linter.LintMessage) {
+  const source = activeSource.value;
+  const editor = source?.editor;
+  if (!source || !editor) {
+    return;
+  }
+
+  // Focus on the message part.
+  editor.setSelection({
+    startLineNumber: message.line,
+    startColumn: message.column,
+    endLineNumber: message.endLine ?? message.line,
+    endColumn: message.endColumn ?? message.column,
+  });
+  editor.revealLineInCenter(message.line);
+
+  inputTabs.value?.setChecked(source.fileName);
+}
 </script>
 
 <template>
   <div class="ep">
-    <TreeTabs @active="handleActiveName">
+    <TreeTabs @active="handleActiveName" ref="inputTabs">
       <template
         v-for="(source, index) in sourceDataList"
         :key="source.fileName"
@@ -469,6 +513,7 @@ function createQuickFixCodeAction(
           <CodeEditor
             v-model:code="source.code"
             v-model:file-name="source.fileName"
+            :ref="(editor) => (source.editor = editor as never)"
             :right-code="source.resultData?.fixedCode ?? source.code"
             :markers="source.resultData?.markers ?? []"
             :right-markers="source.resultData?.fixedMarkers ?? []"
@@ -496,7 +541,10 @@ function createQuickFixCodeAction(
     </TreeTabs>
     <TabsPanel ref="outputTabs" content-top-shadow>
       <TabPanel title="Problems" name="warnings" :order="1">
-        <WarningsPanel :result="activeSource.linterServiceResult" />
+        <WarningsPanel
+          :result="activeSource?.linterServiceResult"
+          @click-message="handleClickMessage"
+        />
       </TabPanel>
       <TabPanel title="Console" name="console" :order="2">
         <ConsoleOutput ref="consoleOutput" />

@@ -1,17 +1,3 @@
-:root {
-  --ep-background-color: white;
-  --ep-color: black;
-  --ep-link-color: steelblue;
-  --ep-label-color: gray;
-  --ep-input-color: black;
-  --ep-input-border-color: gainsboro;
-  --ep-inactive-tab-color: slategray;
-  --ep-warning-item-hover-background-color: whitesmoke;
-  --ep-severity-color: white;
-  --ep-severity-error-background-color: crimson;
-  --ep-severity-warning-background-color: goldenrod;
-}
-
 /* Input panels */
 .ep-input-panel {
   height: 100%;

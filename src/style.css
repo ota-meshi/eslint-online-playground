@@ -1,5 +1,45 @@
+:root {
+  --color-neutral-25: #fcfcfd;
+  --color-neutral-50: #f9fafb;
+  --color-neutral-100: #f2f4f7;
+  --color-neutral-200: #e4e7ec;
+  --color-neutral-300: #d0d5dd;
+  --color-neutral-400: #98a2b3;
+  --color-neutral-500: #667085;
+  --color-neutral-600: #475467;
+  --color-neutral-700: #344054;
+  --color-neutral-800: #1d2939;
+  --color-neutral-900: #101828;
+  --color-primary-25: #fbfbff;
+  --color-primary-50: #f6f6fe;
+  --color-primary-100: #ececfd;
+  --color-primary-200: #dedeff;
+  --color-primary-300: #ccccfa;
+  --color-primary-400: #b7b7ff;
+  --color-primary-500: #a0a0f5;
+  --color-primary-600: #8080f2;
+  --color-primary-700: #6358d4;
+  --color-primary-800: #4b32c3;
+  --color-primary-900: #341bab;
+
+  --body-background-color: var(--color-neutral-100);
+  --ep-background-color: white;
+  --ep-menu-background-color: var(--color-neutral-100);
+  --ep-active-menu-background-color: var(--ep-background-color);
+  --ep-color: var(--color-neutral-900);
+  --ep-link-color: steelblue;
+  --ep-label-color: var(--color-neutral-500);
+  --ep-input-color: var(--color-neutral-900);
+  --ep-border-color: gainsboro;
+  --ep-inactive-tab-color: var(--color-neutral-500);
+  --ep-warning-item-hover-background-color: var(--color-primary-100);
+  --ep-severity-color: white;
+  --ep-severity-error-background-color: crimson;
+  --ep-severity-warning-background-color: goldenrod;
+}
+
 body {
-  background-color: whitesmoke;
+  background-color: var(--body-background-color);
   margin: 0;
   overscroll-behavior-y: none;
 }

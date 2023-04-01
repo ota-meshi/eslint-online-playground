@@ -71,7 +71,7 @@ defineExpose({ setChecked });
 <style scoped>
 .ep-tabs {
   background-color: var(--ep-background-color);
-  border-block-start: 1px solid var(--ep-input-border-color);
+  border-block-start: 1px solid var(--ep-border-color);
   display: flex;
   gap: 1px;
   box-sizing: border-box;

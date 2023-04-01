@@ -93,6 +93,32 @@ watch(
       editorRef.value?.registerCodeActionProvider(codeActionProvider);
   }
 );
+
+function setSelection(selection: {
+  startLineNumber: number;
+  startColumn: number;
+  endLineNumber: number;
+  endColumn: number;
+}) {
+  if (editorRef.value?.type === "standalone") {
+    editorRef.value?.getEditor().setSelection(selection);
+  } else {
+    editorRef.value?.getLeftEditor().setSelection(selection);
+  }
+}
+
+function revealLineInCenter(lineNumber: number) {
+  if (editorRef.value?.type === "standalone") {
+    editorRef.value?.getEditor().revealLineInCenter(lineNumber);
+  } else {
+    editorRef.value?.getLeftEditor().revealLineInCenter(lineNumber);
+  }
+}
+
+defineExpose({
+  setSelection,
+  revealLineInCenter,
+});
 </script>
 
 <template>

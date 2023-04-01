@@ -16,6 +16,7 @@ const emit =
     (type: "update:code" | "update:fileName", value: string) => void
   >();
 const fileNameInput = ref<HTMLInputElement>();
+const monacoEditor = ref();
 
 function handleUpdateModelValue(code: string) {
   emit("update:code", code);
@@ -24,6 +25,24 @@ function handleUpdateModelValue(code: string) {
 function handleFileNameInput() {
   emit("update:fileName", fileNameInput.value?.value ?? "");
 }
+
+function setSelection(selection: {
+  startLineNumber: number;
+  startColumn: number;
+  endLineNumber: number;
+  endColumn: number;
+}) {
+  monacoEditor.value?.setSelection(selection);
+}
+
+function revealLineInCenter(lineNumber: number) {
+  monacoEditor.value?.revealLineInCenter(lineNumber);
+}
+
+defineExpose({
+  setSelection,
+  revealLineInCenter,
+});
 </script>
 
 <template>
@@ -35,10 +54,12 @@ function handleFileNameInput() {
         type="text"
         class="ep-code-file-name"
         :value="fileName"
+        @keydown.enter="handleFileNameInput"
         @blur="handleFileNameInput"
     /></label>
     <MonacoEditor
       class="ep-code-monaco"
+      ref="monacoEditor"
       :model-value="code"
       language="javascript"
       :diff="false"
@@ -53,7 +74,7 @@ function handleFileNameInput() {
 
 <style scoped>
 .ep-code-file-name {
-  border: 1px solid var(--ep-input-border-color);
+  border: 1px solid var(--ep-border-color);
   border-radius: 2px;
 }
 </style>

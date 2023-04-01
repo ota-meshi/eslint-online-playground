@@ -102,7 +102,7 @@ defineExpose({ setChecked });
 
 <style scoped>
 .ep-tree-tabs {
-  border-block-start: 1px solid var(--ep-input-border-color);
+  border-block-start: 1px solid var(--ep-border-color);
   height: 100%;
   display: grid;
   grid:
@@ -116,6 +116,7 @@ defineExpose({ setChecked });
   height: 100%;
   display: flex;
   flex-direction: column;
+  background-color: var(--ep-menu-background-color);
 }
 .ep-tree-tabs-menu label {
   color: var(--ep-inactive-tab-color);
@@ -132,7 +133,7 @@ defineExpose({ setChecked });
   opacity: 0;
 }
 .ep-tree-tabs-menu label:has(input[type="radio"]:checked) {
-  background-color: var(--ep-background-color);
+  background-color: var(--ep-active-menu-background-color);
   color: var(--ep-color);
 }
 
@@ -145,6 +146,6 @@ defineExpose({ setChecked });
   grid-area: panels;
   height: 100%;
   background-color: var(--ep-background-color);
-  border-left: 1px solid var(--ep-input-border-color);
+  border-left: 1px solid var(--ep-border-color);
 }
 </style>

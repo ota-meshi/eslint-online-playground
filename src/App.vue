@@ -74,6 +74,13 @@ watch(
   justify-content: space-between;
   align-items: center;
 }
+.title {
+  font-family: system-ui;
+  color: var(--color-neutral-900);
+  font-size: 2rem;
+  font-size: 1.2rem;
+  font-weight: 500;
+}
 .github {
   width: 24px;
   height: 24px;
