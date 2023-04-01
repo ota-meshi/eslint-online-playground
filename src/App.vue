@@ -7,6 +7,8 @@ import defaultJs from "./defaults/src/example.js.txt?raw";
 import defaultJs2 from "./defaults/src/example2.js.txt?raw";
 import defaultConfig from "./defaults/eslintrc.json.js";
 import defaultPackageJson from "./defaults/package.json.js";
+import github from "./images/github.svg";
+import logo from "./images/logo.png";
 
 const hashData = window.location.hash.slice(
   window.location.hash.indexOf("#") + 1
@@ -49,8 +51,20 @@ watch(
 <template>
   <header class="header">
     <div class="title">eslint-plugin-n Online Playground</div>
+    <a
+      class="github"
+      target="_blank"
+      href="https://github.com/ota-meshi/eslint-plugin-n-playground"
+    >
+      <img :src="github" alt="GitHub" />
+    </a>
   </header>
   <ESLintPlayground v-model:sources="sources" />
+  <footer class="footer">
+    <a href="https://github.com/eslint-community">
+      <img class="logo" :src="logo" alt="ESLint Community" />
+    </a>
+  </footer>
 </template>
 
 <style scoped>
@@ -58,6 +72,21 @@ watch(
   padding: 0 32px;
   display: flex;
   justify-content: space-between;
-  margin: 0 auto;
+  align-items: center;
+}
+.github {
+  width: 24px;
+  height: 24px;
+}
+
+.footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 4px 12px;
+}
+
+.logo {
+  height: 50px;
 }
 </style>
