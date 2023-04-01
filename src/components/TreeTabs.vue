@@ -46,6 +46,7 @@ provide("removeTab", (tab: Tab) => {
 });
 
 const treeTabs = computed(() => {
+  sortTabs(tabs.value);
   const tree: TreeNode = { name: "root", tab: null, children: [] };
   for (const tab of tabs.value) {
     const pathNames = tab.value.title.split(/[/\\]/);
