@@ -33,7 +33,7 @@
     "@types/node": "^18.13.0",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@vitejs/plugin-vue": "^4.1.0",
-    "eslint": "~8.37.0",
+    "eslint": "^8.37.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-json-schema-validator": "^4.0.2",
     "eslint-plugin-jsonc": "^2.4.0",
