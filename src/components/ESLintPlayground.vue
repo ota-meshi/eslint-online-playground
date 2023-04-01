@@ -134,7 +134,7 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
     const fixedMarkers = result.fixResult.messages.map((m) =>
       messageToMarker(m, result.ruleMetadata, monaco)
     );
-    const fixedCode = result.output || "";
+    const fixedCode = result.output ?? code.value;
     return {
       markers,
       fixedCode,

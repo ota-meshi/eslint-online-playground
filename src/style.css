@@ -31,7 +31,7 @@
   --ep-label-color: var(--color-neutral-500);
   --ep-input-color: var(--color-neutral-900);
   --ep-border-color: gainsboro;
-  --ep-inactive-tab-color: var(--color-neutral-500);
+  --ep-inactive-color: var(--color-neutral-500);
   --ep-warning-item-hover-background-color: var(--color-primary-100);
   --ep-severity-color: white;
   --ep-severity-error-background-color: crimson;

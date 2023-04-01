@@ -58,6 +58,19 @@ watch([root, () => props.diff], async ([element, useDiffEditor]) => {
 });
 
 watch(
+  () => props.modelValue,
+  (value) => {
+    if (!editorRef.value) {
+      return;
+    }
+    if (editorRef.value.type === "standalone") {
+      editorRef.value.setValue(value || "");
+    } else {
+      editorRef.value.setLeftValue(value || "");
+    }
+  }
+);
+watch(
   () => props.markers,
   (markers) => {
     if (!editorRef.value) {

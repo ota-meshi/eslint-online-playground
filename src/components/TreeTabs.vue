@@ -120,7 +120,7 @@ defineExpose({ setChecked });
   background-color: var(--ep-menu-background-color);
 }
 .ep-tree-tabs-menu label {
-  color: var(--ep-inactive-tab-color);
+  color: var(--ep-inactive-color);
   cursor: pointer;
   font-size: 0.75rem;
   letter-spacing: 0.01em;

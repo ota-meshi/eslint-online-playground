@@ -33,7 +33,7 @@ const normalizeLevel = computed(() => props.level || 0);
   flex-direction: column;
 }
 .tree-item--parent label {
-  color: var(--ep-inactive-tab-color);
+  color: var(--ep-inactive-color);
   font-size: 0.75rem;
   letter-spacing: 0.01em;
   padding-block: 0.5rem;
