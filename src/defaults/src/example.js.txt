@@ -1,4 +1,4 @@
-import fs from "fs";
+import fs from "node:fs";
 import { lint } from "./examlpe2.js";
 
 fs.writeFileSync("foo.js", "require('foo')");
