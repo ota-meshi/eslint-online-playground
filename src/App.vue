@@ -50,7 +50,12 @@ watch(
 
 <template>
   <header class="header">
-    <div class="title">eslint-plugin-n Online Playground</div>
+    <div class="title">
+      <a href="https://github.com/eslint-community/eslint-plugin-n">
+        eslint-plugin-n
+      </a>
+      Online Playground
+    </div>
     <a
       class="github"
       target="_blank"
@@ -80,6 +85,10 @@ watch(
   font-size: 2rem;
   font-size: 1.2rem;
   font-weight: 500;
+}
+.title a {
+  color: var(--color-primary-800);
+  text-decoration: none;
 }
 .github {
   width: 24px;
