@@ -1,0 +1,151 @@
+<script lang="ts">
+export type TreeNode = {
+  name: string;
+  tab: Tab | null;
+  children: TreeNode[];
+};
+</script>
+<script setup lang="ts">
+import type { Ref } from "vue";
+import { provide, ref, watch, computed } from "vue";
+import type { Tab } from "./tabs";
+import { getUniqueName, sortTabs } from "./tabs";
+import TreeItem from "./TreeItem.vue";
+const name = getUniqueName();
+
+const tabs = ref<Ref<Tab>[]>([]);
+const radios: Record<string, HTMLInputElement> = {};
+const activeName = ref<string>("");
+
+const emit = defineEmits<(type: "active", name: string) => void>();
+
+watch(activeName, (name) => {
+  if (name) {
+    emit("active", name);
+  }
+  for (const tab of tabs.value) {
+    tab.value.active = tab.value.name === name;
+  }
+});
+
+provide("addTab", (tab: Ref<Tab>) => {
+  tabs.value.push(tab);
+  sortTabs(tabs.value);
+  if (tab.value.active || !activeName.value) {
+    activeName.value = tab.value.name;
+  }
+});
+provide("removeTab", (tab: Tab) => {
+  const i = tabs.value.findIndex((t) => t.value.name === tab.name);
+  if (i >= 0) {
+    tabs.value.splice(i, 1);
+    if (activeName.value === tab.name) {
+      activeName.value = tabs.value[0]?.value.name || "";
+    }
+  }
+});
+
+const treeTabs = computed(() => {
+  const tree: TreeNode = { name: "root", tab: null, children: [] };
+  for (const tab of tabs.value) {
+    const pathNames = tab.value.title.split(/[/\\]/);
+    let targetTree = tree;
+    let leaf = pathNames.pop()!;
+    for (const target of pathNames) {
+      const targetNode = targetTree.children.find(
+        (child) => child.name === target
+      );
+      if (targetNode) {
+        targetTree = targetNode;
+      } else {
+        const newNode = { name: target, tab: null, children: [] };
+        targetTree.children.push(newNode);
+        targetTree = newNode;
+      }
+    }
+    targetTree.children.push({ name: leaf, tab: tab.value, children: [] });
+  }
+  return tree;
+});
+
+function setChecked(name: string) {
+  activeName.value = name;
+}
+
+defineExpose({ setChecked });
+</script>
+
+<template>
+  <div class="ep-tree-tabs">
+    <div class="ep-tree-tabs-menu">
+      <template v-for="node in treeTabs.children" :key="node.name">
+        <TreeItem :node="node" v-slot="{ level, tab }">
+          <label :style="{ 'padding-inline-start': level + 1 + 'rem' }">
+            <input
+              :ref="(el) => (radios[tab.name] = el as HTMLInputElement)"
+              v-model="activeName"
+              type="radio"
+              :name="name"
+              class="ep-tab-label"
+              :value="tab.name"
+              :data-radio-name="tab.name"
+            />{{ tab.title.split(/[/\\]/g).pop() }}
+          </label>
+        </TreeItem>
+      </template>
+    </div>
+    <div class="ep-tree-tab-panels">
+      <slot />
+    </div>
+  </div>
+</template>
+
+<style scoped>
+.ep-tree-tabs {
+  border-block-start: 1px solid var(--ep-border-color);
+  height: 100%;
+  display: grid;
+  grid:
+    "menu panels" /
+    min-content 1fr;
+  box-sizing: border-box;
+}
+
+.ep-tree-tabs-menu {
+  grid-area: menu;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  background-color: var(--ep-menu-background-color);
+}
+.ep-tree-tabs-menu label {
+  color: var(--ep-inactive-tab-color);
+  cursor: pointer;
+  font-size: 0.75rem;
+  letter-spacing: 0.01em;
+  padding-block: 0.5rem;
+  padding-inline: 1rem;
+  display: block;
+}
+.ep-tree-tabs-menu input[type="radio"] {
+  inline-size: 0;
+  margin: 0;
+  opacity: 0;
+}
+.ep-tree-tabs-menu label:has(input[type="radio"]:checked) {
+  background-color: var(--ep-active-menu-background-color);
+  color: var(--ep-color);
+}
+
+.ep-tree-tabs-menu
+  label:has(input[type="radio"]:focus, input[type="radio"]:hover) {
+  color: var(--ep-color);
+}
+
+.ep-tree-tab-panels {
+  grid-area: panels;
+  height: 100%;
+  background-color: var(--ep-background-color);
+  border-left: 1px solid var(--ep-border-color);
+}
+</style>

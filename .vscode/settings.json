@@ -1,0 +1,20 @@
+{
+  "eslint.validate": [
+    "javascript",
+    "javascriptreact",
+    "typescript",
+    "typescriptreact",
+    "json",
+    "jsonc",
+    "yaml",
+    "markdown",
+    "toml",
+    "vue"
+  ],
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true,
+    "source.fixAll.stylelint": true
+  }
+}

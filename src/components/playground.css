@@ -1,0 +1,28 @@
+/* Input panels */
+.ep-input-panel {
+  height: 100%;
+  display: grid;
+  grid-template-rows: min-content 1fr;
+}
+
+.ep-input-panel > label {
+  color: var(--ep-label-color);
+  display: flex;
+  gap: 0.25rem;
+  min-block-size: 2rem;
+  padding-inline: 0.25rem;
+  place-items: center;
+}
+
+/* Output panels */
+.ep-output-panel {
+  block-size: 100%;
+  box-sizing: border-box;
+  font-family: monospace;
+  font-size: 0.75rem;
+  inline-size: 100%;
+  overflow: auto;
+  padding-block: 0.75rem;
+  padding-inline: 0.5rem;
+  white-space: pre;
+}

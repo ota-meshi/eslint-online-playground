@@ -1,0 +1,9 @@
+import fs from "node:fs";
+import { lint } from "./examlpe2.js";
+
+fs.writeFileSync("foo.js", "require('foo')");
+
+const result = await lint("foo.js");
+console.log(result);
+
+process.exit();
