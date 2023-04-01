@@ -38,6 +38,8 @@ const emit =
     (type: "update:sources", value: Record<string, string>) => void
   >();
 
+let seq = 0;
+
 const consoleOutput = ref<InstanceType<typeof ConsoleOutput> | null>(null);
 const outputTabs = ref<InstanceType<typeof TabsPanel> | null>(null);
 const inputTabs = ref<InstanceType<typeof TreeTabs> | null>(null);
@@ -70,6 +72,7 @@ type ResultData = {
 };
 
 type SourceData = {
+  id: number;
   fileName: string;
   code: string;
   linterServiceResult: LinterServiceResult | null;
@@ -139,6 +142,7 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
     };
   });
   const sourceData = reactive({
+    id: seq++,
     fileName,
     code,
     linterServiceResult,
@@ -256,8 +260,6 @@ async function getLintServer(): Promise<LinterService> {
   await new Promise((resolve) => setTimeout(resolve, 300));
   return getLintServer();
 }
-
-let seq = 0;
 
 watch([consoleOutput, outputTabs], async ([consoleOutput, outputTabs]) => {
   if (!consoleOutput || !outputTabs) {
@@ -501,10 +503,7 @@ function handleClickMessage(message: Linter.LintMessage) {
 <template>
   <div class="ep">
     <TreeTabs @active="handleActiveName" ref="inputTabs">
-      <template
-        v-for="(source, index) in sourceDataList"
-        :key="source.fileName"
-      >
+      <template v-for="(source, index) in sourceDataList" :key="source.id">
         <TabPanel
           :title="source.fileName"
           :name="source.fileName"
