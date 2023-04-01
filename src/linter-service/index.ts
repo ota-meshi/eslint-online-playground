@@ -157,7 +157,7 @@ export async function setupLintServer({
       return webContainer.fs.readFile(path, "utf8");
     },
     writeFile: async (path, data): Promise<void> => {
-      const dir = path.split(/[/\\]/).slice(0, -1).join("/");
+      const dir = path.split(/[/\\]/u).slice(0, -1).join("/");
       if (dir) {
         await webContainer.fs.mkdir(dir, { recursive: true });
       }

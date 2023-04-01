@@ -1,6 +1,23 @@
 const DIRECTIVE_OPEN = "{{{ep-json-start}}}";
 const DIRECTIVE_CLOSE = "{{{ep-json-end}}}";
 
+const RESERVED_FILE_NAMES = [
+  "eslint-playground-server.mjs",
+  "eslint-playground-server-utils.mjs",
+  "package.json",
+  "package-lock.json",
+  "node_modules",
+  ".eslintrc",
+  ".eslintrc.cjs",
+  ".eslintrc.js",
+  ".eslintrc.json",
+  ".eslintrc.yaml",
+  ".eslintrc.yml",
+  "eslint.config.js",
+  "eslint.config.cjs",
+  "eslint.config.mjs",
+  ".eslintignore",
+];
 /**
  * If the value is JSON enclosed in directives, extract the value and parse the JSON to get the value.
  * @param {string} str
@@ -20,4 +37,18 @@ export function extractJson(str) {
  */
 export function createJsonPayload(payload, replacer) {
   return DIRECTIVE_OPEN + JSON.stringify(payload, replacer) + DIRECTIVE_CLOSE;
+}
+
+/**
+ *
+ * @param {string} fileName
+ * @returns {boolean}
+ */
+export function isReservedFileName(fileName) {
+  return RESERVED_FILE_NAMES.some(
+    (f) =>
+      fileName.endsWith(f) ||
+      fileName.includes(`/${f}/`) ||
+      fileName.includes(`\\${f}\\`)
+  );
 }

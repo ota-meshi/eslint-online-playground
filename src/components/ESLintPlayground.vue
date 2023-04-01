@@ -28,6 +28,7 @@ import { setupLintServer } from "../linter-service";
 import type { Linter } from "eslint";
 import type { Monaco } from "../monaco-editor";
 import { loadMonaco } from "../monaco-editor";
+import { isReservedFileName } from "../linter-service/server/eslint-playground-server-utils.mjs";
 import type { CodeActionProvider } from "../monaco-editor/monaco-setup";
 
 const props = defineProps<{
@@ -156,6 +157,13 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
     }
     if (!newFileName || props.sources[newFileName]) {
       // Empty or has duplicate file name
+      fileName.value = currFileName;
+      return;
+    }
+    if (isReservedFileName(newFileName)) {
+      console.warn(
+        "The specified file name cannot be used as a linting file name on this demo site."
+      );
       fileName.value = currFileName;
       return;
     }

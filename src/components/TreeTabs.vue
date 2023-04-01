@@ -49,7 +49,7 @@ const treeTabs = computed(() => {
   sortTabs(tabs.value);
   const tree: TreeNode = { name: "root", tab: null, children: [] };
   for (const tab of tabs.value) {
-    const pathNames = tab.value.title.split(/[/\\]/);
+    const pathNames = tab.value.title.split(/[/\\]/u);
     let targetTree = tree;
     let leaf = pathNames.pop()!;
     for (const target of pathNames) {
@@ -90,7 +90,7 @@ defineExpose({ setChecked });
               class="ep-tab-label"
               :value="tab.name"
               :data-radio-name="tab.name"
-            />{{ tab.title.split(/[/\\]/g).pop() }}
+            />{{ tab.title.split(/[/\\]/u).pop() }}
           </label>
         </TreeItem>
       </template>

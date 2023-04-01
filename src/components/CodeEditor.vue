@@ -23,7 +23,14 @@ function handleUpdateModelValue(code: string) {
 }
 
 function handleFileNameInput() {
-  emit("update:fileName", fileNameInput.value?.value ?? "");
+  let fileName = fileNameInput.value?.value ?? "";
+  fileName = fileName.trim();
+  fileName = fileName.replace(/[/\\]+/gu, "/");
+  fileName = fileName.replace(/^\/|\/$/gu, "");
+  if (fileNameInput.value) {
+    fileNameInput.value.value = fileName;
+  }
+  emit("update:fileName", fileName);
 }
 
 function setSelection(selection: {

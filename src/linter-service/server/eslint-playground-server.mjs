@@ -5,29 +5,16 @@
  *
  * Always pass data with a directive open prefix and a directive close suffix.
  */
-import { createJsonPayload, extractJson } from "./extract-json.mjs";
+import {
+  createJsonPayload,
+  extractJson,
+  isReservedFileName,
+} from "./eslint-playground-server-utils.mjs";
 import fs from "fs";
 import path from "path";
 import { ESLint } from "eslint";
 
 const ROOT_DIR = path.resolve();
-
-const RESERVED_FILE_NAMES = [
-  "server.mjs",
-  "extract-json.mjs",
-  "package.json",
-  "package-lock.json",
-  "node_modules",
-  ".eslintrc",
-  ".eslintrc.cjs",
-  ".eslintrc.js",
-  ".eslintrc.json",
-  ".eslintrc.yaml",
-  ".eslintrc.yml",
-  "eslint.config.cjs",
-  "eslint.config.js",
-  ".eslintignore",
-];
 
 /**
  * @typedef {import('../index').LintInput} LintInput
@@ -79,14 +66,7 @@ async function lint(input) {
       throw new Error("An out-of-scope path was specified.");
     }
 
-    if (
-      RESERVED_FILE_NAMES.some(
-        (f) =>
-          targetFile.endsWith(f) ||
-          targetFile.includes(`/${f}/`) ||
-          targetFile.includes(`\\${f}\\`)
-      )
-    ) {
+    if (isReservedFileName(targetFile)) {
       throw new Error(
         "The specified file name cannot be used as a linting file name on this demo site."
       );
