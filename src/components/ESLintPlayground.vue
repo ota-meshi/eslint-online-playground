@@ -236,12 +236,17 @@ async function getLintServer(): Promise<LinterService> {
 let seq = 0;
 
 watch([consoleOutput, outputTabs], async ([consoleOutput, outputTabs]) => {
-  if (consoleOutput && outputTabs) {
-    lintServerRef.value = await setupLintServer({
-      consoleOutput,
-      outputTabs,
-    });
+  if (!consoleOutput || !outputTabs) {
+    return;
   }
+  const lintServer = await setupLintServer({
+    consoleOutput,
+    outputTabs,
+  });
+  for (const [fileName, code] of Object.entries(props.sources)) {
+    await lintServer.writeFile(fileName, code);
+  }
+  lintServerRef.value = lintServer;
 });
 
 watch(config, async (config, oldConfig) => {

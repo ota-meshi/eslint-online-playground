@@ -1,0 +1,9 @@
+import { ESLint } from "eslint";
+
+export async function lint(file) {
+    const linter = new ESLint();
+
+    const result = await linter.lintFiles([file]);
+
+    return result;
+}

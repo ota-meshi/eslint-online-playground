@@ -45,6 +45,8 @@ export interface LinterService {
   restart: () => Promise<void>;
   /** Read a file in the server. */
   readFile: (path: string) => Promise<string>;
+  /** Write a file in the server. */
+  writeFile: (path: string, data: string) => Promise<void>;
 
   teardown: () => Promise<void>;
 }
@@ -150,7 +152,14 @@ export async function setupLintServer({
       await server.restart();
     },
     readFile: async (path): Promise<string> => {
-      return Promise.resolve(webContainer.fs.readFile(path, "utf8"));
+      return webContainer.fs.readFile(path, "utf8");
+    },
+    writeFile: async (path, data): Promise<void> => {
+      const dir = path.split(/[/\\]/).slice(0, -1).join("/");
+      if (dir) {
+        await webContainer.fs.mkdir(dir, { recursive: true });
+      }
+      return webContainer.fs.writeFile(path, data, "utf8");
     },
 
     teardown(): Promise<void> {
