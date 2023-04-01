@@ -64,13 +64,13 @@ defineExpose({
       <input
         ref="fileNameInput"
         type="text"
-        class="ep-code-file-name"
+        class="ep-code__file-name"
         :value="fileName"
         @keydown.enter="handleFileNameInput"
         @blur="handleFileNameInput"
     /></label>
     <MonacoEditor
-      class="ep-code-monaco"
+      class="ep-code__monaco"
       ref="monacoEditor"
       :model-value="code"
       language="javascript"
@@ -81,7 +81,7 @@ defineExpose({
       :code-action-provider="codeActionProvider"
       @update:model-value="handleUpdateModelValue"
     />
-    <div class="ep-code-tools">
+    <div class="ep-code__tools">
       <label>
         <input type="checkbox" v-model="showPreview" />
         Preview
@@ -100,12 +100,12 @@ defineExpose({
 .ep-code {
   position: relative;
 }
-.ep-code-file-name {
+.ep-code__file-name {
   border: 1px solid var(--ep-border-color);
   border-radius: 2px;
 }
 
-.ep-code-tools {
+.ep-code__tools {
   position: absolute;
   bottom: 16px;
   right: 48px;
@@ -113,8 +113,8 @@ defineExpose({
   grid-template-columns: 1fr 1fr;
   gap: 4px;
 }
-.ep-code-tools label:has(input[type="checkbox"]),
-.ep-code-tools button {
+.ep-code__tools label:has(input[type="checkbox"]),
+.ep-code__tools button {
   color: var(--ep-color);
   background-color: var(--ep-background-color);
   cursor: pointer;
@@ -134,21 +134,21 @@ defineExpose({
   justify-content: center;
 }
 
-.ep-code-tools button[disabled] {
+.ep-code__tools button[disabled] {
   cursor: initial;
 }
 
-.ep-code-tools input[type="checkbox"] {
+.ep-code__tools input[type="checkbox"] {
   inline-size: 0;
   margin: 0;
   opacity: 0;
 }
-.ep-code-tools label:has(input[type="checkbox"]:not(:checked)),
-.ep-code-tools button[disabled] {
+.ep-code__tools label:has(input[type="checkbox"]:not(:checked)),
+.ep-code__tools button[disabled] {
   color: var(--ep-inactive-color);
 }
 
-.ep-code-tools
+.ep-code__tools
   label:has(input[type="checkbox"]:checked, input[type="checkbox"]:hover) {
   color: var(--ep-color);
 }

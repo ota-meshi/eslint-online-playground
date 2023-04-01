@@ -23,17 +23,17 @@ function handleUpdateModelValue(packageJson: string) {
   <div class="ep-package-json ep-input-panel">
     <label>› package.json</label>
     <MonacoEditor
-      class="ep-package-json-monaco"
+      class="ep-package-json__monaco"
       :model-value="packageJson"
       language="json"
       :diff="false"
       @update:model-value="handleUpdateModelValue"
     />
-    <div class="ep-package-json-installed">
+    <div class="ep-package-json__installed">
       <label>Installed:</label>
-      <ul class="ep-package-json-versions">
+      <ul class="ep-package-json__versions">
         <template v-for="pkg in installedPackages" :key="pkg.name">
-          <li class="ep-package-json-item">
+          <li class="ep-package-json__item">
             <a
               :href="
                 pkg.homepage || `https://www.npmjs.com/package/${pkg.name}`
@@ -61,16 +61,16 @@ function handleUpdateModelValue(packageJson: string) {
   grid-area: package-json-label;
 }
 
-.ep-package-json-monaco {
+.ep-package-json__monaco {
   grid-area: package-json-monaco;
 }
 
-.ep-package-json-installed {
+.ep-package-json__installed {
   grid-area: package-json-installed;
   padding-inline: 0.5rem;
 }
 
-.ep-package-json-versions {
+.ep-package-json__versions {
   list-style: none;
   margin-block: 0;
   padding-inline-start: 0;

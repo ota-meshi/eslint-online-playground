@@ -10,13 +10,13 @@ const normalizeLevel = computed(() => props.level || 0);
 </script>
 
 <template>
-  <div v-if="!node.tab" class="tree-item--parent">
+  <div v-if="!node.tab" class="tree-item__parent">
     <label
       :style="{ 'padding-inline-start': normalizeLevel + 1 + 'rem' }"
       class="tree-item__parent-label"
       >{{ node.name }}</label
     >
-    <div class="tree-item--nest">
+    <div class="tree-item__nest">
       <template v-for="n in node.children">
         <TreeItem :node="n" :level="normalizeLevel + 1" v-slot="{ level, tab }">
           <slot :level="level" :tab="tab" />
@@ -28,11 +28,11 @@ const normalizeLevel = computed(() => props.level || 0);
 </template>
 
 <style scoped>
-.tree-item--parent {
+.tree-item__parent {
   display: flex;
   flex-direction: column;
 }
-.tree-item--parent label {
+.tree-item__parent label {
   color: var(--ep-inactive-color);
   font-size: 0.75rem;
   letter-spacing: 0.01em;

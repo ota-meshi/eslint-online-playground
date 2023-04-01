@@ -8,6 +8,7 @@ const props = defineProps<{
   name: string;
   active?: boolean;
   order: number;
+  removable?: boolean;
 }>();
 const addTab = inject<(tab: Ref<Tab>) => void>("addTab");
 const removeTab = inject<(tab: Tab) => void>("removeTab");
@@ -17,6 +18,7 @@ const activeValue = ref(Boolean(props.active));
 const data = computed(() => ({
   title: props.title,
   name: props.name,
+  removable: Boolean(props.removable),
   get active() {
     return activeValue.value;
   },
@@ -35,13 +37,13 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div v-show="activeValue" class="ep-tab-panel">
+  <div v-show="activeValue" class="ep-tab__panel">
     <slot />
   </div>
 </template>
 
 <style scoped>
-.ep-tab-panel {
+.ep-tab__panel {
   height: 100%;
 }
 </style>

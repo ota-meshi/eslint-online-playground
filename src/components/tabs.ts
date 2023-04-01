@@ -5,6 +5,7 @@ export type Tab = {
   readonly name: string;
   active: boolean;
   order: number;
+  removable: boolean;
 };
 
 const usedNames = new Set<string>();

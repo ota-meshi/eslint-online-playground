@@ -92,6 +92,11 @@ watch(
     if (newSources === oldSources) {
       return;
     }
+    for (const source of [...sourceDataList]) {
+      if (newSources[source.fileName] == null) {
+        sourceDataList.splice(sourceDataList.indexOf(source), 1);
+      }
+    }
     for (const [fileName, code] of Object.entries(newSources)) {
       if (fileName === ".eslintrc.json" || fileName === "package.json") {
         continue;
@@ -161,6 +166,7 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
       return;
     }
     if (isReservedFileName(newFileName)) {
+      // eslint-disable-next-line no-console -- OK
       console.warn(
         "The specified file name cannot be used as a linting file name on this demo site."
       );
@@ -506,16 +512,55 @@ function handleClickMessage(message: Linter.LintMessage) {
 
   inputTabs.value?.setChecked(source.fileName);
 }
+
+async function handleAddFile() {
+  let newFileName = "src/example.js";
+  let i = 1;
+  while (props.sources[newFileName]) {
+    newFileName = `src/example${i++}.js`;
+  }
+  const content = `console.log("Hello!");`;
+  emit("update:sources", {
+    ...props.sources,
+    [newFileName]: content,
+  });
+  await nextTick();
+  const linterServer = await getLintServer();
+  await linterServer.writeFile(newFileName, content);
+  inputTabs.value?.setChecked(newFileName);
+}
+
+async function handleRemoveSource(name: string) {
+  // eslint-disable-next-line no-alert -- OK
+  if (!confirm(`Are you sure you want to delete '${name}'?`)) {
+    return;
+  }
+  const linterServer = await getLintServer();
+  await linterServer.removeFile(name);
+  const newSources = { ...props.sources };
+  delete newSources[name];
+  emit("update:sources", newSources);
+}
 </script>
 
 <template>
   <div class="ep">
-    <TreeTabs @active="handleActiveName" ref="inputTabs">
+    <TreeTabs
+      @active="handleActiveName"
+      ref="inputTabs"
+      @remove="handleRemoveSource"
+    >
+      <template v-slot:tools>
+        <div class="ep__menu-tools">
+          <button @click="handleAddFile" class="ep__tool-button">+</button>
+        </div>
+      </template>
       <template v-for="(source, index) in sourceDataList" :key="source.id">
         <TabPanel
           :title="source.fileName"
           :name="source.fileName"
           :order="index"
+          :removable="sourceDataList.length > 1"
         >
           <CodeEditor
             v-model:code="source.code"
@@ -575,5 +620,32 @@ function handleClickMessage(message: Linter.LintMessage) {
 }
 .ep :deep(a:hover) {
   text-decoration: underline;
+}
+
+.ep__menu-tools {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+.ep__tool-button {
+  font-family: system-ui;
+
+  color: var(--ep-color);
+  background-color: var(--ep-background-color);
+  cursor: pointer;
+  font-size: 0.75rem;
+  letter-spacing: 0.01em;
+  padding-block: 0.1rem;
+  padding-inline: 0.3rem;
+
+  outline: none;
+  appearance: none;
+
+  border: 1px solid var(--ep-border-color);
+  border-radius: 2px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 </style>

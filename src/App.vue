@@ -82,7 +82,6 @@ watch(
 .title {
   font-family: system-ui;
   color: var(--color-neutral-900);
-  font-size: 2rem;
   font-size: 1.2rem;
   font-weight: 500;
 }

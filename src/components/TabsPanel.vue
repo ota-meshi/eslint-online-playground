@@ -51,7 +51,7 @@ defineExpose({ setChecked });
           v-model="activeName"
           type="radio"
           :name="name"
-          class="ep-tab-label"
+          class="ep-tab__label"
           :value="tab.value.name"
           :data-radio-name="tab.value.name"
         />{{ tab.value.title }}
@@ -59,9 +59,9 @@ defineExpose({ setChecked });
     </template>
   </div>
   <div
-    class="ep-tab-panels"
+    class="ep-tab__panels"
     :class="{
-      'ep-tab-panels--top-shadow': contentTopShadow,
+      'ep-tab__panels--top-shadow': contentTopShadow,
     }"
   >
     <slot />
@@ -100,11 +100,11 @@ defineExpose({ setChecked });
 .ep-tabs label:has(input[type="radio"]:focus, input[type="radio"]:hover) {
   color: var(--ep-color);
 }
-.ep-tab-panels {
+.ep-tab__panels {
   height: 100%;
   background-color: var(--ep-background-color);
 }
-.ep-tab-panels--top-shadow {
+.ep-tab__panels--top-shadow {
   box-shadow: inset 0 0 6px 0 hsl(0deg 0% 0% / 15%);
 }
 </style>

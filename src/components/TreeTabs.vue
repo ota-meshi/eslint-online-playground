@@ -17,7 +17,7 @@ const tabs = ref<Ref<Tab>[]>([]);
 const radios: Record<string, HTMLInputElement> = {};
 const activeName = ref<string>("");
 
-const emit = defineEmits<(type: "active", name: string) => void>();
+const emit = defineEmits<(type: "active" | "remove", name: string) => void>();
 
 watch(activeName, (name) => {
   if (name) {
@@ -51,6 +51,7 @@ const treeTabs = computed(() => {
   for (const tab of tabs.value) {
     const pathNames = tab.value.title.split(/[/\\]/u);
     let targetTree = tree;
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- OK
     let leaf = pathNames.pop()!;
     for (const target of pathNames) {
       const targetNode = targetTree.children.find(
@@ -69,6 +70,10 @@ const treeTabs = computed(() => {
   return tree;
 });
 
+function handleRemove(tab: Tab) {
+  emit("remove", tab.name);
+}
+
 function setChecked(name: string) {
   activeName.value = name;
 }
@@ -78,24 +83,41 @@ defineExpose({ setChecked });
 
 <template>
   <div class="ep-tree-tabs">
-    <div class="ep-tree-tabs-menu">
+    <div class="ep-tree-tabs__tools">
+      <slot name="tools" />
+    </div>
+    <div class="ep-tree-tabs__menu">
       <template v-for="node in treeTabs.children" :key="node.name">
         <TreeItem :node="node" v-slot="{ level, tab }">
-          <label :style="{ 'padding-inline-start': level + 1 + 'rem' }">
-            <input
-              :ref="(el) => (radios[tab.name] = el as HTMLInputElement)"
-              v-model="activeName"
-              type="radio"
-              :name="name"
-              class="ep-tab-label"
-              :value="tab.name"
-              :data-radio-name="tab.name"
-            />{{ tab.title.split(/[/\\]/u).pop() }}
-          </label>
+          <div class="ep-tree-tabs__menu-item">
+            <label :style="{ 'padding-inline-start': level + 1 + 'rem' }">
+              <input
+                :ref="(el) => (radios[tab.name] = el as HTMLInputElement)"
+                v-model="activeName"
+                type="radio"
+                :name="name"
+                class="ep-tab-label"
+                :value="tab.name"
+                :data-radio-name="tab.name"
+                @keydown.delete="
+                  () => {
+                    if (tab.removable) handleRemove(tab);
+                  }
+                "
+              />{{ tab.title.split(/[/\\]/u).pop() }}
+            </label>
+            <button
+              v-if="tab.removable"
+              class="ep-tree-tab__remove-button"
+              @click="() => handleRemove(tab)"
+            >
+              -
+            </button>
+          </div>
         </TreeItem>
       </template>
     </div>
-    <div class="ep-tree-tab-panels">
+    <div class="ep-tree-tab__panels">
       <slot />
     </div>
   </div>
@@ -107,43 +129,79 @@ defineExpose({ setChecked });
   height: 100%;
   display: grid;
   grid:
-    "menu panels" /
+    "tools panels" min-content
+    "menu panels" 1fr /
     min-content 1fr;
   box-sizing: border-box;
 }
 
-.ep-tree-tabs-menu {
+.ep-tree-tabs__tools {
+  grid-area: tools;
+}
+
+.ep-tree-tabs__menu {
   grid-area: menu;
   height: 100%;
   display: flex;
   flex-direction: column;
   background-color: var(--ep-menu-background-color);
 }
-.ep-tree-tabs-menu label {
+
+.ep-tree-tabs__menu-item {
+  display: flex;
+  align-items: center;
+}
+.ep-tree-tabs__menu label {
   color: var(--ep-inactive-color);
   cursor: pointer;
   font-size: 0.75rem;
   letter-spacing: 0.01em;
   padding-block: 0.5rem;
   padding-inline: 1rem;
-  display: block;
+  display: flex;
 }
-.ep-tree-tabs-menu input[type="radio"] {
+.ep-tree-tabs__menu input[type="radio"] {
   inline-size: 0;
   margin: 0;
   opacity: 0;
 }
-.ep-tree-tabs-menu label:has(input[type="radio"]:checked) {
+.ep-tree-tabs__menu label:has(input[type="radio"]:checked),
+.ep-tree-tabs__menu .ep-tree-tabs__menu-item:has(input[type="radio"]:checked) {
   background-color: var(--ep-active-menu-background-color);
   color: var(--ep-color);
 }
 
-.ep-tree-tabs-menu
+.ep-tree-tabs__menu
   label:has(input[type="radio"]:focus, input[type="radio"]:hover) {
   color: var(--ep-color);
 }
 
-.ep-tree-tab-panels {
+.ep-tree-tab__remove-button {
+  font-family: system-ui;
+
+  color: var(--ep-color);
+  background-color: transparent;
+  cursor: pointer;
+  font-size: 0.75rem;
+  letter-spacing: 0.01em;
+  padding-block: 0.1rem;
+  padding-inline: 0.3rem;
+  height: 1rem;
+
+  outline: none;
+  appearance: none;
+
+  border: 1px solid var(--ep-border-color);
+  border-radius: 2px;
+
+  margin-left: auto;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ep-tree-tab__panels {
   grid-area: panels;
   height: 100%;
   background-color: var(--ep-background-color);

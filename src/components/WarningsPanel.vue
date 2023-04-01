@@ -49,7 +49,7 @@ function formatPosition(message: Linter.LintMessage) {
   <ul class="ep-warnings ep-output-panel">
     <template v-if="result">
       <template v-if="result.returnCode === 0">
-        <li v-for="(msg, i) in sortedMessage" :key="i" class="ep-warning-item">
+        <li v-for="(msg, i) in sortedMessage" :key="i" class="ep-warning__item">
           <span :class="`ep-severity-${msg.severity}`">
             {{ msg.severity === 1 ? "⚠️" : "❌" }}
           </span>
@@ -59,7 +59,7 @@ function formatPosition(message: Linter.LintMessage) {
           </template>
           <template v-else>({{ msg.ruleId }})</template>
           <span
-            class="ep-line-numbers"
+            class="ep-warning__line-numbers"
             @click="() => emit('clickMessage', msg)"
           >
             [{{ formatPosition(msg) }}]</span
@@ -82,13 +82,13 @@ function formatPosition(message: Linter.LintMessage) {
   margin-block: 0;
 }
 
-.ep-warning-item {
+.ep-warning__item {
   display: flex;
   gap: 0.5rem;
 }
 
-.ep-severity-error,
-.ep-severity-warning {
+.ep-warning__severity-error,
+.ep-warning__severity-warning {
   color: var(--ep-severity-color);
   flex-basis: 8ch;
   font-size: 0.6875rem;
@@ -96,19 +96,19 @@ function formatPosition(message: Linter.LintMessage) {
   text-transform: uppercase;
 }
 
-.ep-severity-error {
+.ep-warning__severity-error {
   background-color: var(--ep-severity-error-background-color);
 }
 
-.ep-severity-warning {
+.ep-warning__severity-warning {
   background-color: var(--ep-severity-warning-background-color);
 }
 
-.ep-line-numbers {
+.ep-warning__line-numbers {
   cursor: pointer;
 }
 
-.ep-line-numbers:hover {
+.ep-warning__line-numbers:hover {
   background-color: var(--ep-warning-item-hover-background-color);
 }
 </style>
