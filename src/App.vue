@@ -12,49 +12,50 @@ const hashData = window.location.hash.slice(
 );
 const queryParam = decompress(hashData);
 
-const {
-  code: codeQueryParam,
-  fileName: fileNameQueryParam,
-  config: configQueryParam,
-  packageJson: packageJsonQueryParam,
-} = queryParam;
+const sources = ref<Record<string, string>>({ ...queryParam });
 
-const code = ref<string>(codeQueryParam ?? defaultJs);
-const fileName = ref<string>(fileNameQueryParam || "example.js");
-const config = ref<string>(
-  configQueryParam || JSON.stringify(defaultConfig, null, 2)
-);
-const packageJson = ref<string>(
-  packageJsonQueryParam || JSON.stringify(defaultPackageJson, null, 2)
-);
+if (!sources.value[".eslintrc.json"]) {
+  sources.value[".eslintrc.json"] = JSON.stringify(defaultConfig, null, 2);
+}
+if (sources.value["package.json"] === undefined) {
+  sources.value["package.json"] = JSON.stringify(defaultPackageJson, null, 2);
+}
+
+if (
+  Object.keys(sources.value).filter(
+    (k) => k !== ".eslintrc.json" && k !== "package.json"
+  ).length === 0
+) {
+  sources.value["src/example.js"] = defaultJs;
+}
 
 watch(
-  [code, fileName, config, packageJson],
-  debounce(
-    ([code, fileName, config, packageJson]: [
-      string,
-      string,
-      string,
-      string
-    ]) => {
-      const query = compress({ code, fileName, config, packageJson });
+  sources,
+  debounce(() => {
+    const query = compress(sources.value);
 
-      window.location.hash = query;
+    window.location.hash = query;
 
-      if (window.parent) {
-        window.parent.postMessage(query, "*");
-      }
-    },
-    300
-  )
+    if (window.parent) {
+      window.parent.postMessage(query, "*");
+    }
+  }, 300),
+  { deep: true }
 );
 </script>
 
 <template>
-  <ESLintPlayground
-    v-model:code="code"
-    v-model:file-name="fileName"
-    v-model:config="config"
-    v-model:package-json="packageJson"
-  />
+  <header class="header">
+    <div class="title">eslint-plugin-n Online Playground</div>
+  </header>
+  <ESLintPlayground v-model:sources="sources" />
 </template>
+
+<style scoped>
+.header {
+  padding: 0 32px;
+  display: flex;
+  justify-content: space-between;
+  margin: 0 auto;
+}
+</style>

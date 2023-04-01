@@ -27,7 +27,7 @@ function handleFileNameInput() {
 </script>
 
 <template>
-  <div class="ep-code">
+  <div class="ep-code ep-input-panel">
     <label
       >›
       <input
@@ -50,3 +50,10 @@ function handleFileNameInput() {
     />
   </div>
 </template>
+
+<style scoped>
+.ep-code-file-name {
+  border: 1px solid var(--ep-input-border-color);
+  border-radius: 2px;
+}
+</style>

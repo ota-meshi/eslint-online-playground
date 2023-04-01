@@ -20,7 +20,7 @@ function handleUpdateModelValue(packageJson: string) {
 </script>
 
 <template>
-  <div class="ep-package-json">
+  <div class="ep-package-json ep-input-panel">
     <label>› package.json</label>
     <MonacoEditor
       class="ep-package-json-monaco"
@@ -47,3 +47,32 @@ function handleUpdateModelValue(packageJson: string) {
     </div>
   </div>
 </template>
+
+<style scoped>
+.ep-package-json {
+  display: grid;
+  grid:
+    "package-json-label package-json-label" min-content
+    "package-json-monaco package-json-installed" 1fr
+    / 1fr 1fr;
+}
+
+.ep-package-json > label {
+  grid-area: package-json-label;
+}
+
+.ep-package-json-monaco {
+  grid-area: package-json-monaco;
+}
+
+.ep-package-json-installed {
+  grid-area: package-json-installed;
+  padding-inline: 0.5rem;
+}
+
+.ep-package-json-versions {
+  list-style: none;
+  margin-block: 0;
+  padding-inline-start: 0;
+}
+</style>

@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import type { Ref } from "vue";
 import { inject, onMounted, onUnmounted, ref, computed } from "vue";
-import type { Tab } from "./TabsPanel.vue";
+import type { Tab } from "./tabs";
 
 const props = defineProps<{
   title: string;
   name: string;
   active?: boolean;
+  order: number;
 }>();
 const addTab = inject<(tab: Ref<Tab>) => void>("addTab");
 const removeTab = inject<(tab: Tab) => void>("removeTab");
@@ -22,6 +23,7 @@ const data = computed(() => ({
   set active(active) {
     activeValue.value = active;
   },
+  order: props.order,
 }));
 
 onMounted(() => {

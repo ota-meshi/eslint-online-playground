@@ -1,21 +1,12 @@
-<script lang="ts">
+<script setup lang="ts">
 import type { Ref } from "vue";
 import { provide, ref, watch } from "vue";
-export type Tab = {
-  readonly title: string;
-  readonly name: string;
-  active: boolean;
-};
-const usedNames = new Set<string>();
-</script>
-<script setup lang="ts">
-const name = (() => {
-  let n = Math.random().toString(32).substring(2);
-  while (usedNames.has(n)) {
-    n = Math.random().toString(32).substring(2);
-  }
-  return n;
-})();
+import type { Tab } from "./tabs";
+import { sortTabs, getUniqueName } from "./tabs";
+defineProps<{
+  contentTopShadow?: boolean;
+}>();
+const name = getUniqueName();
 
 const tabs = ref<Ref<Tab>[]>([]);
 const radios: Record<string, HTMLInputElement> = {};
@@ -29,7 +20,8 @@ watch(activeName, (name) => {
 
 provide("addTab", (tab: Ref<Tab>) => {
   tabs.value.push(tab);
-  if (tab.value.active) {
+  sortTabs(tabs.value);
+  if (tab.value.active || !activeName.value) {
     activeName.value = tab.value.name;
   }
 });
@@ -66,17 +58,25 @@ defineExpose({ setChecked });
       </label>
     </template>
   </div>
-  <div class="ep-tabs-panels">
+  <div
+    class="ep-tab-panels"
+    :class="{
+      'ep-tab-panels--top-shadow': contentTopShadow,
+    }"
+  >
     <slot />
   </div>
 </template>
 
 <style scoped>
 .ep-tabs {
-  /* background-color: var(--ep-background-color); */
+  background-color: var(--ep-background-color);
+  border-block-start: 1px solid var(--ep-input-border-color);
   display: flex;
   gap: 1px;
+  box-sizing: border-box;
 }
+
 .ep-tabs label {
   color: var(--ep-inactive-tab-color);
   cursor: pointer;
@@ -96,10 +96,15 @@ defineExpose({ setChecked });
   text-underline-offset: 0.45em;
   color: var(--ep-color);
 }
+
 .ep-tabs label:has(input[type="radio"]:focus, input[type="radio"]:hover) {
   color: var(--ep-color);
 }
-.ep-tabs-panels {
+.ep-tab-panels {
   height: 100%;
+  background-color: var(--ep-background-color);
+}
+.ep-tab-panels--top-shadow {
+  box-shadow: inset 0 0 6px 0 hsl(0deg 0% 0% / 15%);
 }
 </style>

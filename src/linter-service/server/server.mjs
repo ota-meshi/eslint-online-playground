@@ -10,8 +10,7 @@ import fs from "fs";
 import path from "path";
 import { ESLint } from "eslint";
 
-const rootDir = path.resolve();
-const SRC_DIR = path.join(rootDir, "src");
+const ROOT_DIR = path.resolve();
 
 const RESERVED_FILE_NAMES = [
   "server.mjs",
@@ -74,9 +73,9 @@ async function lint(input) {
   console.log("Linting file: ", input.fileName);
 
   try {
-    const targetFile = path.normalize(path.join(SRC_DIR, input.fileName));
+    const targetFile = path.normalize(path.join(ROOT_DIR, input.fileName));
 
-    if (!targetFile.startsWith(SRC_DIR)) {
+    if (!targetFile.startsWith(ROOT_DIR)) {
       throw new Error("An out-of-scope path was specified.");
     }
 
@@ -93,7 +92,7 @@ async function lint(input) {
       );
     }
 
-    const configFile = path.join(SRC_DIR, ".eslintrc.json");
+    const configFile = path.join(ROOT_DIR, ".eslintrc.json");
 
     fs.mkdirSync(path.dirname(targetFile), { recursive: true });
     fs.mkdirSync(path.dirname(configFile), { recursive: true });

@@ -11,7 +11,7 @@ function handleUpdateModelValue(config: string) {
 </script>
 
 <template>
-  <div class="ep-config">
+  <div class="ep-config ep-input-panel">
     <label>› .eslintrc.json </label>
     <MonacoEditor
       class="ep-config-monaco"

@@ -5,7 +5,7 @@ import { computed } from "vue";
 import type { LinterServiceResult } from "../linter-service";
 
 const props = defineProps<{
-  result?: LinterServiceResult;
+  result?: LinterServiceResult | null;
 }>();
 const emit =
   defineEmits<(type: "clickMessage", message: Linter.LintMessage) => void>();
@@ -46,7 +46,7 @@ function formatPosition(message: Linter.LintMessage) {
 </script>
 
 <template>
-  <ul class="ep-warnings">
+  <ul class="ep-warnings ep-output-panel">
     <template v-if="result">
       <template v-if="result.returnCode === 0">
         <li v-for="(msg, i) in sortedMessage" :key="i" class="ep-warning-item">
@@ -72,3 +72,43 @@ function formatPosition(message: Linter.LintMessage) {
     </template>
   </ul>
 </template>
+
+<style scoped>
+.ep-warnings {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  list-style: none;
+  margin-block: 0;
+}
+
+.ep-warning-item {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.ep-severity-error,
+.ep-severity-warning {
+  color: var(--ep-severity-color);
+  flex-basis: 8ch;
+  font-size: 0.6875rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.ep-severity-error {
+  background-color: var(--ep-severity-error-background-color);
+}
+
+.ep-severity-warning {
+  background-color: var(--ep-severity-warning-background-color);
+}
+
+.ep-line-numbers {
+  cursor: pointer;
+}
+
+.ep-line-numbers:hover {
+  background-color: var(--ep-warning-item-hover-background-color);
+}
+</style>

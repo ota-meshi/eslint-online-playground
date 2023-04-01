@@ -61,5 +61,5 @@ defineExpose({ appendLine, append, clear });
 </script>
 
 <template>
-  <div ref="element" class="ep-console">{{ consoleText }}</div>
+  <div ref="element" class="ep-console ep-output-panel">{{ consoleText }}</div>
 </template>
