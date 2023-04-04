@@ -64,6 +64,9 @@ const packageJson = computed({
     emit("update:sources", { ...props.sources, "package.json": value });
   },
 });
+defineExpose({
+  selectFile,
+});
 type ResultData = {
   markers?: editor.IMarkerData[];
   fixedCode?: string;
@@ -539,6 +542,10 @@ async function handleRemoveSource(name: string) {
   const newSources = { ...props.sources };
   delete newSources[name];
   emit("update:sources", newSources);
+}
+
+function selectFile(nm: string) {
+  inputTabs.value?.setChecked(nm);
 }
 </script>
 

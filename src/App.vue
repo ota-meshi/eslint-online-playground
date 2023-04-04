@@ -12,6 +12,9 @@ import logo from "./images/logo.png";
 import { CONFIG_FILE_NAMES } from "./utils/eslint-info";
 import type { Example } from "./examples";
 
+const eslintPlayground = ref<InstanceType<typeof ESLintPlayground> | null>(
+  null
+);
 const selectExampleDialog = ref<InstanceType<
   typeof SelectExampleDialog
 > | null>(null);
@@ -47,6 +50,14 @@ async function handleSelectExample(example: Example) {
   sources.value["package.json"] = example.files["package.json"];
   await nextTick();
   sources.value = { ...example.files };
+  await nextTick();
+  const fileName =
+    Object.keys(example.files).find(
+      (nm) =>
+        nm !== "package.json" &&
+        !CONFIG_FILE_NAMES.some((configName) => nm.endsWith(configName))
+    ) || Object.keys(example.files)[0];
+  eslintPlayground.value?.selectFile(fileName);
 }
 
 watch(
@@ -81,7 +92,7 @@ watch(
       </a>
     </div>
   </header>
-  <ESLintPlayground v-model:sources="sources" />
+  <ESLintPlayground v-model:sources="sources" ref="eslintPlayground" />
   <footer class="footer">
     <a href="https://github.com/eslint-community">
       <img class="logo" :src="logo" alt="ESLint Community" />
