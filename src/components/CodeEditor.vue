@@ -82,11 +82,12 @@ defineExpose({
       @update:model-value="handleUpdateModelValue"
     />
     <div class="ep-code__tools">
-      <label>
+      <label class="ep-button">
         <input type="checkbox" v-model="showPreview" />
         Preview
       </label>
       <button
+        class="ep-button"
         @click="applyFix"
         :disabled="rightCode == null || rightCode === code"
       >
@@ -112,44 +113,5 @@ defineExpose({
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 4px;
-}
-.ep-code__tools label:has(input[type="checkbox"]),
-.ep-code__tools button {
-  color: var(--ep-color);
-  background-color: var(--ep-background-color);
-  cursor: pointer;
-  font-size: 0.75rem;
-  letter-spacing: 0.01em;
-  padding-block: 0.5rem;
-  padding-inline: 1rem;
-
-  outline: none;
-  appearance: none;
-
-  border: 1px solid var(--ep-border-color);
-  border-radius: 2px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.ep-code__tools button[disabled] {
-  cursor: initial;
-}
-
-.ep-code__tools input[type="checkbox"] {
-  inline-size: 0;
-  margin: 0;
-  opacity: 0;
-}
-.ep-code__tools label:has(input[type="checkbox"]:not(:checked)),
-.ep-code__tools button[disabled] {
-  color: var(--ep-inactive-color);
-}
-
-.ep-code__tools
-  label:has(input[type="checkbox"]:checked, input[type="checkbox"]:hover) {
-  color: var(--ep-color);
 }
 </style>

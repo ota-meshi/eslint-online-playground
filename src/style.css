@@ -25,9 +25,10 @@
   --body-background-color: var(--color-neutral-100);
   --ep-background-color: white;
   --ep-menu-background-color: var(--color-neutral-100);
+  --ep-dialog-background-color: var(--color-neutral-100);
   --ep-active-menu-background-color: var(--ep-background-color);
   --ep-color: var(--color-neutral-900);
-  --ep-link-color: steelblue;
+  --ep-link-color: var(--color-primary-600);
   --ep-label-color: var(--color-neutral-500);
   --ep-input-color: var(--color-neutral-900);
   --ep-border-color: gainsboro;
@@ -50,4 +51,76 @@ body {
   min-inline-size: 48rem;
   overflow-x: scroll;
   grid-template-rows: min-content 1fr;
+}
+
+/* Input panels */
+.ep-input-panel {
+  height: 100%;
+  display: grid;
+  grid-template-rows: min-content 1fr;
+}
+
+.ep-input-panel > label {
+  color: var(--ep-label-color);
+  display: flex;
+  gap: 0.25rem;
+  min-block-size: 2rem;
+  padding-inline: 0.25rem;
+  place-items: center;
+}
+
+/* Output panels */
+.ep-output-panel {
+  block-size: 100%;
+  box-sizing: border-box;
+  font-family: monospace;
+  font-size: 0.75rem;
+  inline-size: 100%;
+  overflow: auto;
+  padding-block: 0.75rem;
+  padding-inline: 0.5rem;
+  white-space: pre;
+}
+
+/* Button */
+.ep-button {
+  color: var(--ep-color);
+  background-color: var(--ep-background-color);
+  cursor: pointer;
+  font-size: 0.75rem;
+  letter-spacing: 0.01em;
+  padding-block: 0.5rem;
+  padding-inline: 1rem;
+
+  outline: none;
+  appearance: none;
+
+  border: 1px solid var(--ep-border-color);
+  border-radius: 2px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.ep-button[disabled] {
+  cursor: initial;
+  color: var(--ep-inactive-color);
+}
+
+label.ep-button input[type="checkbox"] {
+  inline-size: 0;
+  margin: 0;
+  opacity: 0;
+}
+
+label.ep-button:has(input[type="checkbox"]:not(:checked)) {
+  color: var(--ep-inactive-color);
+}
+
+label.ep-button:has(
+    input[type="checkbox"]:checked,
+    input[type="checkbox"]:hover
+  ) {
+  color: var(--ep-color);
 }

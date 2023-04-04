@@ -9,7 +9,6 @@ import {
   reactive,
 } from "vue";
 import type { editor, IRange, Range, languages } from "monaco-editor";
-import "./playground.css";
 import CodeEditor from "./CodeEditor.vue";
 import ConfigEditor from "./ConfigEditor.vue";
 import type { PackageJsonData } from "./PackageJsonEditor.vue";
@@ -64,6 +63,9 @@ const packageJson = computed({
   set: (value) => {
     emit("update:sources", { ...props.sources, "package.json": value });
   },
+});
+defineExpose({
+  selectFile,
 });
 type ResultData = {
   markers?: editor.IMarkerData[];
@@ -540,6 +542,10 @@ async function handleRemoveSource(name: string) {
   const newSources = { ...props.sources };
   delete newSources[name];
   emit("update:sources", newSources);
+}
+
+function selectFile(nm: string) {
+  inputTabs.value?.setChecked(nm);
 }
 </script>
 
