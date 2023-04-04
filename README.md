@@ -1,6 +1,8 @@
-# eslint-plugin-n-playground
+# eslint-playground
 
-`eslint-plugin-n` online playground
+[ESLint](https://eslint.org/) online playground.
+
+This playground allows you to check the behavior in combination with the plugins.
 
 ## About
 
