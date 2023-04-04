@@ -1,0 +1,6 @@
+const something = new Promise((r) => {
+    r(42)
+});
+something.then((val) => {
+    return Promise.resolve(val * 2)
+});

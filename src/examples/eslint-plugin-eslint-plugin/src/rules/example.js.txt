@@ -1,0 +1,21 @@
+export default {
+    meta: {
+        type: "suggestion",
+        docs: {
+            description: "Disallow `with` statements",
+            recommended: true,
+            url: "https://eslint.org/docs/rules/no-with"
+        },
+        schema: [],
+        messages: {
+            unexpected: "Unexpected use of 'with' statement."
+        }
+    },
+    create(context) {
+        return {
+            WithStatement(node) {
+                context.report({ node, messageId: "unexpectedWith" });
+            }
+        };
+    }
+}

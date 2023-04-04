@@ -9,7 +9,6 @@ import {
   reactive,
 } from "vue";
 import type { editor, IRange, Range, languages } from "monaco-editor";
-import "./playground.css";
 import CodeEditor from "./CodeEditor.vue";
 import ConfigEditor from "./ConfigEditor.vue";
 import type { PackageJsonData } from "./PackageJsonEditor.vue";

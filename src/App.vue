@@ -1,14 +1,20 @@
 <script setup lang="ts">
-import { ref, watch } from "vue";
+import { nextTick, ref, watch } from "vue";
 import ESLintPlayground from "./components/ESLintPlayground.vue";
+import SelectExampleDialog from "./components/SelectExampleDialog.vue";
 import { compress, decompress } from "./utils/compress";
 import { debounce } from "./utils/debounce";
-import defaultJs from "./defaults/src/example.js.txt?raw";
-import defaultJs2 from "./defaults/src/example2.js.txt?raw";
-import defaultConfig from "./defaults/eslintrc.json.js";
-import defaultPackageJson from "./defaults/package.json.js";
+import defaultJs from "./examples/eslint/src/example.js.txt?raw";
+import defaultConfig from "./examples/eslint/_eslintrc.json.js";
+import defaultPackageJson from "./examples/eslint/package.json.js";
 import github from "./images/github.svg";
 import logo from "./images/logo.png";
+import { CONFIG_FILE_NAMES } from "./utils/eslint-info";
+import type { Example } from "./examples";
+
+const selectExampleDialog = ref<InstanceType<
+  typeof SelectExampleDialog
+> | null>(null);
 
 const hashData = window.location.hash.slice(
   window.location.hash.indexOf("#") + 1
@@ -17,7 +23,7 @@ const queryParam = decompress(hashData);
 
 const sources = ref<Record<string, string>>({ ...queryParam });
 
-if (!sources.value[".eslintrc.json"]) {
+if (CONFIG_FILE_NAMES.every((nm) => !sources.value[nm])) {
   sources.value[".eslintrc.json"] = JSON.stringify(defaultConfig, null, 2);
 }
 if (sources.value["package.json"] === undefined) {
@@ -30,7 +36,17 @@ if (
   ).length === 0
 ) {
   sources.value["src/example.js"] = defaultJs;
-  sources.value["src/example2.js"] = defaultJs2;
+}
+
+function selectExample() {
+  selectExampleDialog.value?.open();
+}
+
+async function handleSelectExample(example: Example) {
+  // Update dependencies first.
+  sources.value["package.json"] = example.files["package.json"];
+  await nextTick();
+  sources.value = { ...example.files };
 }
 
 watch(
@@ -51,18 +67,19 @@ watch(
 <template>
   <header class="header">
     <div class="title">
-      <a href="https://github.com/eslint-community/eslint-plugin-n">
-        eslint-plugin-n
-      </a>
+      <a href="https://eslint.org/"> ESLint </a>
       Online Playground
     </div>
-    <a
-      class="github"
-      target="_blank"
-      href="https://github.com/ota-meshi/eslint-plugin-n-playground"
-    >
-      <img :src="github" alt="GitHub" />
-    </a>
+    <div class="header-menu">
+      <button class="ep-button" @click="selectExample">More Examples</button>
+      <a
+        class="github"
+        target="_blank"
+        href="https://github.com/ota-meshi/eslint-plugin-n-playground"
+      >
+        <img :src="github" alt="GitHub" />
+      </a>
+    </div>
   </header>
   <ESLintPlayground v-model:sources="sources" />
   <footer class="footer">
@@ -70,6 +87,10 @@ watch(
       <img class="logo" :src="logo" alt="ESLint Community" />
     </a>
   </footer>
+  <SelectExampleDialog
+    ref="selectExampleDialog"
+    @select="handleSelectExample"
+  ></SelectExampleDialog>
 </template>
 
 <style scoped>
@@ -89,7 +110,15 @@ watch(
   color: var(--color-primary-800);
   text-decoration: none;
 }
+.header-menu {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 4px 0;
+}
+
 .github {
+  display: block;
   width: 24px;
   height: 24px;
 }
