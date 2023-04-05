@@ -1,26 +1,40 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { ref, computed } from "vue";
 import type { Plugin } from "../plugins";
 import { loadPlugins } from "../plugins";
 import github from "../images/github.svg";
 
-const plugins = ref<Record<string, Plugin>>();
+const plugins = ref<Record<string, Plugin>>({});
 const dialogRef = ref<HTMLDialogElement>();
+const selectPlugins = ref<string[]>([]);
+const packageJson = ref({});
+const availablePlugins = computed(() => {
+  return Object.values(plugins.value).filter(
+    (p) => !p.hasInstalled(packageJson.value)
+  );
+});
 
-const emit = defineEmits<(type: "select", plugin: Plugin) => void>();
+const emit = defineEmits<(type: "select", plugins: Plugin[]) => void>();
 
 defineExpose({
   open,
 });
 
-async function open() {
+async function open(packageJsonText: string) {
   plugins.value = await loadPlugins();
+  packageJson.value = packageJsonText ? JSON.parse(packageJsonText) : {};
   dialogRef.value?.showModal();
 }
 
-function handleClickPlugin(plugin: Plugin) {
+function handleOk() {
   dialogRef.value?.close();
-  emit("select", plugin);
+  emit(
+    "select",
+    selectPlugins.value
+      .map((nm) => plugins.value?.[nm])
+      .filter((p): p is Plugin => Boolean(p))
+  );
+  selectPlugins.value = [];
 }
 
 function handleClickDialog() {
@@ -31,32 +45,45 @@ function handleClickDialog() {
 <template>
   <dialog ref="dialogRef" @click="handleClickDialog" class="ep-select-plugin">
     <div @click.stop class="ep-select-plugin__list">
-      <div
-        v-for="plugin in plugins"
-        :key="plugin.name"
-        @click="
-          (e) => {
-            (e.target as HTMLElement).tagName !== 'A' && handleClickPlugin(plugin);
-          }
-        "
-        class="ep-select-plugin__item"
-      >
-        <div class="ep-select-plugin__item-title">{{ plugin.name }}</div>
-        <template v-if="plugin.description">
-          <div>
-            {{ plugin.description }}
-          </div>
-        </template>
-        <a
-          v-if="plugin.repo"
-          class="github"
-          target="_blank"
-          :href="plugin.repo"
-          @click.stop
+      <template v-if="availablePlugins.length">
+        <div
+          v-for="plugin in availablePlugins"
+          :key="plugin.name"
+          class="ep-select-plugin__item"
         >
-          <img :src="github" alt="GitHub" />
-        </a>
-      </div>
+          <label class="ep-select-plugin__item-meta">
+            <input
+              type="checkbox"
+              v-model="selectPlugins"
+              :value="plugin.name"
+            />
+            <div class="ep-select-plugin__item-title">{{ plugin.name }}</div>
+            <template v-if="plugin.description">
+              <div>
+                {{ plugin.description }}
+              </div>
+            </template>
+          </label>
+          <a
+            v-if="plugin.repo"
+            class="github"
+            target="_blank"
+            :href="plugin.repo"
+            @click.stop
+          >
+            <img :src="github" alt="GitHub" />
+          </a>
+        </div>
+      </template>
+      <template v-else>
+        <p>
+          There are no additional plugins that can be installed.<br />
+          Add any plugins you want to add yourself to the dependencies in
+          <code>package.json</code> and install them.
+        </p>
+      </template>
+
+      <button class="ep-button" @click="handleOk">OK</button>
     </div>
   </dialog>
 </template>
@@ -76,13 +103,18 @@ function handleClickDialog() {
 }
 
 .ep-select-plugin__item {
-  cursor: pointer;
   display: flex;
   gap: 16px;
   align-items: center;
 }
 .ep-select-plugin__item:has(+ .ep-select-plugin__item) {
   border-bottom: 1px solid var(--ep-border-color);
+}
+
+.ep-select-plugin__item-meta {
+  display: flex;
+  gap: 16px;
+  align-items: center;
 }
 
 .ep-select-plugin__item-title {

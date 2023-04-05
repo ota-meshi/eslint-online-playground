@@ -54,7 +54,7 @@ function selectExample() {
 }
 
 function selectPlugin() {
-  selectPluginDialog.value?.open();
+  selectPluginDialog.value?.open(sources.value["package.json"]);
 }
 
 async function handleSelectExample(example: Example) {
@@ -69,22 +69,24 @@ async function handleSelectExample(example: Example) {
   eslintPlayground.value?.selectFile(fileName);
 }
 
-function handleSelectPlugin(plugin: Plugin) {
-  const packageJson = JSON.parse(sources.value["package.json"]);
-  packageJson.devDependencies = {
-    ...packageJson.devDependencies,
-    ...plugin.devDependencies,
-  };
-  sources.value["package.json"] = JSON.stringify(packageJson, null, 2);
+function handleSelectPlugins(plugins: Plugin[]) {
+  for (const plugin of plugins) {
+    const packageJson = JSON.parse(sources.value["package.json"]);
+    packageJson.devDependencies = {
+      ...packageJson.devDependencies,
+      ...plugin.devDependencies,
+    };
+    sources.value["package.json"] = JSON.stringify(packageJson, null, 2);
 
-  const configFileName =
-    CONFIG_FILE_NAMES.find((nm) => sources.value[nm]) || ".eslintrc.json";
+    const configFileName =
+      CONFIG_FILE_NAMES.find((nm) => sources.value[nm]) || ".eslintrc.json";
 
-  sources.value[configFileName] = installPlugin(
-    sources.value[configFileName] ?? "{}",
-    configFileName,
-    plugin
-  );
+    sources.value[configFileName] = installPlugin(
+      sources.value[configFileName] ?? "{}",
+      configFileName,
+      plugin
+    );
+  }
 }
 
 watch(
@@ -132,7 +134,7 @@ watch(
   ></SelectExampleDialog>
   <SelectPluginDialog
     ref="selectPluginDialog"
-    @select="handleSelectPlugin"
+    @select="handleSelectPlugins"
   ></SelectPluginDialog>
 </template>
 

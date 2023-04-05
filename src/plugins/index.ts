@@ -7,6 +7,7 @@ export type Plugin = {
     plugins?: string[];
     extends?: string[];
   };
+  hasInstalled: (packageJson: any) => boolean;
 };
 
 export * from "./installer";
@@ -22,9 +23,19 @@ export async function loadPlugins(): Promise<Record<string, Plugin>> {
   const list = await Promise.all([
     ...Object.entries(import.meta.glob("./plugins/**/*.ts")).map(
       async ([fileName, content]) => {
-        const plugin = (await content()) as Plugin;
+        const plugin = { ...((await content()) as Plugin) };
         if (!plugin.name) {
           plugin.name = convertToName(fileName);
+        }
+        if (!plugin.hasInstalled) {
+          plugin.hasInstalled = function hasInstalled(
+            packageJson: any
+          ): boolean {
+            return (
+              packageJson.devDependencies?.[plugin.name] != null ||
+              packageJson.dependencies?.[plugin.name] != null
+            );
+          };
         }
         return plugin;
       }
