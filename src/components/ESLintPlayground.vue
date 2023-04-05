@@ -29,6 +29,9 @@ import type { Monaco } from "../monaco-editor";
 import { loadMonaco } from "../monaco-editor";
 import { isReservedFileName } from "../linter-service/server/eslint-playground-server-utils.mjs";
 import type { CodeActionProvider } from "../monaco-editor/monaco-setup";
+import { debounce } from "../utils/debounce";
+import type { ConfigFileName } from "../utils/eslint-info";
+import { CONFIG_FILE_NAMES } from "../utils/eslint-info";
 
 const props = defineProps<{
   sources: Record<string, string>;
@@ -52,20 +55,39 @@ const installedPackages = reactive<PackageJsonData[]>([]);
 const sourceDataList = reactive<SourceData[]>([]);
 const activeSource = shallowRef<SourceData | null>(null);
 
-const config = computed({
-  get: () => props.sources[".eslintrc.json"] || "{}",
+const configFileName = computed<ConfigFileName>({
+  get: () => {
+    return (
+      CONFIG_FILE_NAMES.find((name) => props.sources[name]) || ".eslintrc.json"
+    );
+  },
   set: (value) => {
-    emit("update:sources", { ...props.sources, ".eslintrc.json": value });
+    const old = configFileName.value;
+
+    emitUpdateSources({ configFileName: value });
+    void remove();
+
+    async function remove() {
+      const linterServer = await getLintServer();
+      await linterServer.removeFile(old);
+    }
+  },
+});
+const configText = computed({
+  get: () => props.sources[configFileName.value] || "{}",
+  set: (value) => {
+    emitUpdateSources({ configText: value });
   },
 });
 const packageJson = computed({
   get: () => props.sources["package.json"] || "{}",
   set: (value) => {
-    emit("update:sources", { ...props.sources, "package.json": value });
+    emitUpdateSources({ packageJson: value });
   },
 });
 defineExpose({
   selectFile,
+  selectOutput,
 });
 type ResultData = {
   markers?: editor.IMarkerData[];
@@ -100,7 +122,10 @@ watch(
       }
     }
     for (const [fileName, code] of Object.entries(newSources)) {
-      if (fileName === ".eslintrc.json" || fileName === "package.json") {
+      if (
+        (CONFIG_FILE_NAMES as readonly string[]).includes(fileName) ||
+        fileName === "package.json"
+      ) {
         continue;
       }
       const sourceData = sourceDataList.find((d) => d.fileName === fileName);
@@ -196,19 +221,13 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
   function update() {
     sourceDataList.sort((a, b) => a.fileName.localeCompare(b.fileName));
 
-    emit(
-      "update:sources",
-      Object.fromEntries([
-        ...sourceDataList.map((sourceData) => [
-          sourceData.fileName,
-          sourceData.code,
-        ]),
-        [".eslintrc.json", config.value],
-        ["package.json", packageJson.value],
-      ])
-    );
+    emitUpdateSources();
 
-    void lint({ source: sourceData, config: config.value });
+    void lint({
+      source: sourceData,
+      config: configText.value,
+      configFileName: configFileName.value,
+    });
   }
 
   function provideCodeAction(
@@ -261,6 +280,29 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
   }
 }
 
+function emitUpdateSources(
+  option: {
+    configFileName?: string;
+    configText?: string;
+    packageJson?: string;
+  } = {}
+) {
+  emit(
+    "update:sources",
+    Object.fromEntries([
+      ...sourceDataList.map((sourceData) => [
+        sourceData.fileName,
+        sourceData.code,
+      ]),
+      [
+        option.configFileName || configFileName.value,
+        option.configText || configText.value,
+      ],
+      ["package.json", option.packageJson || packageJson.value],
+    ])
+  );
+}
+
 function handleActiveName(name: string) {
   const a = sourceDataList.find((source) => source.fileName === name);
   if (a) {
@@ -291,12 +333,12 @@ watch([consoleOutput, outputTabs], async ([consoleOutput, outputTabs]) => {
   lintServerRef.value = lintServer;
 });
 
-watch(config, async (config, oldConfig) => {
+watch(configText, async (config, oldConfig) => {
   if (config === oldConfig) {
     return;
   }
   for (const source of sourceDataList) {
-    await lint({ source, config });
+    await lint({ source, config, configFileName: configFileName.value });
   }
 });
 
@@ -308,25 +350,36 @@ onMounted(async () => {
   await lintServer.install();
   await updateInstalledPackages();
   for (const source of sourceDataList) {
-    await lint({ source, config: config.value });
+    await lint({
+      source,
+      config: configText.value,
+      configFileName: configFileName.value,
+    });
   }
 });
 
-watch(packageJson, async (packageJson, old) => {
-  if (packageJson === old) return;
-  if (!(await updatePackageJson(packageJson))) {
-    return;
-  }
-  const lintServer = await getLintServer();
+watch(
+  packageJson,
+  debounce(async (packageJson: string, old: string) => {
+    if (packageJson === old) return;
+    if (!(await updatePackageJson(packageJson))) {
+      return;
+    }
+    const lintServer = await getLintServer();
 
-  consoleOutput.value?.clear();
-  await lintServer.install();
-  await updateInstalledPackages();
-  await lintServer.restart();
-  for (const source of sourceDataList) {
-    await lint({ source: source as SourceData, config: config.value });
-  }
-});
+    consoleOutput.value?.clear();
+    await lintServer.install();
+    await updateInstalledPackages();
+    await lintServer.restart();
+    for (const source of sourceDataList) {
+      await lint({
+        source: source as SourceData,
+        config: configText.value,
+        configFileName: configFileName.value,
+      });
+    }
+  }, 300)
+);
 
 async function updatePackageJson(packageJson: string) {
   const lintServer = await getLintServer();
@@ -383,9 +436,11 @@ async function updateInstalledPackages() {
 async function lint({
   source,
   config,
+  configFileName,
 }: {
   source: SourceData;
   config: string;
+  configFileName: string;
 }) {
   const lintServer = await getLintServer();
 
@@ -398,6 +453,7 @@ async function lint({
     code: source.code,
     fileName: source.fileName,
     config,
+    configFileName,
   });
 
   if (result.version > version) {
@@ -547,6 +603,10 @@ async function handleRemoveSource(name: string) {
 function selectFile(nm: string) {
   inputTabs.value?.setChecked(nm);
 }
+
+function selectOutput(nm: "console" | "warnings") {
+  outputTabs.value?.setChecked(nm);
+}
 </script>
 
 <template>
@@ -580,11 +640,14 @@ function selectFile(nm: string) {
         </TabPanel>
       </template>
       <TabPanel
-        title=".eslintrc.json"
+        :title="configFileName"
         name="config"
         :order="sourceDataList.length"
       >
-        <ConfigEditor v-model:config="config" />
+        <ConfigEditor
+          v-model:config="configText"
+          v-model:file-name="configFileName"
+        />
       </TabPanel>
       <TabPanel
         title="package.json"

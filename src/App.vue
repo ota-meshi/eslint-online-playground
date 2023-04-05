@@ -2,6 +2,7 @@
 import { nextTick, ref, watch } from "vue";
 import ESLintPlayground from "./components/ESLintPlayground.vue";
 import SelectExampleDialog from "./components/SelectExampleDialog.vue";
+import SelectPluginDialog from "./components/SelectPluginDialog.vue";
 import { compress, decompress } from "./utils/compress";
 import { debounce } from "./utils/debounce";
 import defaultJs from "./examples/eslint/src/example.js.txt?raw";
@@ -11,6 +12,8 @@ import github from "./images/github.svg";
 import logo from "./images/logo.png";
 import { CONFIG_FILE_NAMES } from "./utils/eslint-info";
 import type { Example } from "./examples";
+import { installPlugin } from "./plugins";
+import type { Plugin } from "./plugins";
 
 const eslintPlayground = ref<InstanceType<typeof ESLintPlayground> | null>(
   null
@@ -18,6 +21,9 @@ const eslintPlayground = ref<InstanceType<typeof ESLintPlayground> | null>(
 const selectExampleDialog = ref<InstanceType<
   typeof SelectExampleDialog
 > | null>(null);
+const selectPluginDialog = ref<InstanceType<typeof SelectPluginDialog> | null>(
+  null
+);
 
 const hashData = window.location.hash.slice(
   window.location.hash.indexOf("#") + 1
@@ -35,7 +41,9 @@ if (sources.value["package.json"] === undefined) {
 
 if (
   Object.keys(sources.value).filter(
-    (k) => k !== ".eslintrc.json" && k !== "package.json"
+    (k) =>
+      !(CONFIG_FILE_NAMES as readonly string[]).includes(k) &&
+      k !== "package.json"
   ).length === 0
 ) {
   sources.value["src/example.js"] = defaultJs;
@@ -45,10 +53,11 @@ function selectExample() {
   selectExampleDialog.value?.open();
 }
 
+function selectPlugin() {
+  selectPluginDialog.value?.open();
+}
+
 async function handleSelectExample(example: Example) {
-  // Update dependencies first.
-  sources.value["package.json"] = example.files["package.json"];
-  await nextTick();
   sources.value = { ...example.files };
   await nextTick();
   const fileName =
@@ -58,6 +67,24 @@ async function handleSelectExample(example: Example) {
         !CONFIG_FILE_NAMES.some((configName) => nm.endsWith(configName))
     ) || Object.keys(example.files)[0];
   eslintPlayground.value?.selectFile(fileName);
+}
+
+function handleSelectPlugin(plugin: Plugin) {
+  const packageJson = JSON.parse(sources.value["package.json"]);
+  packageJson.devDependencies = {
+    ...packageJson.devDependencies,
+    ...plugin.devDependencies,
+  };
+  sources.value["package.json"] = JSON.stringify(packageJson, null, 2);
+
+  const configFileName =
+    CONFIG_FILE_NAMES.find((nm) => sources.value[nm]) || ".eslintrc.json";
+
+  sources.value[configFileName] = installPlugin(
+    sources.value[configFileName] ?? "{}",
+    configFileName,
+    plugin
+  );
 }
 
 watch(
@@ -82,6 +109,7 @@ watch(
       Online Playground
     </div>
     <div class="header-menu">
+      <button class="ep-button" @click="selectPlugin">More Plugins</button>
       <button class="ep-button" @click="selectExample">More Examples</button>
       <a
         class="github"
@@ -102,6 +130,10 @@ watch(
     ref="selectExampleDialog"
     @select="handleSelectExample"
   ></SelectExampleDialog>
+  <SelectPluginDialog
+    ref="selectPluginDialog"
+    @select="handleSelectPlugin"
+  ></SelectPluginDialog>
 </template>
 
 <style scoped>

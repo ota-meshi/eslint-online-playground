@@ -9,6 +9,7 @@ import {
   createJsonPayload,
   extractJson,
   isReservedFileName,
+  CONFIG_FILE_NAMES,
 } from "./eslint-playground-server-utils.mjs";
 import fs from "fs";
 import path from "path";
@@ -72,16 +73,16 @@ async function lint(input) {
       );
     }
 
-    const configFile = path.join(ROOT_DIR, ".eslintrc.json");
+    const configFile = path.join(ROOT_DIR, input.configFileName);
 
     fs.mkdirSync(path.dirname(targetFile), { recursive: true });
     fs.mkdirSync(path.dirname(configFile), { recursive: true });
 
-    // for (const configFormat of CONFIG_FORMATS) {
-    //   if (configFormat.id === input.configFormat) continue;
-    //   const otherConfigFile = path.join(SRC_DIR, configFormat.name);
-    //   if (fs.existsSync(otherConfigFile)) fs.unlinkSync(otherConfigFile);
-    // }
+    for (const configFileName of CONFIG_FILE_NAMES) {
+      const target = path.join(ROOT_DIR, configFileName);
+      if (target === configFile) continue;
+      if (fs.existsSync(target)) fs.unlinkSync(target);
+    }
 
     fs.writeFileSync(targetFile, input.code, "utf8");
     fs.writeFileSync(configFile, input.config, "utf8");

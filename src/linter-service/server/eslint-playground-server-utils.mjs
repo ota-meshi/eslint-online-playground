@@ -1,12 +1,7 @@
 const DIRECTIVE_OPEN = "{{{ep-json-start}}}";
 const DIRECTIVE_CLOSE = "{{{ep-json-end}}}";
 
-const RESERVED_FILE_NAMES = [
-  "eslint-playground-server.mjs",
-  "eslint-playground-server-utils.mjs",
-  "package.json",
-  "package-lock.json",
-  "node_modules",
+export const CONFIG_FILE_NAMES = [
   ".eslintrc",
   ".eslintrc.cjs",
   ".eslintrc.js",
@@ -16,6 +11,14 @@ const RESERVED_FILE_NAMES = [
   "eslint.config.js",
   "eslint.config.cjs",
   "eslint.config.mjs",
+];
+const RESERVED_FILE_NAMES = [
+  "eslint-playground-server.mjs",
+  "eslint-playground-server-utils.mjs",
+  "package.json",
+  "package-lock.json",
+  "node_modules",
+  ...CONFIG_FILE_NAMES,
   ".eslintignore",
 ];
 /**

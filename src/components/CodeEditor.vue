@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { editor } from "monaco-editor";
-import { ref } from "vue";
+import { computed, ref } from "vue";
 import type { CodeActionProvider } from "../monaco-editor/monaco-setup";
 import MonacoEditor from "./MonacoEditor.vue";
+import { getLang } from "./lang";
 const props = defineProps<{
   code: string;
   fileName: string;
@@ -18,6 +19,9 @@ const emit =
 const fileNameInput = ref<HTMLInputElement>();
 const monacoEditor = ref<InstanceType<typeof MonacoEditor> | null>(null);
 const showPreview = ref(false);
+const language = computed(() => {
+  return getLang(props.fileName);
+});
 
 function handleUpdateModelValue(code: string) {
   emit("update:code", code);
@@ -68,12 +72,13 @@ defineExpose({
         :value="fileName"
         @keydown.enter="handleFileNameInput"
         @blur="handleFileNameInput"
+        :style="{ width: fileName.length + 1 + 'ch' }"
     /></label>
     <MonacoEditor
       class="ep-code__monaco"
       ref="monacoEditor"
       :model-value="code"
-      language="javascript"
+      :language="language"
       :diff="showPreview"
       :right-value="rightCode"
       :markers="markers"

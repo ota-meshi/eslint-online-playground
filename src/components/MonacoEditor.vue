@@ -7,10 +7,11 @@ import type {
   MonacoEditor,
 } from "../monaco-editor/monaco-setup.js";
 import { setupMonacoEditor } from "../monaco-editor/monaco-setup.js";
+import type { Language } from "./lang";
 
 const props = defineProps<{
   modelValue?: string;
-  language?: "javascript" | "typescript" | "json";
+  language?: Language;
   diff?: boolean;
   rightValue?: string;
   markers?: editor.IMarkerData[];
