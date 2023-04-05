@@ -50,5 +50,5 @@ export async function loadPlugins(): Promise<Record<string, Plugin>> {
 }
 
 function convertToName(file: string) {
-  return file.replace(/^\.\//, "").split(/[/\\]/u)[0].replace(/^_/, ".");
+  return file.replace(/^\.\//, "").split(/[/\\]/u)[1].replace(/^_/, ".");
 }

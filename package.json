@@ -24,8 +24,10 @@
   "homepage": "https://github.com/ota-meshi/eslint-plugin-n-playground#readme",
   "dependencies": {
     "@webcontainer/api": "^1.1.0",
+    "espree": "^9.5.1",
     "fflate": "^0.7.4",
-    "vue": "^3.2.47"
+    "vue": "^3.2.47",
+    "yaml": "^2.2.1"
   },
   "devDependencies": {
     "@ota-meshi/eslint-plugin": "^0.13.3",
