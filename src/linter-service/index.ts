@@ -28,6 +28,7 @@ export type LintInput = {
   code: string;
   fileName: string;
   config: string;
+  configFileName: string;
 };
 
 export interface LinterService {
@@ -164,7 +165,13 @@ export async function setupLintServer({
       return webContainer.fs.writeFile(path, data, "utf8");
     },
     removeFile: async (path): Promise<void> => {
-      return webContainer.fs.rm(path);
+      try {
+        await webContainer.fs.rm(path);
+      } catch (e) {
+        // ignore
+        // eslint-disable-next-line no-console -- ignore
+        console.warn(e);
+      }
     },
 
     teardown(): Promise<void> {

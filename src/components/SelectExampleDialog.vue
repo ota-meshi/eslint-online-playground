@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from "vue";
+import { markRaw, ref } from "vue";
 import type { Example } from "../examples";
 import { loadExamples } from "../examples";
 
@@ -13,7 +13,7 @@ defineExpose({
 });
 
 async function open() {
-  examples.value = await loadExamples();
+  examples.value = markRaw(await loadExamples());
   dialogRef.value?.showModal();
 }
 
@@ -33,14 +33,24 @@ function handleClickDialog() {
       <div
         v-for="example in examples"
         :key="example.name"
-        @click="() => handleClickExample(example)"
+        @click="
+          (e) => {
+            (e.target as HTMLElement).tagName !== 'A' && handleClickExample(example);
+          }
+        "
         class="ep-select-example__item"
       >
         <div class="ep-select-example__item-title">{{ example.name }}</div>
         <template v-if="example.description">
-          <div>
+          <Component
+            :is="
+              typeof example.description === 'string'
+                ? 'div'
+                : example.description
+            "
+          >
             {{ example.description }}
-          </div>
+          </Component>
         </template>
       </div>
     </div>
@@ -53,6 +63,14 @@ function handleClickDialog() {
   border: 1px solid var(--ep-border-color);
   border-radius: 2px;
   font-size: 0.75rem;
+}
+
+.ep-select-example :deep(a) {
+  color: var(--ep-link-color);
+  text-decoration: none;
+}
+.ep-select-example :deep(a:hover) {
+  text-decoration: underline;
 }
 
 .ep-select-example__list {

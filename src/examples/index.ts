@@ -1,6 +1,8 @@
+import type { Component } from "vue";
+
 export type Example = {
   name: string;
-  description?: string;
+  description?: string | Component;
   files: Record<string, string>;
 };
 
@@ -11,36 +13,49 @@ export async function loadExamples(): Promise<Record<string, Example>> {
     return allExamples;
   }
   allExamples = {};
+  const examplesMap: Record<string, Example> = {};
 
   const list = await Promise.all([
     ...Object.entries(import.meta.glob("./**/*.ts")).map(
       async ([fileName, content]) => {
-        const val = (await content()) as any;
-        return [fileName, JSON.stringify(val.default || val, null, 2)] as const;
+        const val = (await content()) as {
+          default?: any;
+          name?: string;
+          description?: string;
+        };
+        return {
+          keys: convertToExampleKeys(fileName),
+          content: val,
+        };
       }
     ),
     ...Object.entries(
-      import.meta.glob("./**/*.!(ts)", {
+      import.meta.glob("./**/*.{txt,js}", {
         as: "raw",
       })
-    )
-      .filter(([fileName]) => !fileName.endsWith(".ts"))
-      .map(async ([fileName, content]) => [fileName, await content()] as const),
-  ]);
-  for (const { keys, content } of list
-    .map(([fileName, content]) => ({
+    ).map(async ([fileName, content]) => ({
       keys: convertToExampleKeys(fileName),
-      content,
-    }))
-    .sort(({ keys: a }, { keys: b }) => a.name.localeCompare(b.name))) {
-    const ex = (allExamples[keys.name] ??= { name: keys.name, files: {} });
-    if (keys.fileName === "meta") {
-      const meta = JSON.parse(content);
+      content: await content(),
+    })),
+  ]);
+  for (const { keys, content } of list) {
+    const ex = (examplesMap[keys.name] ??= { name: keys.name, files: {} });
+    if (keys.fileName === "meta" && typeof content === "object") {
+      const meta = content;
       ex.name = meta.name || ex.name;
       ex.description = meta.description;
       continue;
     }
-    ex.files[keys.fileName] = content;
+    ex.files[keys.fileName] =
+      typeof content === "string"
+        ? content
+        : JSON.stringify(content.default ?? content, null, 2);
+  }
+
+  for (const ex of Object.values(examplesMap).sort(({ name: a }, { name: b }) =>
+    a.localeCompare(b)
+  )) {
+    allExamples[ex.name] = ex;
   }
   return allExamples;
 }
@@ -54,7 +69,10 @@ function convertToExampleKeys(file: string) {
   const last = keys[keys.length - 1];
   const lastExtIndex = last.lastIndexOf(".");
   if (lastExtIndex !== -1) {
-    keys[keys.length - 1] = last.slice(0, lastExtIndex);
+    const ext = last.slice(lastExtIndex);
+    if (ext === ".ts" || ext === ".txt") {
+      keys[keys.length - 1] = last.slice(0, lastExtIndex);
+    }
   }
 
   return {

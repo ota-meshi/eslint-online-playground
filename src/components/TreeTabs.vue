@@ -159,6 +159,7 @@ defineExpose({ setChecked });
   padding-block: 0.5rem;
   padding-inline: 1rem;
   display: flex;
+  white-space: nowrap;
 }
 .ep-tree-tabs__menu input[type="radio"] {
   inline-size: 0;

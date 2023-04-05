@@ -12,10 +12,21 @@ export function loadMonaco(): Promise<Monaco> {
       const monaco: Monaco = await loadModuleFromMonaco(
         "vs/editor/editor.main"
       );
+      // Turn off built-in validation.
+      // monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+      //   validate: false,
+      // });
+      // monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+      //   validate: false,
+      // });
+      // monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+      //   validate: false,
+      // });
+      // monaco.languages.css.cssDefaults.setOptions({
+      //   validate: false,
+      // });
 
-      monaco.languages.css.cssDefaults.setOptions({
-        validate: false, // Turn off CSS built-in validation.
-      });
+      setupEnhancedLanguages(monaco);
 
       return monaco;
     })())
@@ -79,5 +90,24 @@ async function appendMonacoEditorScript(): Promise<HTMLScriptElement> {
       }
     };
     document.head.append(script);
+  });
+}
+
+function setupEnhancedLanguages(monaco: Monaco) {
+  monaco.languages.register({ id: "astro" });
+  monaco.languages.registerTokensProviderFactory("astro", {
+    async create() {
+      const astro = await import("./monarch-syntaxes/astro");
+
+      return astro.language;
+    },
+  });
+  monaco.languages.register({ id: "svelte" });
+  monaco.languages.registerTokensProviderFactory("svelte", {
+    async create() {
+      const svelte = await import("./monarch-syntaxes/svelte");
+
+      return svelte.language;
+    },
   });
 }
