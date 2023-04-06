@@ -6,6 +6,10 @@ export type Plugin = {
   eslintConfig: {
     plugins?: string[];
     extends?: string[];
+    overrides?: {
+      files: string[];
+      parser?: string;
+    }[];
   };
   hasInstalled: (packageJson: any) => boolean;
 };

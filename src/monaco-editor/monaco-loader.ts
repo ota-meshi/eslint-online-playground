@@ -16,14 +16,15 @@ export function loadMonaco(): Promise<Monaco> {
       //   allowComments: true,
       //   trailingCommas: "ignore",
       // });
+
       // Turn off built-in validation.
-      // monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-      //   validate: false,
-      // });
-      // monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-      //   validate: false,
-      // });
+      monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
+        validate: false,
+      });
       // monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+      //   validate: false,
+      // });
+      // monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
       //   validate: false,
       // });
       // monaco.languages.css.cssDefaults.setOptions({

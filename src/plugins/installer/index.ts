@@ -3,6 +3,7 @@ import type { ConfigFileName } from "../../utils/eslint-info";
 import { alertAndLog } from "./error";
 import { installPluginForYaml } from "./yaml";
 import { installPluginForCJS, installPluginForMJS } from "./js";
+import { installPluginForJson } from "./json";
 
 export type InstallPluginResult =
   | {
@@ -17,31 +18,7 @@ export async function installPlugin(
   plugin: Plugin
 ): Promise<InstallPluginResult> {
   if (configFileName === ".eslintrc.json") {
-    try {
-      const config = JSON.parse(configText);
-      if (plugin.eslintConfig.plugins)
-        config.plugins = [
-          ...new Set([
-            ...[config.plugins].flat().filter(Boolean),
-            ...plugin.eslintConfig.plugins,
-          ]),
-        ];
-      if (plugin.eslintConfig.extends)
-        config.extends = [
-          ...new Set([
-            ...[config.extends].flat().filter(Boolean),
-            ...(plugin.eslintConfig.extends ?? []),
-          ]),
-        ];
-      return {
-        text: JSON.stringify(config, null, 2),
-      };
-    } catch (e) {
-      // eslint-disable-next-line no-console -- ignore
-      console.error(e);
-      alertAndLog("Failed to parse JSON. Failed to add new configuration.");
-      return { error: true };
-    }
+    return installPluginForJson(configText, plugin);
   }
   if (configFileName === ".eslintrc.yaml") {
     return installPluginForYaml(configText, plugin);

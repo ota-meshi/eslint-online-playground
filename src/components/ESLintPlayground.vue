@@ -52,7 +52,7 @@ void loadMonaco().then((monaco) => (monacoRef.value = monaco));
 
 const installedPackages = reactive<PackageJsonData[]>([]);
 
-const sourceDataList = reactive<SourceData[]>([]);
+const allSourceDataList = reactive<SourceData[]>([]);
 const activeSource = shallowRef<SourceData | null>(null);
 
 const configFileName = computed<ConfigFileName>({
@@ -85,6 +85,21 @@ const packageJson = computed({
     emitUpdateSources({ packageJson: value });
   },
 });
+const displaySourceDataList = computed(() => {
+  const list: SourceData[] = [];
+  const tsconfigs: SourceData[] = [];
+  for (const sourceData of allSourceDataList) {
+    if (/^tsconfig(?:\.\w+)?\.json$/u.test(sourceData.fileName)) {
+      tsconfigs.push(sourceData);
+    } else {
+      list.push(sourceData);
+    }
+  }
+  return {
+    list: list.sort((a, b) => a.fileName.localeCompare(b.fileName)),
+    tsconfigs: tsconfigs.sort((a, b) => a.fileName.localeCompare(b.fileName)),
+  };
+});
 defineExpose({
   selectFile,
   selectOutput,
@@ -116,9 +131,9 @@ watch(
     if (newSources === oldSources) {
       return;
     }
-    for (const source of [...sourceDataList]) {
+    for (const source of [...allSourceDataList]) {
       if (newSources[source.fileName] == null) {
-        sourceDataList.splice(sourceDataList.indexOf(source), 1);
+        allSourceDataList.splice(allSourceDataList.indexOf(source), 1);
       }
     }
     for (const [fileName, code] of Object.entries(newSources)) {
@@ -128,16 +143,15 @@ watch(
       ) {
         continue;
       }
-      const sourceData = sourceDataList.find((d) => d.fileName === fileName);
+      const sourceData = allSourceDataList.find((d) => d.fileName === fileName);
       if (sourceData) {
         sourceData.code = code;
       } else {
-        sourceDataList.push(createSourceData(fileName, code));
+        allSourceDataList.push(createSourceData(fileName, code));
       }
     }
-    sourceDataList.sort((a, b) => a.fileName.localeCompare(b.fileName));
     if (!activeSource.value) {
-      activeSource.value = sourceDataList[0];
+      activeSource.value = allSourceDataList[0];
     }
   },
   { immediate: true }
@@ -219,8 +233,6 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
   return sourceData;
 
   function update() {
-    sourceDataList.sort((a, b) => a.fileName.localeCompare(b.fileName));
-
     emitUpdateSources();
 
     void lint({
@@ -290,7 +302,7 @@ function emitUpdateSources(
   emit(
     "update:sources",
     Object.fromEntries([
-      ...sourceDataList.map((sourceData) => [
+      ...allSourceDataList.map((sourceData) => [
         sourceData.fileName,
         sourceData.code,
       ]),
@@ -304,7 +316,7 @@ function emitUpdateSources(
 }
 
 function handleActiveName(name: string) {
-  const a = sourceDataList.find((source) => source.fileName === name);
+  const a = allSourceDataList.find((source) => source.fileName === name);
   if (a) {
     activeSource.value = a;
   }
@@ -337,7 +349,7 @@ watch(configText, async (config, oldConfig) => {
   if (config === oldConfig) {
     return;
   }
-  for (const source of sourceDataList) {
+  for (const source of allSourceDataList) {
     await lint({ source, config, configFileName: configFileName.value });
   }
 });
@@ -349,7 +361,7 @@ onMounted(async () => {
   const lintServer = await getLintServer();
   await lintServer.install();
   await updateInstalledPackages();
-  for (const source of sourceDataList) {
+  for (const source of allSourceDataList) {
     await lint({
       source,
       config: configText.value,
@@ -371,7 +383,7 @@ watch(
     await lintServer.install();
     await updateInstalledPackages();
     await lintServer.restart();
-    for (const source of sourceDataList) {
+    for (const source of allSourceDataList) {
       await lint({
         source: source as SourceData,
         config: configText.value,
@@ -621,12 +633,15 @@ function selectOutput(nm: "console" | "warnings") {
           <button @click="handleAddFile" class="ep__tool-button">+</button>
         </div>
       </template>
-      <template v-for="(source, index) in sourceDataList" :key="source.id">
+      <template
+        v-for="(source, index) in displaySourceDataList.list"
+        :key="source.id"
+      >
         <TabPanel
           :title="source.fileName"
           :name="source.fileName"
           :order="index"
-          :removable="sourceDataList.length > 1"
+          :removable="displaySourceDataList.list.length > 1"
         >
           <CodeEditor
             v-model:code="source.code"
@@ -642,7 +657,7 @@ function selectOutput(nm: "console" | "warnings") {
       <TabPanel
         :title="configFileName"
         name="config"
-        :order="sourceDataList.length"
+        :order="displaySourceDataList.list.length"
       >
         <ConfigEditor
           v-model:config="configText"
@@ -652,13 +667,30 @@ function selectOutput(nm: "console" | "warnings") {
       <TabPanel
         title="package.json"
         name="package-json"
-        :order="sourceDataList.length + 1"
+        :order="displaySourceDataList.list.length + 1"
       >
         <PackageJsonEditor
           v-model:package-json="packageJson"
           :installed-packages="installedPackages"
         />
       </TabPanel>
+      <template
+        v-for="(source, index) in displaySourceDataList.tsconfigs"
+        :key="source.id"
+      >
+        <TabPanel
+          :title="source.fileName"
+          :name="source.fileName"
+          :order="displaySourceDataList.list.length + 2 + index"
+          :removable="true"
+        >
+          <CodeEditor
+            v-model:code="source.code"
+            v-model:file-name="source.fileName"
+            disable-fix
+          />
+        </TabPanel>
+      </template>
     </TreeTabs>
     <TabsPanel ref="outputTabs" content-top-shadow>
       <TabPanel title="Problems" name="warnings" :order="1">
