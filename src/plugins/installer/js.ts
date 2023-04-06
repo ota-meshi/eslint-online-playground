@@ -1,25 +1,21 @@
 import type * as ESTree from "estree";
 import type { InstallPluginResult, Plugin } from "..";
 import { alertAndLog } from "./error";
+import type * as CodeRead from "code-red";
 
-type InsertText = { index: number; text: string };
 export async function installPluginForCJS(
   configText: string,
   plugin: Plugin
 ): Promise<InstallPluginResult> {
-  // @ts-expect-error -- Missing type
-  const espree = await import("espree");
-  const insertList: InsertText[] = [];
+  const codeRead = await import("code-red");
   try {
-    const ast: ESTree.Program = espree.parse(configText, {
+    const ast: ESTree.Program = codeRead.parse(configText, {
       ecmaVersion: "latest",
-      range: true,
-      loc: true,
+      ranges: true,
+      locations: true,
       sourceType: "module",
-      ecmaFeatures: {
-        globalReturn: true,
-      },
-    });
+      allowReturnOutsideFunction: true,
+    }) as never;
 
     const commonJsExports = ast.body.find(isModuleExports);
     if (!commonJsExports) {
@@ -32,32 +28,20 @@ export async function installPluginForCJS(
       return { error: true };
     }
     if (plugin.eslintConfig.plugins) {
-      insertList.push(
-        ...addToArray(right, "plugins", [
-          ...new Set(plugin.eslintConfig.plugins),
-        ])
-      );
+      addToArray(codeRead, right, "plugins", [
+        ...new Set(plugin.eslintConfig.plugins),
+      ]);
     }
     if (plugin.eslintConfig.extends) {
-      insertList.push(
-        ...addToArray(right, "extends", [
-          ...new Set(plugin.eslintConfig.extends),
-        ])
-      );
+      addToArray(codeRead, right, "extends", [
+        ...new Set(plugin.eslintConfig.extends),
+      ]);
     }
     if (plugin.eslintConfig.overrides) {
-      insertList.push(...margeOverride(right, plugin.eslintConfig.overrides));
+      margeOverride(codeRead, right, plugin.eslintConfig.overrides);
     }
 
-    let newText = "";
-    let start = 0;
-    for (const ins of insertList.sort((a, b) => a.index - b.index)) {
-      newText += configText.slice(start, ins.index) + ins.text;
-      start = ins.index;
-    }
-    newText += configText.slice(start);
-
-    return { text: newText };
+    return { text: codeRead.print(ast).code };
   } catch (e) {
     // eslint-disable-next-line no-console -- ignore
     console.error(e);
@@ -100,41 +84,28 @@ function isModuleExports(
   );
 }
 
-function* addToArray(
+function addToArray(
+  codeRead: typeof CodeRead,
   node: ESTree.ObjectExpression,
   key: string,
   values: string[]
-): Iterable<InsertText> {
+): void {
   const target = node.properties.find(buildPropMatch(key));
   if (!target) {
-    const lastProp = node.properties[node.properties.length - 1];
-    const indentProp = " ".repeat(
-      lastProp ? lastProp.loc!.start.column : node.loc!.start.column + 2
-    );
-    yield {
-      index: lastProp?.range![1] ?? node.range![0] + 1,
-      text: `${
-        node.properties.length ? "," : ""
-      }\n${indentProp}${key}: [\n${indentProp}  ${values
-        .map((s) => JSON.stringify(s))
-        .join(`,\n${indentProp}  `)}\n${indentProp}]`,
-    };
+    node.properties.push({
+      type: "Property",
+      kind: "init",
+      computed: false,
+      key: {
+        type: "Identifier",
+        name: key,
+      },
+      value: toExpression(codeRead, values),
+      method: false,
+      shorthand: false,
+    });
     return;
   }
-  if (target.value.type === "Literal") {
-    const literal = target.value;
-    yield {
-      index: target.value.range![0],
-      text: "[",
-    };
-    const insertValues = values.filter((val) => literal.value === val);
-    yield {
-      index: target.value.range![1],
-      text: `, ${insertValues.map((s) => JSON.stringify(s)).join(`, `)}]`,
-    };
-    return;
-  }
-
   if (target.value.type === "ArrayExpression") {
     const array = target.value;
     const insertValues = values.filter(
@@ -143,69 +114,53 @@ function* addToArray(
           (e) => e && e.type === "Literal" && e.value === val
         )
     );
-    if (insertValues.length) {
-      const lastElement = array.elements.findLast((e) => e);
-      const indentElement = " ".repeat(
-        lastElement
-          ? lastElement.loc!.start.column
-          : array.loc!.start.column + 2
-      );
-      yield {
-        index: lastElement?.range![1] ?? array.range![0] + 1,
-        text: `${
-          array.elements.length ? "," : ""
-        }\n${indentElement}${insertValues
-          .map((s) => JSON.stringify(s))
-          .join(`,\n${indentElement}`)}`,
-      };
+    for (const value of insertValues) {
+      array.elements.push(toExpression(codeRead, value));
     }
     return;
   }
-
-  throw new Error(`Unknown '${key}' value. Failed to add new configuration.`);
+  if (target.value.type === "Literal") {
+    const newValues = [...new Set([target.value.value, ...values])];
+    target.value = toExpression(codeRead, newValues);
+    return;
+  }
+  target.value = toFlatArray(codeRead, target.value, values);
 }
 
-function* margeOverride(
+function margeOverride(
+  codeRead: typeof CodeRead,
   node: ESTree.ObjectExpression,
   overrides: {
     files: string[];
     parser?: string;
   }[]
-): Iterable<InsertText> {
+): void {
   const overridesProperty = node.properties.find(buildPropMatch("overrides"));
   if (!overridesProperty) {
-    const lastProp = node.properties[node.properties.length - 1];
-    const indentProp = " ".repeat(
-      lastProp ? lastProp.loc!.start.column : node.loc!.start.column + 2
-    );
-    const valueText = jsonText(indentProp, overrides);
-    yield {
-      index: lastProp?.range![1] ?? node.range![0] + 1,
-      text: `${
-        node.properties.length ? "," : ""
-      }\n${indentProp}overrides: ${valueText}`,
-    };
+    node.properties.push({
+      type: "Property",
+      kind: "init",
+      computed: false,
+      key: {
+        type: "Identifier",
+        name: "overrides",
+      },
+      value: toExpression(codeRead, overrides),
+      method: false,
+      shorthand: false,
+    });
     return;
   }
-  const indentProp = " ".repeat(overridesProperty.loc!.start.column);
   if (overridesProperty.value.type !== "ArrayExpression") {
-    const valueText = jsonText(indentProp, overrides);
-    yield {
-      index: overridesProperty.value.range![0],
-      text: `[\n${indentProp}  ...`,
-    };
-    yield {
-      index: overridesProperty.value.range![1],
-      text: valueText.slice(1),
-    };
+    overridesProperty.value = toFlatArray(
+      codeRead,
+      overridesProperty.value,
+      overrides
+    );
     return;
   }
   const array = overridesProperty.value;
 
-  const remainingOverrides: {
-    files: string[];
-    parser?: string;
-  }[] = [];
   for (const override of overrides) {
     const target = array.elements.find(
       (element): element is ESTree.ObjectExpression => {
@@ -234,35 +189,119 @@ function* margeOverride(
         return true;
       }
     );
-    if (!target) {
-      remainingOverrides.push(override);
+    if (target) {
+      continue;
     }
-  }
-  if (remainingOverrides.length === 0) {
-    return;
-  }
-  const lastElement = array.elements.findLast((e) => e);
-  const valueText = jsonText(indentProp, remainingOverrides);
-  yield {
-    index: lastElement?.range![1] ?? array.range![0] + 1,
-    text: `${lastElement ? "," : ""}${valueText.slice(1, -1).trimEnd()}`,
-  };
-
-  function jsonText(indent: string, object: any) {
-    const lines = JSON.stringify(object, null, 2).split("\n");
-    if (lines.length <= 1) {
-      return lines.join("\n");
-    }
-    return [
-      ...lines.slice(0, 1),
-      ...lines.slice(1).map((line) => indent + line),
-    ].join("\n");
+    overridesProperty.value.elements.push(toExpression(codeRead, override));
   }
 }
 
 function buildPropMatch(name: string) {
-  return (p: ESTree.Property | ESTree.SpreadElement): p is ESTree.Property =>
+  return (
+    p: ESTree.Property | ESTree.SpreadElement
+  ): p is ESTree.Property & { value: ESTree.Expression } =>
     p.type === "Property" &&
     ((!p.computed && p.key.type === "Identifier" && p.key.name === name) ||
       (p.key.type === "Literal" && p.key.value === name));
+}
+
+function toFlatArray(
+  codeRead: typeof CodeRead,
+  element: ESTree.Expression,
+  values: any[]
+): ESTree.Expression {
+  if (element.type === "ArrayExpression") {
+    const array: ESTree.ArrayExpression = {
+      type: "ArrayExpression",
+      elements: [
+        ...flatten(element.elements),
+        ...values.map((v) => toExpression(codeRead, v)),
+      ],
+    };
+    return array;
+  }
+  let elements: (ESTree.Expression | ESTree.SpreadElement)[];
+  if (
+    element.type === "CallExpression" &&
+    element.callee.type === "MemberExpression" &&
+    !element.callee.computed &&
+    element.callee.property.type === "Identifier" &&
+    element.callee.property.name === "flat" &&
+    element.callee.object.type !== "Super"
+  ) {
+    elements = [element.callee.object];
+  } else {
+    elements = [element];
+  }
+  elements = [...flatten(elements)];
+  const array: ESTree.ArrayExpression = {
+    type: "ArrayExpression",
+    elements: [...elements, ...values.map((v) => toExpression(codeRead, v))],
+  };
+  if (elements.every((n) => n.type === "Literal")) {
+    return array;
+  }
+  const member: ESTree.MemberExpression = {
+    type: "MemberExpression",
+    object: array,
+    computed: false,
+    property: {
+      type: "Identifier",
+      name: "flat",
+    },
+    optional: false,
+  };
+  const call: ESTree.CallExpression = {
+    type: "CallExpression",
+    callee: member,
+    optional: false,
+    arguments: [],
+  };
+  return call;
+
+  function* flatten(
+    nodes: (ESTree.Expression | ESTree.SpreadElement | null)[]
+  ): Iterable<ESTree.Expression | ESTree.SpreadElement> {
+    for (const node of nodes) {
+      if (!node) continue;
+      if (node.type === "ArrayExpression") {
+        yield* flatten(node.elements);
+      } else {
+        yield node;
+      }
+    }
+  }
+}
+
+function toExpression(
+  codeRead: typeof CodeRead,
+  object: any
+): ESTree.Expression {
+  if (!object || typeof object !== "object") {
+    return codeRead.x`${JSON.stringify(object, null, 2)}`;
+  }
+  if (Array.isArray(object)) {
+    return {
+      type: "ArrayExpression",
+      elements: object.map((v) => toExpression(codeRead, v)),
+    };
+  }
+  return {
+    type: "ObjectExpression",
+    properties: Object.entries(object).map(([k, v]): ESTree.Property => {
+      const expr = toExpression(codeRead, v);
+      return {
+        type: "Property",
+        kind: "init",
+        computed: false,
+        key: {
+          type: "Identifier",
+          name: k,
+        },
+        value: expr,
+        method: false,
+        shorthand: false,
+      };
+    }),
+  };
 }
