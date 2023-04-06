@@ -2,7 +2,7 @@ import type { Plugin } from "..";
 import type { ConfigFileName } from "../../utils/eslint-info";
 import { alertAndLog } from "./error";
 import { installPluginForYaml } from "./yaml";
-import { installPluginForCJS } from "./js";
+import { installPluginForCJS, installPluginForMJS } from "./js";
 
 export type InstallPluginResult =
   | {
@@ -48,6 +48,9 @@ export async function installPlugin(
   }
   if (configFileName === ".eslintrc.js") {
     return installPluginForCJS(configText, plugin);
+  }
+  if (configFileName === "eslint.config.js") {
+    return installPluginForMJS(configText, plugin);
   }
 
   alertAndLog(`Cannot install plugin for config file name: ${configFileName}`);

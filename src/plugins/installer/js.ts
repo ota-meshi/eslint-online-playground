@@ -2,13 +2,14 @@ import type * as ESTree from "estree";
 import type { InstallPluginResult, Plugin } from "..";
 import { alertAndLog } from "./error";
 
+type InsertText = { index: number; text: string };
 export async function installPluginForCJS(
   configText: string,
   plugin: Plugin
 ): Promise<InstallPluginResult> {
   // @ts-expect-error -- Missing type
   const espree = await import("espree");
-  const insertList: { index: number; text: string }[] = [];
+  const insertList: InsertText[] = [];
   try {
     const ast: ESTree.Program = espree.parse(configText, {
       ecmaVersion: "latest",
@@ -63,67 +64,14 @@ export async function installPluginForCJS(
 }
 
 export async function installPluginForMJS(
-  configText: string,
+  _configText: string,
   _plugin: Plugin
 ): Promise<InstallPluginResult> {
-  // @ts-expect-error -- Missing type
-  const espree = await import("espree");
-  // const insertList: { index: number; text: string }[] = [];
-  try {
-    const ast: ESTree.Program = espree.parse(configText, {
-      ecmaVersion: "latest",
-      range: true,
-      loc: true,
-      sourceType: "module",
-      ecmaFeatures: {
-        globalReturn: true,
-      },
-    });
-
-    const exportDefault = ast.body.find(
-      (node) => node.type === "ExportDefaultDeclaration"
-    );
-    if (!exportDefault) {
-      alertAndLog("Unknown `export default`. Failed to add new configuration.");
-      return { error: true };
-    }
-    alertAndLog("Unsupported for MJS. Failed to add new configuration.");
-    return { error: true };
-    // const right = exportDefault.expression.right;
-    // if (!right || right.type !== "ObjectExpression") {
-    //   alertAndLog("Unknown exports. Failed to add new configuration.");
-    //   return configText;
-    // }
-    // if (plugin.eslintConfig.plugins) {
-    //   insertList.push(
-    //     ...addToArray(right, "plugins", [
-    //       ...new Set(plugin.eslintConfig.plugins),
-    //     ])
-    //   );
-    // }
-    // if (plugin.eslintConfig.extends) {
-    //   insertList.push(
-    //     ...addToArray(right, "extends", [
-    //       ...new Set(plugin.eslintConfig.extends),
-    //     ])
-    //   );
-    // }
-
-    // let newText = "";
-    // let start = 0;
-    // for (const ins of insertList.sort((a, b) => a.index - b.index)) {
-    //   newText += configText.slice(start, ins.index) + ins.text;
-    //   start = ins.index;
-    // }
-    // newText += configText.slice(start);
-
-    // return newText;
-  } catch (e) {
-    // eslint-disable-next-line no-console -- ignore
-    console.error(e);
-    alertAndLog("Failed to parse CJS. Failed to add new configuration.");
-    return { error: true };
-  }
+  await Promise.resolve();
+  alertAndLog(
+    "Flat Config is not yet supported. Failed to add new configuration."
+  );
+  return { error: true };
 }
 
 function isModuleExports(
@@ -153,7 +101,7 @@ function* addToArray(
   node: ESTree.ObjectExpression,
   key: string,
   values: string[]
-): Iterable<{ index: number; text: string }> {
+): Iterable<InsertText> {
   const target = node.properties.find(
     (p): p is ESTree.Property =>
       p.type === "Property" &&
