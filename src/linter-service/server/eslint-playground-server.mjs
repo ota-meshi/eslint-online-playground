@@ -87,8 +87,8 @@ async function lint(input) {
     fs.writeFileSync(targetFile, input.code, "utf8");
     fs.writeFileSync(configFile, input.config, "utf8");
 
-    const eslintInstance = new ESLint();
-    const eslintInstanceForFix = new ESLint({ fix: true });
+    const eslintInstance = await newESLint();
+    const eslintInstanceForFix = await newESLint({ fix: true });
     const result = (await eslintInstance.lintFiles([targetFile]))[0];
     const fixResult = (await eslintInstanceForFix.lintFiles([targetFile]))[0];
     const fixedFile = fixResult.output ?? input.code;
@@ -122,5 +122,15 @@ async function lint(input) {
     };
 
     process.stdout.write(createJsonPayload(output));
+  }
+
+  async function newESLint(options) {
+    if (input.configFileName !== "eslint.config.js") {
+      return new ESLint(options);
+    }
+
+    const mod = await import("eslint/use-at-your-own-risk");
+    const { FlatESLint } = mod.default;
+    return new FlatESLint(options);
   }
 }
