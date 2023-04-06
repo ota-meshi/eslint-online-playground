@@ -209,22 +209,36 @@ function toFlatArray(
   codeRead: typeof CodeRead,
   element: ESTree.Expression,
   values: any[]
-) {
+): ESTree.Expression {
   if (element.type === "ArrayExpression") {
     const array: ESTree.ArrayExpression = {
       type: "ArrayExpression",
       elements: [
-        ...element.elements,
+        ...flatten(element.elements),
         ...values.map((v) => toExpression(codeRead, v)),
       ],
     };
     return array;
   }
+  let elements: (ESTree.Expression | ESTree.SpreadElement)[];
+  if (
+    element.type === "CallExpression" &&
+    element.callee.type === "MemberExpression" &&
+    !element.callee.computed &&
+    element.callee.property.type === "Identifier" &&
+    element.callee.property.name === "flat" &&
+    element.callee.object.type !== "Super"
+  ) {
+    elements = [element.callee.object];
+  } else {
+    elements = [element];
+  }
+  elements = [...flatten(elements)];
   const array: ESTree.ArrayExpression = {
     type: "ArrayExpression",
-    elements: [element, ...values.map((v) => toExpression(codeRead, v))],
+    elements: [...elements, ...values.map((v) => toExpression(codeRead, v))],
   };
-  if (element.type === "Literal") {
+  if (elements.every((n) => n.type === "Literal")) {
     return array;
   }
   const member: ESTree.MemberExpression = {
@@ -244,6 +258,19 @@ function toFlatArray(
     arguments: [],
   };
   return call;
+
+  function* flatten(
+    nodes: (ESTree.Expression | ESTree.SpreadElement | null)[]
+  ): Iterable<ESTree.Expression | ESTree.SpreadElement> {
+    for (const node of nodes) {
+      if (!node) continue;
+      if (node.type === "ArrayExpression") {
+        yield* flatten(node.elements);
+      } else {
+        yield node;
+      }
+    }
+  }
 }
 
 function toExpression(
