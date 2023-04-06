@@ -9,14 +9,14 @@ export const devDependencies = {
 };
 export const eslintConfig = {
   plugins: ["@typescript-eslint"],
-  extends: [
-    "eslint:recommended",
-    "plugin:@typescript-eslint/eslint-recommended",
-    "plugin:@typescript-eslint/recommended",
-  ],
+  extends: ["eslint:recommended"],
   overrides: [
     {
       files: ["*.ts", "*.tsx"],
+      extends: [
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+      ],
       parser: "@typescript-eslint/parser",
     },
   ],

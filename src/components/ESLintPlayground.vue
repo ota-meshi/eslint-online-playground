@@ -32,6 +32,7 @@ import type { CodeActionProvider } from "../monaco-editor/monaco-setup";
 import { debounce } from "../utils/debounce";
 import type { ConfigFileName } from "../utils/eslint-info";
 import { CONFIG_FILE_NAMES } from "../utils/eslint-info";
+import { maybeTSConfig } from "../utils/tsconfig";
 
 const props = defineProps<{
   sources: Record<string, string>;
@@ -89,7 +90,7 @@ const displaySourceDataList = computed(() => {
   const list: SourceData[] = [];
   const tsconfigs: SourceData[] = [];
   for (const sourceData of allSourceDataList) {
-    if (/^tsconfig(?:\.\w+)?\.json$/u.test(sourceData.fileName)) {
+    if (maybeTSConfig(sourceData.fileName)) {
       tsconfigs.push(sourceData);
     } else {
       list.push(sourceData);
@@ -316,7 +317,9 @@ function emitUpdateSources(
 }
 
 function handleActiveName(name: string) {
-  const a = allSourceDataList.find((source) => source.fileName === name);
+  const a = displaySourceDataList.value.list.find(
+    (source) => source.fileName === name
+  );
   if (a) {
     activeSource.value = a;
   }

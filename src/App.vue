@@ -14,6 +14,7 @@ import { CONFIG_FILE_NAMES } from "./utils/eslint-info";
 import type { Example } from "./examples";
 import { installPlugin } from "./plugins";
 import type { Plugin } from "./plugins";
+import { maybeTSConfig } from "./utils/tsconfig";
 
 const eslintPlayground = ref<InstanceType<typeof ESLintPlayground> | null>(
   null
@@ -64,7 +65,8 @@ async function handleSelectExample(example: Example) {
     Object.keys(example.files).find(
       (nm) =>
         nm !== "package.json" &&
-        !CONFIG_FILE_NAMES.some((configName) => nm.endsWith(configName))
+        !CONFIG_FILE_NAMES.some((configName) => nm.endsWith(configName)) &&
+        !maybeTSConfig(nm)
     ) || Object.keys(example.files)[0];
   eslintPlayground.value?.selectFile(fileName);
 }
