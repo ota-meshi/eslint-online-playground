@@ -5,6 +5,7 @@ import type { FileSystemTree } from "@webcontainer/api";
 import { Installer } from "./installer";
 import { Server } from "./server";
 import { WebContainer } from "@webcontainer/api";
+import type { ConfigFileName } from "../utils/eslint-info";
 
 export type LinterServiceResult =
   | LinterServiceResultSuccess
@@ -28,7 +29,7 @@ export type LintInput = {
   code: string;
   fileName: string;
   config: string;
-  configFileName: string;
+  configFileName: ConfigFileName;
 };
 
 export interface LinterService {
