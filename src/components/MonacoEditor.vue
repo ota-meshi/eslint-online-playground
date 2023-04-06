@@ -72,6 +72,15 @@ watch(
   }
 );
 watch(
+  () => props.language,
+  (value) => {
+    if (!editorRef.value) {
+      return;
+    }
+    editorRef.value.setModelLanguage(value || "");
+  }
+);
+watch(
   () => props.markers,
   (markers) => {
     if (!editorRef.value) {

@@ -12,6 +12,10 @@ export function loadMonaco(): Promise<Monaco> {
       const monaco: Monaco = await loadModuleFromMonaco(
         "vs/editor/editor.main"
       );
+      // monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+      //   allowComments: true,
+      //   trailingCommas: "ignore",
+      // });
       // Turn off built-in validation.
       // monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
       //   validate: false,
