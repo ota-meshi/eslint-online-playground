@@ -440,7 +440,7 @@ async function lint({
 }: {
   source: SourceData;
   config: string;
-  configFileName: string;
+  configFileName: ConfigFileName;
 }) {
   const lintServer = await getLintServer();
 
