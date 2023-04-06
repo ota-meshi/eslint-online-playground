@@ -11,6 +11,7 @@ const props = defineProps<{
   markers?: editor.IMarkerData[];
   rightMarkers?: editor.IMarkerData[];
   codeActionProvider?: CodeActionProvider;
+  disableFix?: boolean;
 }>();
 const emit =
   defineEmits<
@@ -86,7 +87,7 @@ defineExpose({
       :code-action-provider="codeActionProvider"
       @update:model-value="handleUpdateModelValue"
     />
-    <div class="ep-code__tools">
+    <div class="ep-code__tools" v-if="!props.disableFix">
       <label class="ep-button">
         <input type="checkbox" v-model="showPreview" />
         Preview

@@ -45,6 +45,9 @@ export async function installPluginForCJS(
         ])
       );
     }
+    if (plugin.eslintConfig.overrides) {
+      insertList.push(...margeOverride(right, plugin.eslintConfig.overrides));
+    }
 
     let newText = "";
     let start = 0;
@@ -102,12 +105,7 @@ function* addToArray(
   key: string,
   values: string[]
 ): Iterable<InsertText> {
-  const target = node.properties.find(
-    (p): p is ESTree.Property =>
-      p.type === "Property" &&
-      ((!p.computed && p.key.type === "Identifier" && p.key.name === key) ||
-        (p.key.type === "Literal" && p.key.value === key))
-  );
+  const target = node.properties.find(buildPropMatch(key));
   if (!target) {
     const lastProp = node.properties[node.properties.length - 1];
     const indentProp = " ".repeat(
@@ -122,24 +120,149 @@ function* addToArray(
         .join(`,\n${indentProp}  `)}\n${indentProp}]`,
     };
     return;
-  } else if (!target.value || target.value.type !== "ArrayExpression") {
-    throw new Error(`Unknown '${key}' value. Failed to add new configuration.`);
   }
-  const array = target.value;
-  const insertValues = values.filter(
-    (val) =>
-      !array.elements.some((e) => e && e.type === "Literal" && e.value === val)
-  );
-  if (insertValues.length) {
-    const lastElement = array.elements.findLast((e) => e);
-    const indentElement = " ".repeat(
-      lastElement ? lastElement.loc!.start.column : array.loc!.start.column + 2
-    );
+  if (target.value.type === "Literal") {
+    const literal = target.value;
     yield {
-      index: lastElement?.range![1] ?? array.range![0] + 1,
-      text: `${array.elements.length ? "," : ""}\n${indentElement}${insertValues
-        .map((s) => JSON.stringify(s))
-        .join(`,\n${indentElement}`)}`,
+      index: target.value.range![0],
+      text: "[",
     };
+    const insertValues = values.filter((val) => literal.value === val);
+    yield {
+      index: target.value.range![1],
+      text: `, ${insertValues.map((s) => JSON.stringify(s)).join(`, `)}]`,
+    };
+    return;
   }
+
+  if (target.value.type === "ArrayExpression") {
+    const array = target.value;
+    const insertValues = values.filter(
+      (val) =>
+        !array.elements.some(
+          (e) => e && e.type === "Literal" && e.value === val
+        )
+    );
+    if (insertValues.length) {
+      const lastElement = array.elements.findLast((e) => e);
+      const indentElement = " ".repeat(
+        lastElement
+          ? lastElement.loc!.start.column
+          : array.loc!.start.column + 2
+      );
+      yield {
+        index: lastElement?.range![1] ?? array.range![0] + 1,
+        text: `${
+          array.elements.length ? "," : ""
+        }\n${indentElement}${insertValues
+          .map((s) => JSON.stringify(s))
+          .join(`,\n${indentElement}`)}`,
+      };
+    }
+    return;
+  }
+
+  throw new Error(`Unknown '${key}' value. Failed to add new configuration.`);
+}
+
+function* margeOverride(
+  node: ESTree.ObjectExpression,
+  overrides: {
+    files: string[];
+    parser?: string;
+  }[]
+): Iterable<InsertText> {
+  const overridesProperty = node.properties.find(buildPropMatch("overrides"));
+  if (!overridesProperty) {
+    const lastProp = node.properties[node.properties.length - 1];
+    const indentProp = " ".repeat(
+      lastProp ? lastProp.loc!.start.column : node.loc!.start.column + 2
+    );
+    const valueText = jsonText(indentProp, overrides);
+    yield {
+      index: lastProp?.range![1] ?? node.range![0] + 1,
+      text: `${
+        node.properties.length ? "," : ""
+      }\n${indentProp}overrides: ${valueText}`,
+    };
+    return;
+  }
+  const indentProp = " ".repeat(overridesProperty.loc!.start.column);
+  if (overridesProperty.value.type !== "ArrayExpression") {
+    const valueText = jsonText(indentProp, overrides);
+    yield {
+      index: overridesProperty.value.range![0],
+      text: `[\n${indentProp}  ...`,
+    };
+    yield {
+      index: overridesProperty.value.range![1],
+      text: valueText.slice(1),
+    };
+    return;
+  }
+  const array = overridesProperty.value;
+
+  const remainingOverrides: {
+    files: string[];
+    parser?: string;
+  }[] = [];
+  for (const override of overrides) {
+    const target = array.elements.find(
+      (element): element is ESTree.ObjectExpression => {
+        if (element?.type !== "ObjectExpression") {
+          return false;
+        }
+        for (const [key, value] of Object.entries(override)) {
+          const property = element.properties.find(buildPropMatch(key));
+          if (!property) {
+            return false;
+          }
+          const nodeValue =
+            property.value.type === "Literal"
+              ? property.value.value
+              : property.value.type === "ArrayExpression"
+              ? property.value.elements.map((e) =>
+                  e?.type === "Literal" ? e.value : null
+                )
+              : null;
+
+          if (JSON.stringify(nodeValue) !== JSON.stringify(value)) {
+            return false;
+          }
+        }
+
+        return true;
+      }
+    );
+    if (!target) {
+      remainingOverrides.push(override);
+    }
+  }
+  if (remainingOverrides.length === 0) {
+    return;
+  }
+  const lastElement = array.elements.findLast((e) => e);
+  const valueText = jsonText(indentProp, remainingOverrides);
+  yield {
+    index: lastElement?.range![1] ?? array.range![0] + 1,
+    text: `${lastElement ? "," : ""}${valueText.slice(1, -1).trimEnd()}`,
+  };
+
+  function jsonText(indent: string, object: any) {
+    const lines = JSON.stringify(object, null, 2).split("\n");
+    if (lines.length <= 1) {
+      return lines.join("\n");
+    }
+    return [
+      ...lines.slice(0, 1),
+      ...lines.slice(1).map((line) => indent + line),
+    ].join("\n");
+  }
+}
+
+function buildPropMatch(name: string) {
+  return (p: ESTree.Property | ESTree.SpreadElement): p is ESTree.Property =>
+    p.type === "Property" &&
+    ((!p.computed && p.key.type === "Identifier" && p.key.name === name) ||
+      (p.key.type === "Literal" && p.key.value === name));
 }
