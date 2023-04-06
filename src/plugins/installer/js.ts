@@ -1,12 +1,11 @@
 import type * as ESTree from "estree";
-import type { InstallPluginResult, Plugin } from "..";
+import type { ConfigInstallPluginResult, Plugin } from "..";
 import { alertAndLog } from "./error";
-import type * as CodeRead from "code-red";
 
 export async function installPluginForCJS(
   configText: string,
-  plugin: Plugin
-): Promise<InstallPluginResult> {
+  plugins: Plugin[]
+): Promise<ConfigInstallPluginResult> {
   const codeRead = await import("code-red");
   try {
     const ast: ESTree.Program = codeRead.parse(configText, {
@@ -17,31 +16,61 @@ export async function installPluginForCJS(
       allowReturnOutsideFunction: true,
     }) as never;
 
-    const commonJsExports = ast.body.find(isModuleExports);
+    let commonJsExports = ast.body.find(isModuleExports);
     if (!commonJsExports) {
-      alertAndLog("Unknown exports. Failed to add new configuration.");
-      return { error: true };
+      commonJsExports = {
+        type: "ExpressionStatement",
+        expression: {
+          type: "AssignmentExpression",
+          left: {
+            type: "MemberExpression",
+            object: {
+              type: "Identifier",
+              name: "module",
+            },
+            computed: false,
+            property: {
+              type: "Identifier",
+              name: "exports",
+            },
+            optional: false,
+          },
+          operator: "=",
+          right: {
+            type: "ObjectExpression",
+            properties: [],
+          },
+        },
+      };
+      ast.body.push(commonJsExports);
     }
-    const right = commonJsExports.expression.right;
-    if (!right || right.type !== "ObjectExpression") {
-      alertAndLog("Unknown exports. Failed to add new configuration.");
-      return { error: true };
-    }
-    if (plugin.eslintConfig.plugins) {
-      addToArray(codeRead, right, "plugins", [
-        ...new Set(plugin.eslintConfig.plugins),
-      ]);
-    }
-    if (plugin.eslintConfig.extends) {
-      addToArray(codeRead, right, "extends", [
-        ...new Set(plugin.eslintConfig.extends),
-      ]);
-    }
-    if (plugin.eslintConfig.overrides) {
-      margeOverride(codeRead, right, plugin.eslintConfig.overrides);
+    let targetNode = commonJsExports.expression.right;
+
+    if (targetNode.type !== "ObjectExpression") {
+      targetNode = commonJsExports.expression.right = {
+        type: "ObjectExpression",
+        properties: [
+          {
+            type: "SpreadElement",
+            argument: targetNode,
+          },
+        ],
+      };
     }
 
-    return { text: codeRead.print(ast).code };
+    for (const plugin of plugins) {
+      for (const key of ["plugins", "extends"] as const) {
+        const values = plugin.eslintConfig[key];
+        if (values) {
+          addToArray(targetNode, key, values);
+        }
+      }
+      if (plugin.eslintConfig.overrides) {
+        margeOverride(targetNode, plugin.eslintConfig.overrides);
+      }
+    }
+
+    return { configText: codeRead.print(ast).code };
   } catch (e) {
     // eslint-disable-next-line no-console -- ignore
     console.error(e);
@@ -52,8 +81,8 @@ export async function installPluginForCJS(
 
 export async function installPluginForMJS(
   _configText: string,
-  _plugin: Plugin
-): Promise<InstallPluginResult> {
+  _plugins: Plugin[]
+): Promise<ConfigInstallPluginResult> {
   await Promise.resolve();
   alertAndLog(
     "Flat Config is not yet supported. Failed to add new configuration."
@@ -85,7 +114,6 @@ function isModuleExports(
 }
 
 function addToArray(
-  codeRead: typeof CodeRead,
   node: ESTree.ObjectExpression,
   key: string,
   values: string[]
@@ -100,35 +128,16 @@ function addToArray(
         type: "Identifier",
         name: key,
       },
-      value: toExpression(codeRead, values),
+      value: toExpression(values),
       method: false,
       shorthand: false,
     });
     return;
   }
-  if (target.value.type === "ArrayExpression") {
-    const array = target.value;
-    const insertValues = values.filter(
-      (val) =>
-        !array.elements.some(
-          (e) => e && e.type === "Literal" && e.value === val
-        )
-    );
-    for (const value of insertValues) {
-      array.elements.push(toExpression(codeRead, value));
-    }
-    return;
-  }
-  if (target.value.type === "Literal") {
-    const newValues = [...new Set([target.value.value, ...values])];
-    target.value = toExpression(codeRead, newValues);
-    return;
-  }
-  target.value = toFlatArray(codeRead, target.value, values);
+  target.value = toFlatDistinctArray(target.value, values);
 }
 
 function margeOverride(
-  codeRead: typeof CodeRead,
   node: ESTree.ObjectExpression,
   overrides: {
     files: string[];
@@ -145,15 +154,14 @@ function margeOverride(
         type: "Identifier",
         name: "overrides",
       },
-      value: toExpression(codeRead, overrides),
+      value: toExpression(overrides),
       method: false,
       shorthand: false,
     });
     return;
   }
   if (overridesProperty.value.type !== "ArrayExpression") {
-    overridesProperty.value = toFlatArray(
-      codeRead,
+    overridesProperty.value = toFlatDistinctArray(
       overridesProperty.value,
       overrides
     );
@@ -192,7 +200,7 @@ function margeOverride(
     if (target) {
       continue;
     }
-    overridesProperty.value.elements.push(toExpression(codeRead, override));
+    overridesProperty.value.elements.push(toExpression(override));
   }
 }
 
@@ -205,22 +213,21 @@ function buildPropMatch(name: string) {
       (p.key.type === "Literal" && p.key.value === name));
 }
 
-function toFlatArray(
-  codeRead: typeof CodeRead,
+function toFlatDistinctArray(
   element: ESTree.Expression,
   values: any[]
 ): ESTree.Expression {
   if (element.type === "ArrayExpression") {
     const array: ESTree.ArrayExpression = {
       type: "ArrayExpression",
-      elements: [
+      elements: distinct([
         ...flatten(element.elements),
-        ...values.map((v) => toExpression(codeRead, v)),
-      ],
+        ...values.map(toExpression),
+      ]),
     };
     return array;
   }
-  let elements: (ESTree.Expression | ESTree.SpreadElement)[];
+  let elements: Iterable<ESTree.Expression | ESTree.SpreadElement>;
   if (
     element.type === "CallExpression" &&
     element.callee.type === "MemberExpression" &&
@@ -233,12 +240,12 @@ function toFlatArray(
   } else {
     elements = [element];
   }
-  elements = [...flatten(elements)];
+  elements = flatten(elements);
   const array: ESTree.ArrayExpression = {
     type: "ArrayExpression",
-    elements: [...elements, ...values.map((v) => toExpression(codeRead, v))],
+    elements: distinct([...elements, ...values.map(toExpression)]),
   };
-  if (elements.every((n) => n.type === "Literal")) {
+  if (array.elements.every((n) => n && n.type === "Literal")) {
     return array;
   }
   const member: ESTree.MemberExpression = {
@@ -260,7 +267,7 @@ function toFlatArray(
   return call;
 
   function* flatten(
-    nodes: (ESTree.Expression | ESTree.SpreadElement | null)[]
+    nodes: Iterable<ESTree.Expression | ESTree.SpreadElement | null>
   ): Iterable<ESTree.Expression | ESTree.SpreadElement> {
     for (const node of nodes) {
       if (!node) continue;
@@ -271,25 +278,40 @@ function toFlatArray(
       }
     }
   }
+
+  function distinct(
+    nodes: Iterable<ESTree.Expression | ESTree.SpreadElement>
+  ): (ESTree.Expression | ESTree.SpreadElement)[] {
+    const map = new Map<any, ESTree.Expression | ESTree.SpreadElement>();
+    for (const node of nodes) {
+      if (node.type === "Literal") {
+        map.set(node.value, node);
+      } else {
+        map.set(node, node);
+      }
+    }
+
+    return [...map.values()];
+  }
 }
 
-function toExpression(
-  codeRead: typeof CodeRead,
-  object: any
-): ESTree.Expression {
+function toExpression(object: any): ESTree.Expression {
   if (!object || typeof object !== "object") {
-    return codeRead.x`${JSON.stringify(object, null, 2)}`;
+    return {
+      type: "Literal",
+      value: object,
+    };
   }
   if (Array.isArray(object)) {
     return {
       type: "ArrayExpression",
-      elements: object.map((v) => toExpression(codeRead, v)),
+      elements: object.map(toExpression),
     };
   }
   return {
     type: "ObjectExpression",
     properties: Object.entries(object).map(([k, v]): ESTree.Property => {
-      const expr = toExpression(codeRead, v);
+      const expr = toExpression(v);
       return {
         type: "Property",
         kind: "init",

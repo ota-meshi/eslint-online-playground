@@ -75,25 +75,22 @@ async function handleSelectPlugins(plugins: Plugin[]) {
   const newSources = { ...sources.value };
   const configFileName =
     CONFIG_FILE_NAMES.find((nm) => newSources[nm]) || ".eslintrc.json";
-  for (const plugin of plugins) {
-    const packageJson = JSON.parse(newSources["package.json"]);
-    packageJson.devDependencies = {
-      ...packageJson.devDependencies,
-      ...plugin.devDependencies,
-    };
-    newSources["package.json"] = JSON.stringify(packageJson, null, 2);
 
-    const installResult = await installPlugin(
-      newSources[configFileName] ?? "{}",
-      configFileName,
-      plugin
-    );
-    if (installResult.error) {
-      break;
-    }
-    // eslint-disable-next-line require-atomic-updates -- OK
-    newSources[configFileName] = installResult.text;
+  const installResult = await installPlugin(
+    newSources["package.json"] || "{}",
+    newSources[configFileName] || "{}",
+    configFileName,
+    plugins
+  );
+  if (installResult.error) {
+    return;
   }
+  // eslint-disable-next-line require-atomic-updates -- OK
+  newSources["package.json"] = installResult.packageJson;
+  // eslint-disable-next-line require-atomic-updates -- OK
+  newSources[configFileName] = installResult.configText;
+
+  // eslint-disable-next-line require-atomic-updates -- OK
   sources.value = newSources;
 }
 

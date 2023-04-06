@@ -8,26 +8,78 @@ import { installPluginForJson } from "./json";
 export type InstallPluginResult =
   | {
       error?: false;
-      text: string;
+      packageJson: string;
+      configText: string;
     }
-  | { error: true };
+  | { error: true; packageJson?: string; configText?: string };
+export type ConfigInstallPluginResult =
+  | {
+      error?: false;
+      configText: string;
+    }
+  | { error: true; configText?: string };
 
 export async function installPlugin(
+  packageJson: string,
   configText: string,
   configFileName: ConfigFileName,
-  plugin: Plugin
+  plugins: Plugin[]
 ): Promise<InstallPluginResult> {
-  if (configFileName === ".eslintrc.json") {
-    return installPluginForJson(configText, plugin);
+  let packageJsonObject: { devDependencies?: Record<string, string> };
+  try {
+    packageJsonObject = JSON.parse(packageJson);
+  } catch (_e) {
+    alertAndLog(`Cannot parse package.json`);
+    return {
+      error: true,
+    };
   }
-  if (configFileName === ".eslintrc.yaml") {
-    return installPluginForYaml(configText, plugin);
+  if (
+    !packageJsonObject ||
+    typeof packageJsonObject !== "object" ||
+    Array.isArray(packageJsonObject)
+  ) {
+    alertAndLog(`Cannot parse package.json`);
+    return {
+      error: true,
+    };
   }
-  if (configFileName === ".eslintrc.js") {
-    return installPluginForCJS(configText, plugin);
+  for (const plugin of plugins) {
+    packageJsonObject.devDependencies = {
+      ...packageJsonObject.devDependencies,
+      ...plugin.devDependencies,
+    };
   }
-  if (configFileName === "eslint.config.js") {
-    return installPluginForMJS(configText, plugin);
+  const packageJsonResult = JSON.stringify(packageJsonObject, null, 2);
+  try {
+    if (configFileName === ".eslintrc.json") {
+      return {
+        ...installPluginForJson(configText, plugins),
+        packageJson: packageJsonResult,
+      };
+    }
+    if (configFileName === ".eslintrc.yaml") {
+      return {
+        ...(await installPluginForYaml(configText, plugins)),
+        packageJson: packageJsonResult,
+      };
+    }
+    if (configFileName === ".eslintrc.js") {
+      return {
+        ...(await installPluginForCJS(configText, plugins)),
+        packageJson: packageJsonResult,
+      };
+    }
+    if (configFileName === "eslint.config.js") {
+      return {
+        ...(await installPluginForMJS(configText, plugins)),
+        packageJson: packageJsonResult,
+      };
+    }
+  } catch (_e) {
+    return {
+      error: true,
+    };
   }
 
   alertAndLog(`Cannot install plugin for config file name: ${configFileName}`);
