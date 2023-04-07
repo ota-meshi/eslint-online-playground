@@ -17,6 +17,7 @@ export default defineConfig(() => ({
   resolve: {
     alias: {
       yaml: path.resolve(dirname, "./node_modules/yaml/browser/index.js"),
+      assert: path.join(dirname, "./shim-assert.mjs"),
     },
   },
 }));

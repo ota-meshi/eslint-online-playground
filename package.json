@@ -23,8 +23,10 @@
   },
   "homepage": "https://github.com/ota-meshi/eslint-plugin-n-playground#readme",
   "dependencies": {
+    "@eslint-community/eslint-utils": "^4.4.0",
     "@webcontainer/api": "^1.1.0",
     "code-red": "^1.0.0",
+    "eslint-scope": "^7.1.1",
     "fflate": "^0.7.4",
     "vue": "^3.2.47",
     "yaml": "^2.2.1"
@@ -32,6 +34,8 @@
   "devDependencies": {
     "@ota-meshi/eslint-plugin": "^0.13.3",
     "@types/eslint": "^8.21.3",
+    "@types/eslint-scope": "^3.7.4",
+    "@types/eslint-utils": "^3.0.2",
     "@types/node": "^18.13.0",
     "@typescript-eslint/eslint-plugin": "^5.56.0",
     "@vitejs/plugin-vue": "^4.1.0",
