@@ -1,6 +1,7 @@
 import type * as ESTree from "estree";
 import type { ConfigInstallPluginResult, Plugin } from "..";
 import { alertAndLog } from "./error";
+import { isModuleExports, toExpression } from "../../utils/estree-utils";
 
 export async function installPluginForCJS(
   configText: string,
@@ -88,29 +89,6 @@ export async function installPluginForMJS(
     "Flat Config is not yet supported. Failed to add new configuration."
   );
   return { error: true };
-}
-
-function isModuleExports(
-  node: ESTree.Node
-): node is ESTree.ExpressionStatement & {
-  expression: ESTree.AssignmentExpression & {
-    left: ESTree.MemberExpression & {
-      object: ESTree.Identifier & {
-        name: "module";
-      };
-      property: ESTree.Identifier & { name: "exports" };
-    };
-  };
-} {
-  return (
-    node.type === "ExpressionStatement" &&
-    node.expression.type === "AssignmentExpression" &&
-    node.expression.left.type === "MemberExpression" &&
-    node.expression.left.object.type === "Identifier" &&
-    node.expression.left.object.name === "module" &&
-    node.expression.left.property.type === "Identifier" &&
-    node.expression.left.property.name === "exports"
-  );
 }
 
 function addToArray(
@@ -293,37 +271,4 @@ function toFlatDistinctArray(
 
     return [...map.values()];
   }
-}
-
-function toExpression(object: any): ESTree.Expression {
-  if (!object || typeof object !== "object") {
-    return {
-      type: "Literal",
-      value: object,
-    };
-  }
-  if (Array.isArray(object)) {
-    return {
-      type: "ArrayExpression",
-      elements: object.map(toExpression),
-    };
-  }
-  return {
-    type: "ObjectExpression",
-    properties: Object.entries(object).map(([k, v]): ESTree.Property => {
-      const expr = toExpression(v);
-      return {
-        type: "Property",
-        kind: "init",
-        computed: false,
-        key: {
-          type: "Identifier",
-          name: k,
-        },
-        value: expr,
-        method: false,
-        shorthand: false,
-      };
-    }),
-  };
 }

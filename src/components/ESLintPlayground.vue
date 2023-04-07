@@ -33,6 +33,7 @@ import { debounce } from "../utils/debounce";
 import type { ConfigFileName } from "../utils/eslint-info";
 import { CONFIG_FILE_NAMES } from "../utils/eslint-info";
 import { maybeTSConfig } from "../utils/tsconfig";
+import { transformConfigFormat } from "./transform-config";
 
 const props = defineProps<{
   sources: Record<string, string>;
@@ -65,8 +66,17 @@ const configFileName = computed<ConfigFileName>({
   set: (value) => {
     const old = configFileName.value;
 
-    emitUpdateSources({ configFileName: value });
+    void updateConfigFormat();
     void remove();
+
+    async function updateConfigFormat() {
+      const configText = await transformConfigFormat(
+        props.sources[old],
+        old,
+        value
+      );
+      emitUpdateSources({ configFileName: value, configText });
+    }
 
     async function remove() {
       const linterServer = await getLintServer();

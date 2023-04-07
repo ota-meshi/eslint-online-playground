@@ -1,6 +1,7 @@
 import type * as Yaml from "yaml";
 import type { ConfigInstallPluginResult, Plugin } from "..";
 import { alertAndLog } from "./error";
+import { toYamlContent } from "../../utils/yaml-utils";
 
 export async function installPluginForYaml(
   configText: string,
@@ -40,22 +41,33 @@ export async function installPluginForYaml(
 
 function addToSeq(
   yaml: typeof Yaml,
-  config: Yaml.YAMLMap,
+  config: Yaml.YAMLMap<Yaml.Node, Yaml.Node | null>,
   key: string,
   values: string[]
 ) {
   const target = config.get(key);
   if (!target) {
-    config.set(key, [...new Set(values)]);
+    config.set(
+      toYamlContent(yaml, key),
+      toYamlContent(yaml, [...new Set(values)])
+    );
     return;
   }
-  const array = [yaml.isNode(target) ? target.toJSON() : target].flat();
-  config.set(key, [...new Set([...array, ...values])]);
+  const seq = toSeqNode(yaml, target);
+  const arrayValueJSONs = new Set(
+    seq.items.map((v) => JSON.stringify(v.toJSON()))
+  );
+  seq.items.push(
+    ...values
+      .filter((v) => !arrayValueJSONs.has(JSON.stringify(v)))
+      .map((v) => toYamlContent(yaml, v))
+  );
+  config.set(toYamlContent(yaml, key), seq);
 }
 
 function margeOverride(
   yaml: typeof Yaml,
-  config: Yaml.YAMLMap,
+  config: Yaml.YAMLMap<Yaml.Node, Yaml.Node | null>,
   override: {
     files: string[];
     parser?: string;
@@ -63,20 +75,33 @@ function margeOverride(
 ) {
   const overrides = config.get("overrides");
   if (!overrides) {
-    config.set("overrides", [override]);
+    config.set(
+      toYamlContent(yaml, "overrides"),
+      toYamlContent(yaml, [override])
+    );
     return;
   }
-  const array = [
-    yaml.isNode(overrides) ? overrides.toJSON() : overrides,
-  ].flat();
-  const element = array.find((e) => {
-    const filesValue = [e?.files].flat();
+  const seq = toSeqNode(yaml, overrides);
+  const element = seq.items.find((e) => {
+    const filesValue = [e.toJSON()?.files].flat();
     return JSON.stringify(filesValue) === JSON.stringify(override.files);
   });
-  if (element) {
-    Object.assign(element, override);
+  if (element && yaml.isMap(element)) {
+    for (const [key, value] of Object.entries(override)) {
+      if (key === "files") continue;
+      element.set(toYamlContent(yaml, key), toYamlContent(yaml, value));
+    }
   } else {
-    array.push(override);
+    seq.items.push(toYamlContent(yaml, override));
+    config.set(toYamlContent(yaml, "overrides"), seq);
   }
-  config.set("overrides", array);
+}
+
+function toSeqNode(yaml: typeof Yaml, value: unknown): Yaml.YAMLSeq<Yaml.Node> {
+  if (yaml.isSeq(value)) {
+    return value as Yaml.YAMLSeq<Yaml.Node>;
+  }
+  const node = new yaml.YAMLSeq<Yaml.Node>();
+  node.items.push(yaml.isNode(value) ? value : toYamlContent(yaml, value));
+  return node;
 }
