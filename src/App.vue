@@ -72,6 +72,9 @@ async function handleSelectExample(example: Example) {
 }
 
 async function handleSelectPlugins(plugins: Plugin[]) {
+  if (!plugins.length) {
+    return;
+  }
   const newSources = { ...sources.value };
   const configFileName =
     CONFIG_FILE_NAMES.find((nm) => newSources[nm]) || ".eslintrc.json";
