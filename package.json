@@ -1,7 +1,7 @@
 {
-  "name": "eslint-plugin-n-playground",
+  "name": "eslint-online-playground",
   "version": "1.0.0",
-  "description": "eslint-plugin-n Online Playground",
+  "description": "ESLint Online Playground",
   "type": "module",
   "main": "index.js",
   "scripts": {
@@ -14,14 +14,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ota-meshi/eslint-plugin-n-playground.git"
+    "url": "git+https://github.com/ota-meshi/eslint-online-playground.git"
   },
   "author": "Yosuke Ota (https://github.com/ota-meshi)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/ota-meshi/eslint-plugin-n-playground/issues"
+    "url": "https://github.com/ota-meshi/eslint-online-playground/issues"
   },
-  "homepage": "https://github.com/ota-meshi/eslint-plugin-n-playground#readme",
+  "homepage": "https://github.com/ota-meshi/eslint-online-playground#readme",
   "dependencies": {
     "@eslint-community/eslint-utils": "^4.4.0",
     "@webcontainer/api": "^1.1.0",

@@ -27,7 +27,7 @@ import { setupLintServer } from "../linter-service";
 import type { Linter } from "eslint";
 import type { Monaco } from "../monaco-editor";
 import { loadMonaco } from "../monaco-editor";
-import { isReservedFileName } from "../linter-service/server/eslint-playground-server-utils.mjs";
+import { isReservedFileName } from "../linter-service/server/eslint-online-playground-server-utils.mjs";
 import type { CodeActionProvider } from "../monaco-editor/monaco-setup";
 import { debounce } from "../utils/debounce";
 import type { ConfigFileName } from "../utils/eslint-info";
