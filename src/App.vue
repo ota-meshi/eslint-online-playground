@@ -124,7 +124,7 @@ watch(
       <a
         class="github"
         target="_blank"
-        href="https://github.com/ota-meshi/eslint-playground"
+        href="https://github.com/ota-meshi/eslint-online-playground"
       >
         <img :src="github" alt="GitHub" />
       </a>

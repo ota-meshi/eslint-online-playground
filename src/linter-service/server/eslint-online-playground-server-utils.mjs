@@ -13,8 +13,8 @@ export const CONFIG_FILE_NAMES = [
   "eslint.config.mjs",
 ];
 const RESERVED_FILE_NAMES = [
-  "eslint-playground-server.mjs",
-  "eslint-playground-server-utils.mjs",
+  "eslint-online-playground-server.mjs",
+  "eslint-online-playground-server-utils.mjs",
   "package.json",
   "package-lock.json",
   "node_modules",

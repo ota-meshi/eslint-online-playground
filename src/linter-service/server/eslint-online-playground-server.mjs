@@ -10,7 +10,7 @@ import {
   extractJson,
   isReservedFileName,
   CONFIG_FILE_NAMES,
-} from "./eslint-playground-server-utils.mjs";
+} from "./eslint-online-playground-server-utils.mjs";
 import fs from "fs";
 import path from "path";
 import { ESLint } from "eslint";

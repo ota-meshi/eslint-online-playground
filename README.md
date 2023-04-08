@@ -1,4 +1,4 @@
-# eslint-playground
+# eslint-online-playground
 
 [ESLint](https://eslint.org/) online playground.
 

@@ -2,7 +2,7 @@ import type { WebContainer, WebContainerProcess } from "@webcontainer/api";
 import {
   createJsonPayload,
   extractJson,
-} from "./server/eslint-playground-server-utils.mjs";
+} from "./server/eslint-online-playground-server-utils.mjs";
 import type ConsoleOutput from "../components/ConsoleOutput.vue";
 import type TabsPanel from "../components/TabsPanel.vue";
 
@@ -108,7 +108,7 @@ async function startServerInternal(
   webContainer: WebContainer
 ): Promise<ServerInternal> {
   const serverProcess = await webContainer.spawn("node", [
-    "./eslint-playground-server.mjs",
+    "./eslint-online-playground-server.mjs",
   ]);
 
   let boot = false;
