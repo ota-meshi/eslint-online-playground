@@ -34,6 +34,10 @@ import type { ConfigFileName } from "../utils/eslint-info";
 import { CONFIG_FILE_NAMES } from "../utils/eslint-info";
 import { maybeTSConfig } from "../utils/tsconfig";
 import { transformConfigFormat } from "./transform-config";
+import {
+  disableBuiltinValidate,
+  enableBuiltinValidate,
+} from "../monaco-editor/monaco-loader";
 
 const props = defineProps<{
   sources: Record<string, string>;
@@ -332,6 +336,15 @@ function handleActiveName(name: string) {
   );
   if (a) {
     activeSource.value = a;
+    disableBuiltinValidate();
+  } else if (
+    displaySourceDataList.value.tsconfigs.some(
+      (source) => source.fileName === name
+    )
+  ) {
+    enableBuiltinValidate({ jsonAs: "jsonc" });
+  } else {
+    enableBuiltinValidate({ jsonAs: "json" });
   }
 }
 

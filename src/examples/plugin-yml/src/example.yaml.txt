@@ -1,0 +1,10 @@
+---
+blockStyle:
+  packageName: eslint-plugin-yml
+  description: This ESLint plugin provides linting rules for YAML.
+  github: https://github.com/ota-meshi/eslint-plugin-yml
+flowStyle: {
+  package_name: eslint-plugin-yml,
+  description: This ESLint plugin provides linting rules for YAML.,
+   github: https://github.com/ota-meshi/eslint-plugin-yml,
+}

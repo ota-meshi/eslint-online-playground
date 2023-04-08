@@ -8,7 +8,7 @@ const pluginName = name;
   <div>
     Example to try
     <a
-      :href="'https://github.com/eslint-community/' + pluginName"
+      href="https://eslint-community.github.io/eslint-plugin-es-x/"
       target="_blank"
       >{{ pluginName }}</a
     >.

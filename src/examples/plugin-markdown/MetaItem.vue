@@ -1,5 +1,5 @@
 <script lang="ts">
-export const name = "eslint-plugin-svelte";
+export const name = "eslint-plugin-markdown";
 </script>
 <script setup lang="ts">
 const pluginName = name;
@@ -8,7 +8,7 @@ const pluginName = name;
   <div>
     Example to try
     <a
-      href="https://sveltejs.github.io/eslint-plugin-svelte/"
+      href="https://github.com/eslint/eslint-plugin-markdown"
       target="_blank"
       >{{ pluginName }}</a
     >.

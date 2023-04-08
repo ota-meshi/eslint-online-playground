@@ -1,5 +1,5 @@
 <script lang="ts">
-export const name = "eslint-plugin-vue";
+export const name = "eslint-plugin-yml";
 </script>
 <script setup lang="ts">
 const pluginName = name;
@@ -7,7 +7,9 @@ const pluginName = name;
 <template>
   <div>
     Example to try
-    <a href="https://eslint.vuejs.org/" target="_blank">{{ pluginName }}</a
+    <a href="https://ota-meshi.github.io/eslint-plugin-yml/" target="_blank">{{
+      pluginName
+    }}</a
     >.
   </div>
 </template>

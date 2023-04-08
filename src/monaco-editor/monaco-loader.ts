@@ -38,6 +38,59 @@ export function loadMonaco(): Promise<Monaco> {
   );
 }
 
+let validateStateQueue = Promise.resolve();
+export function enableBuiltinValidate({
+  jsonAs,
+}: {
+  jsonAs: "json" | "jsonc";
+}): void {
+  validateStateQueue = validateStateQueue.then(async () => {
+    const monaco = await loadMonaco();
+    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+      validate: true,
+    });
+    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+      validate: true,
+      ...(jsonAs === "jsonc"
+        ? { allowComments: true, trailingCommas: "ignore" }
+        : {}),
+    });
+    monaco.languages.css.cssDefaults.setOptions({
+      validate: true,
+    });
+  });
+}
+
+export function enableJsoncValidate(): void {
+  validateStateQueue = validateStateQueue.then(async () => {
+    const monaco = await loadMonaco();
+    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+      validate: false,
+    });
+    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+      validate: false,
+    });
+    monaco.languages.css.cssDefaults.setOptions({
+      validate: false,
+    });
+  });
+}
+
+export function disableBuiltinValidate(): void {
+  validateStateQueue = validateStateQueue.then(async () => {
+    const monaco = await loadMonaco();
+    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
+      validate: false,
+    });
+    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+      validate: false,
+    });
+    monaco.languages.css.cssDefaults.setOptions({
+      validate: false,
+    });
+  });
+}
+
 async function loadModuleFromMonaco<T>(moduleName: string): Promise<T> {
   await setupMonaco();
 
@@ -113,6 +166,14 @@ function setupEnhancedLanguages(monaco: Monaco) {
       const svelte = await import("./monarch-syntaxes/svelte");
 
       return svelte.language;
+    },
+  });
+  monaco.languages.register({ id: "toml" });
+  monaco.languages.registerTokensProviderFactory("toml", {
+    async create() {
+      const toml = await import("./monarch-syntaxes/toml");
+
+      return toml.language;
     },
   });
 }

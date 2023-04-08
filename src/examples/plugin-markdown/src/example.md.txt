@@ -1,0 +1,18 @@
+```js
+// This gets linted
+var answer = 6 * 7;
+console.log(answer);
+```
+
+Here is some regular Markdown text that will be ignored.
+
+```js
+// This also gets linted
+
+/* eslint quotes: [2, "double"] */
+
+function hello() {
+    console.log('Hello, world!');
+}
+hello();
+```
