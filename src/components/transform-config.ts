@@ -118,7 +118,7 @@ async function transformYamlToCjs(configText: string) {
 async function transformJsonToCjs(configText: string) {
   const parsed = JSON.parse(configText);
   const codeRead = await import("code-red");
-  return `module.exports = ${codeRead.print(toESExpression(parsed)).code}}`;
+  return `module.exports = ${codeRead.print(toESExpression(parsed)).code}`;
 }
 
 async function jsExpressionToYaml(
