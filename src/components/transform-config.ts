@@ -3,11 +3,11 @@ import type * as Yaml from "yaml";
 import type { ConfigFileName } from "../utils/eslint-info";
 import {
   isModuleExports,
-  astToValue,
-  toExpression,
+  toValueFromESExpression,
+  toESExpression,
   analyzeScope,
 } from "../utils/estree-utils";
-import { toYamlContent } from "../utils/yaml-utils";
+import { toYAMLContent } from "../utils/yaml-utils";
 import type * as _eslintUtils from "eslint-utils";
 type ESLintUtils = typeof _eslintUtils;
 
@@ -20,7 +20,7 @@ export async function transformConfigFormat(
   try {
     // From JSON
     if (from === ".eslintrc.json" && to === ".eslintrc.js") {
-      return transformJsonToCjs(configText);
+      return await transformJsonToCjs(configText);
     }
     if (from === ".eslintrc.json" && to === ".eslintrc.yaml") {
       return configText;
@@ -61,7 +61,10 @@ async function transformCjsToJson(configText: string) {
 
   const exportNode = ast.body.find(isModuleExports);
   if (exportNode) {
-    const value = await astToValue(exportNode.expression.right, scopeManager);
+    const value = await toValueFromESExpression(
+      exportNode.expression.right,
+      scopeManager
+    );
     if (value !== undefined) {
       return JSON.stringify(value, null, 2);
     }
@@ -112,8 +115,10 @@ async function transformYamlToCjs(configText: string) {
   }`;
 }
 
-function transformJsonToCjs(configText: string) {
-  return `module.exports = ${configText}`;
+async function transformJsonToCjs(configText: string) {
+  const parsed = JSON.parse(configText);
+  const codeRead = await import("code-red");
+  return `module.exports = ${codeRead.print(toESExpression(parsed)).code}}`;
 }
 
 async function jsExpressionToYaml(
@@ -143,7 +148,7 @@ async function jsExpressionToYaml(
     | null
   > {
     if (node == null) {
-      return toYamlContent(yaml, null);
+      return toYAMLContent(yaml, null);
     }
     if (node.type === "ArrayExpression") {
       const seq = new yaml.YAMLSeq<Yaml.Node>();
@@ -170,7 +175,7 @@ async function jsExpressionToYaml(
           scopeManager.globalScope
         );
         if (keyValue == null) return null;
-        const keyNode = toYamlContent(yaml, keyValue);
+        const keyNode = toYAMLContent(yaml, keyValue);
         attachComments(keyNode, prop);
         attachComments(keyNode, prop.key);
 
@@ -181,7 +186,10 @@ async function jsExpressionToYaml(
       }
       return map;
     }
-    const content = toYamlContent(yaml, await astToValue(node, scopeManager));
+    const content = toYAMLContent(
+      yaml,
+      await toValueFromESExpression(node, scopeManager)
+    );
     attachComments(content, node);
     return content;
   }
@@ -247,7 +255,7 @@ function yamlToJsExpression(
     };
   }
 
-  return toExpression(node.toJSON());
+  return toESExpression(node.toJSON());
 
   function comments(n: Yaml.ParsedNode) {
     const leadingComments = (n.commentBefore ?? "").trimEnd();

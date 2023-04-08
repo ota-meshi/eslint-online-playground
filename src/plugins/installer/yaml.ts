@@ -1,7 +1,7 @@
 import type * as Yaml from "yaml";
 import type { ConfigInstallPluginResult, Plugin } from "..";
 import { alertAndLog } from "./error";
-import { toYamlContent } from "../../utils/yaml-utils";
+import { toYAMLContent } from "../../utils/yaml-utils";
 
 export async function installPluginForYaml(
   configText: string,
@@ -48,8 +48,8 @@ function addToSeq(
   const target = config.get(key);
   if (!target) {
     config.set(
-      toYamlContent(yaml, key),
-      toYamlContent(yaml, [...new Set(values)])
+      toYAMLContent(yaml, key),
+      toYAMLContent(yaml, [...new Set(values)])
     );
     return;
   }
@@ -60,9 +60,9 @@ function addToSeq(
   seq.items.push(
     ...values
       .filter((v) => !arrayValueJSONs.has(JSON.stringify(v)))
-      .map((v) => toYamlContent(yaml, v))
+      .map((v) => toYAMLContent(yaml, v))
   );
-  config.set(toYamlContent(yaml, key), seq);
+  config.set(toYAMLContent(yaml, key), seq);
 }
 
 function margeOverride(
@@ -76,8 +76,8 @@ function margeOverride(
   const overrides = config.get("overrides");
   if (!overrides) {
     config.set(
-      toYamlContent(yaml, "overrides"),
-      toYamlContent(yaml, [override])
+      toYAMLContent(yaml, "overrides"),
+      toYAMLContent(yaml, [override])
     );
     return;
   }
@@ -89,11 +89,11 @@ function margeOverride(
   if (element && yaml.isMap(element)) {
     for (const [key, value] of Object.entries(override)) {
       if (key === "files") continue;
-      element.set(toYamlContent(yaml, key), toYamlContent(yaml, value));
+      element.set(toYAMLContent(yaml, key), toYAMLContent(yaml, value));
     }
   } else {
-    seq.items.push(toYamlContent(yaml, override));
-    config.set(toYamlContent(yaml, "overrides"), seq);
+    seq.items.push(toYAMLContent(yaml, override));
+    config.set(toYAMLContent(yaml, "overrides"), seq);
   }
 }
 
@@ -102,6 +102,6 @@ function toSeqNode(yaml: typeof Yaml, value: unknown): Yaml.YAMLSeq<Yaml.Node> {
     return value as Yaml.YAMLSeq<Yaml.Node>;
   }
   const node = new yaml.YAMLSeq<Yaml.Node>();
-  node.items.push(yaml.isNode(value) ? value : toYamlContent(yaml, value));
+  node.items.push(yaml.isNode(value) ? value : toYAMLContent(yaml, value));
   return node;
 }

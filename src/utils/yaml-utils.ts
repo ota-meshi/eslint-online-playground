@@ -1,6 +1,6 @@
 import type * as Yaml from "yaml";
 
-export function toYamlContent(
+export function toYAMLContent(
   yaml: typeof Yaml,
   object: any
 ): Yaml.Scalar | Yaml.YAMLMap<Yaml.Node, Yaml.Node> | Yaml.YAMLSeq<Yaml.Node> {
@@ -9,12 +9,12 @@ export function toYamlContent(
   }
   if (Array.isArray(object)) {
     const seq = new yaml.YAMLSeq<Yaml.Node>();
-    seq.items.push(...object.map((o) => toYamlContent(yaml, o)));
+    seq.items.push(...object.map((o) => toYAMLContent(yaml, o)));
     return seq;
   }
   const map = new yaml.YAMLMap<Yaml.Node, Yaml.Node>();
   for (const [k, v] of Object.entries(object)) {
-    map.set(toYamlContent(yaml, k), toYamlContent(yaml, v));
+    map.set(toYAMLContent(yaml, k), toYAMLContent(yaml, v));
   }
   return map;
 }

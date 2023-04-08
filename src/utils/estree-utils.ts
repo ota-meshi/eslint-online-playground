@@ -26,7 +26,7 @@ export function isModuleExports(
   );
 }
 
-export function toExpression(object: any): ESTree.Expression {
+export function toESExpression(object: any): ESTree.Expression {
   if (!object || typeof object !== "object") {
     return {
       type: "Literal",
@@ -36,13 +36,13 @@ export function toExpression(object: any): ESTree.Expression {
   if (Array.isArray(object)) {
     return {
       type: "ArrayExpression",
-      elements: object.map(toExpression),
+      elements: object.map(toESExpression),
     };
   }
   return {
     type: "ObjectExpression",
     properties: Object.entries(object).map(([k, v]): ESTree.Property => {
-      const expr = toExpression(v);
+      const expr = toESExpression(v);
       return {
         type: "Property",
         kind: "init",
@@ -59,7 +59,7 @@ export function toExpression(object: any): ESTree.Expression {
   };
 }
 
-export async function astToValue(
+export async function toValueFromESExpression(
   object: ESTree.Expression,
   scopeManager: ScopeManager
 ): Promise<unknown> {

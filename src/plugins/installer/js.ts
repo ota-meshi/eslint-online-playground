@@ -1,7 +1,7 @@
 import type * as ESTree from "estree";
 import type { ConfigInstallPluginResult, Plugin } from "..";
 import { alertAndLog } from "./error";
-import { isModuleExports, toExpression } from "../../utils/estree-utils";
+import { isModuleExports, toESExpression } from "../../utils/estree-utils";
 
 export async function installPluginForCJS(
   configText: string,
@@ -106,7 +106,7 @@ function addToArray(
         type: "Identifier",
         name: key,
       },
-      value: toExpression(values),
+      value: toESExpression(values),
       method: false,
       shorthand: false,
     });
@@ -132,7 +132,7 @@ function margeOverride(
         type: "Identifier",
         name: "overrides",
       },
-      value: toExpression(overrides),
+      value: toESExpression(overrides),
       method: false,
       shorthand: false,
     });
@@ -178,7 +178,7 @@ function margeOverride(
     if (target) {
       continue;
     }
-    overridesProperty.value.elements.push(toExpression(override));
+    overridesProperty.value.elements.push(toESExpression(override));
   }
 }
 
@@ -200,7 +200,7 @@ function toFlatDistinctArray(
       type: "ArrayExpression",
       elements: distinct([
         ...flatten(element.elements),
-        ...values.map(toExpression),
+        ...values.map(toESExpression),
       ]),
     };
     return array;
@@ -221,7 +221,7 @@ function toFlatDistinctArray(
   elements = flatten(elements);
   const array: ESTree.ArrayExpression = {
     type: "ArrayExpression",
-    elements: distinct([...elements, ...values.map(toExpression)]),
+    elements: distinct([...elements, ...values.map(toESExpression)]),
   };
   if (array.elements.every((n) => n && n.type === "Literal")) {
     return array;
