@@ -1,5 +1,6 @@
 <script lang="ts">
 export const name = "eslint-plugin-vue with typescript";
+export default {};
 </script>
 <script setup lang="ts"></script>
 <template>
