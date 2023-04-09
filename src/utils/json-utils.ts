@@ -14,7 +14,7 @@ function toLines(indent: string, object: unknown): string[] {
       object.map((element: unknown) => toLines(indent + indentStr, element))
     );
   }
-  return toLinesWithLineFeed(
+  return toLinesObject(
     indent,
     "{}",
     Object.entries(object).map(([k, v]) => {
@@ -23,41 +23,36 @@ function toLines(indent: string, object: unknown): string[] {
         `${indent + indentStr}${JSON.stringify(k)}: ${vs[0].trim()}`,
         ...vs.slice(1),
       ];
-    })
+    }),
+    true
   );
 }
 
 function toLinesObject(
   indent: string,
-  parens: string,
-  elements: string[][]
+  [open, close]: string,
+  elements: string[][],
+  forceLF = false
 ): string[] {
-  if (elements.some((element) => element.length > 1)) {
-    return toLinesWithLineFeed(indent, parens, elements);
+  if (elements.some((element) => element.length > 1 || forceLF)) {
+    return toLinesWithLineFeed();
   }
-  const [open, close] = parens;
   const line =
     indent + open + elements.map(([line]) => line.trim()).join(", ") + close;
-  if (line.length > 80) {
-    return toLinesWithLineFeed(indent, parens, elements);
-  }
+  if (line.length > 80) return toLinesWithLineFeed();
   return [line];
-}
 
-function toLinesWithLineFeed(
-  indent: string,
-  [open, close]: string,
-  elements: string[][]
-) {
-  return [
-    indent + open,
-    ...elements
-      .slice(0, -1)
-      .flatMap((element) => [
-        ...element.slice(0, -1),
-        `${element.slice(-1)[0]},`,
-      ]),
-    ...elements.slice(-1).flat(),
-    indent + close,
-  ];
+  function toLinesWithLineFeed() {
+    return [
+      indent + open,
+      ...elements
+        .slice(0, -1)
+        .flatMap((element) => [
+          ...element.slice(0, -1),
+          `${element.slice(-1)[0]},`,
+        ]),
+      ...elements.slice(-1).flat(),
+      indent + close,
+    ];
+  }
 }
