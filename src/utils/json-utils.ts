@@ -1,59 +1,63 @@
-export function prettyStringify(object: any): string {
-  return toLines(object).join("\n");
+const indentStr = "  ";
+export function prettyStringify(object: unknown): string {
+  return toLines("", object).join("\n");
 }
 
-function toLines(object: any): string[] {
+function toLines(indent: string, object: unknown): string[] {
   if (!object || typeof object !== "object") {
-    return [JSON.stringify(object)];
+    return [indent + JSON.stringify(object)];
   }
   if (Array.isArray(object)) {
-    return toLinesObject("[", "]", object.map(toLines));
+    return toLinesObject(
+      indent,
+      "[]",
+      object.map((element: unknown) => toLines(indent + indentStr, element))
+    );
   }
-  return toLinesObject(
-    "{",
-    "}",
-    Object.entries(object).map(([k, v]): string[] => {
-      const vs = toLines(v);
-      return [`${JSON.stringify(k)}: ${vs[0]}`, ...vs.slice(1)];
+  return toLinesWithLineFeed(
+    indent,
+    "{}",
+    Object.entries(object).map(([k, v]) => {
+      const vs = toLines(indent + indentStr, v);
+      return [
+        `${indent + indentStr}${JSON.stringify(k)}: ${vs[0].trim()}`,
+        ...vs.slice(1),
+      ];
     })
   );
 }
 
 function toLinesObject(
-  open: string,
-  close: string,
+  indent: string,
+  parens: string,
   elements: string[][]
 ): string[] {
-  const first = elements[0];
-  if (!first) {
-    return [open + close];
+  if (elements.some((element) => element.length > 1)) {
+    return toLinesWithLineFeed(indent, parens, elements);
   }
-  if (first.length > 1) {
-    return toLinesWithLineFeed();
-  }
-  let line = first[0];
-  for (const element of elements.slice(1)) {
-    if (element.length > 1) {
-      return toLinesWithLineFeed();
-    }
-    line += `, ${element[0]}`;
-  }
-  line = open + line + close;
-  if (line.length > 40) {
-    return toLinesWithLineFeed();
+  const [open, close] = parens;
+  const line =
+    indent + open + elements.map(([line]) => line.trim()).join(", ") + close;
+  if (line.length > 80) {
+    return toLinesWithLineFeed(indent, parens, elements);
   }
   return [line];
+}
 
-  function toLinesWithLineFeed() {
-    const result = [open];
-    elements.forEach((lines, i) => {
-      const lastElement = elements.length - 1 === i;
-      lines.forEach((line, i) => {
-        const lastLine = lines.length - 1 === i;
-        result.push(`  ${line}${!lastElement && lastLine ? "," : ""}`);
-      });
-    });
-    result.push(close);
-    return result;
-  }
+function toLinesWithLineFeed(
+  indent: string,
+  [open, close]: string,
+  elements: string[][]
+) {
+  return [
+    indent + open,
+    ...elements
+      .slice(0, -1)
+      .flatMap((element) => [
+        ...element.slice(0, -1),
+        `${element.slice(-1)[0]},`,
+      ]),
+    ...elements.slice(-1).flat(),
+    indent + close,
+  ];
 }
