@@ -15,6 +15,7 @@ import type { Example } from "./examples";
 import { installPlugin } from "./plugins";
 import type { Plugin } from "./plugins";
 import { maybeTSConfig } from "./utils/tsconfig";
+import { prettyStringify } from "./utils/json-utils";
 
 const eslintPlayground = ref<InstanceType<typeof ESLintPlayground> | null>(
   null
@@ -34,10 +35,10 @@ const queryParam = decompress(hashData);
 const sources = ref<Record<string, string>>({ ...queryParam });
 
 if (CONFIG_FILE_NAMES.every((nm) => !sources.value[nm])) {
-  sources.value[".eslintrc.json"] = JSON.stringify(defaultConfig, null, 2);
+  sources.value[".eslintrc.json"] = prettyStringify(defaultConfig);
 }
 if (sources.value["package.json"] === undefined) {
-  sources.value["package.json"] = JSON.stringify(defaultPackageJson, null, 2);
+  sources.value["package.json"] = prettyStringify(defaultPackageJson);
 }
 
 if (

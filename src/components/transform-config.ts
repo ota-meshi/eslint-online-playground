@@ -9,6 +9,7 @@ import {
 } from "../utils/estree-utils";
 import { toYAMLContent } from "../utils/yaml-utils";
 import type * as _eslintUtils from "eslint-utils";
+import { prettyStringify } from "../utils/json-utils";
 type ESLintUtils = typeof _eslintUtils;
 
 export async function transformConfigFormat(
@@ -66,7 +67,7 @@ async function transformCjsToJson(configText: string) {
       scopeManager
     );
     if (value !== undefined) {
-      return JSON.stringify(value, null, 2);
+      return prettyStringify(value);
     }
   }
   return configText;
@@ -101,7 +102,7 @@ async function transformCjsToYaml(configText: string) {
 async function transformYamlToJson(configText: string) {
   const yaml = await import("yaml");
 
-  return JSON.stringify(yaml.parse(configText), null, 2);
+  return prettyStringify(yaml.parse(configText));
 }
 
 async function transformYamlToCjs(configText: string) {

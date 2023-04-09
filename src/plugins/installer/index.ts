@@ -4,6 +4,7 @@ import { alertAndLog } from "./error";
 import { installPluginForYaml } from "./yaml";
 import { installPluginForCJS, installPluginForMJS } from "./js";
 import { installPluginForJson } from "./json";
+import { prettyStringify } from "../../utils/json-utils";
 
 export type InstallPluginResult =
   | {
@@ -50,7 +51,7 @@ export async function installPlugin(
       ...plugin.devDependencies,
     };
   }
-  const packageJsonResult = JSON.stringify(packageJsonObject, null, 2);
+  const packageJsonResult = prettyStringify(packageJsonObject);
   try {
     if (configFileName === ".eslintrc.json") {
       return {

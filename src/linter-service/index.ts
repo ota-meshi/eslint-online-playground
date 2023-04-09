@@ -6,6 +6,7 @@ import { Installer } from "./installer";
 import { Server } from "./server";
 import { WebContainer } from "@webcontainer/api";
 import type { ConfigFileName } from "../utils/eslint-info";
+import { prettyStringify } from "../utils/json-utils";
 
 export type LinterServiceResult =
   | LinterServiceResultSuccess
@@ -145,7 +146,7 @@ export async function setupLintServer({
     async updatePackageJson(pkg) {
       updatingPackageJson = webContainer.fs.writeFile(
         "/package.json",
-        JSON.stringify(pkg, null, 2)
+        prettyStringify(pkg)
       );
       await updatingPackageJson;
     },

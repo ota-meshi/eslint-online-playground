@@ -1,4 +1,5 @@
 import type { ConfigInstallPluginResult, Plugin } from "..";
+import { prettyStringify } from "../../utils/json-utils";
 import { alertAndLog } from "./error";
 import type { Linter } from "eslint";
 
@@ -48,6 +49,6 @@ export function installPluginForJson(
     }
   }
   return {
-    configText: JSON.stringify(config, null, 2),
+    configText: prettyStringify(config),
   };
 }

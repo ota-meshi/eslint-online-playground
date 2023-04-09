@@ -1,4 +1,5 @@
 import type { Component } from "vue";
+import { prettyStringify } from "../utils/json-utils";
 
 export type Example = {
   name: string;
@@ -49,7 +50,7 @@ export async function loadExamples(): Promise<Record<string, Example>> {
     ex.files[keys.fileName] =
       typeof content === "string"
         ? content
-        : JSON.stringify(content.default ?? content, null, 2);
+        : prettyStringify(content.default ?? content);
   }
 
   for (const ex of Object.values(examplesMap).sort(({ name: a }, { name: b }) =>
