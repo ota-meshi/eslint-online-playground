@@ -29,3 +29,5 @@ Add a plugin to the directory below and submit a PR.
 This playground works by calling ESLint in a Node.js process launched inside the browser using [WebContainers](https://webcontainers.io/).
 
 It is [deployed to Netlify](https://eslint-online-playground.netlify.app/).
+
+[![Netlify Status](https://api.netlify.com/api/v1/badges/2d9757d5-f0ac-4cd1-8b30-e1b9941edba4/deploy-status)](https://app.netlify.com/sites/eslint-online-playground/deploys)
