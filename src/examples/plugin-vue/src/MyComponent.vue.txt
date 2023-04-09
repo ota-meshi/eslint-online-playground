@@ -1,18 +1,3 @@
-<template>
-  <input v-model="inputValue" />
-  <button @click="handleClick" class="add-button">Add ToDo</button>
-  <ul class="todo-list">
-    <li
-      v-for="(todo, index) in todoItems"
-      :key="todo.id"
-      class="todo-item"
-      :class="{ 'todo-item--done': todo.done }"
-      @click="todo.done = !todo.done"
-    >
-      <span v-if="todo.done">✓</span> {{ todo.text }}
-    </li>
-  </ul>
-</template>
 <script setup>
 import { ref, computed } from "vue";
 const inputValue = ref("");
@@ -32,6 +17,23 @@ const buttonPointerEvents = computed(() =>
   inputValue.value ? "initial" : "none"
 );
 </script>
+
+<template>
+  <input v-model="inputValue" />
+  <button @click="handleClick" class="add-button">Add ToDo</button>
+  <ul class="todo-list">
+    <li
+      v-for="(todo, index) in todoItems"
+      :key="todo.id"
+      class="todo-item"
+      :class="{ 'todo-item--done': todo.done }"
+      @click="todo.done = !todo.done"
+    >
+      <span v-if="todo.done">✓</span> {{ todo.text }}
+    </li>
+  </ul>
+</template>
+
 <style>
 .add-button {
   color: v-bind(buttonColor);

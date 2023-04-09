@@ -1,0 +1,13 @@
+/**
+ * @param {string} foo
+ */
+export function bad (foo) {
+  console.log(foo)
+}
+
+/**
+ * @param {string} foo description
+ */
+export function good (foo) {
+  console.log(foo)
+}
