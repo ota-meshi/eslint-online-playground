@@ -10,7 +10,6 @@ import { debounce } from "./utils/debounce";
 import defaultJs from "./examples/eslint/src/example.js.txt?raw";
 import defaultConfig from "./examples/eslint/_eslintrc.json.js";
 import defaultPackageJson from "./examples/eslint/package.json.js";
-import logo from "./images/logo.png";
 import { CONFIG_FILE_NAMES } from "./utils/eslint-info";
 import type { Example } from "./examples";
 import { installPlugin } from "./plugins";
