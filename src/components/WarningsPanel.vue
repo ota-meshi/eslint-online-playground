@@ -50,8 +50,12 @@ function formatPosition(message: Linter.LintMessage) {
     <template v-if="result">
       <template v-if="result.returnCode === 0">
         <li v-for="(msg, i) in sortedMessage" :key="i" class="ep-warning__item">
-          <span :class="`ep-severity-${msg.severity}`">
-            {{ msg.severity === 1 ? "⚠️" : "❌" }}
+          <span
+            :class="`ep-warning__severity-${
+              msg.severity === 1 ? 'warning' : 'error'
+            }`"
+          >
+            {{ msg.severity === 1 ? "⚠️" : "✕" }}
           </span>
           <span> {{ msg.message.trim() }} </span>
           <template v-if="msg.url">
@@ -90,10 +94,11 @@ function formatPosition(message: Linter.LintMessage) {
 .ep-warning__severity-error,
 .ep-warning__severity-warning {
   color: var(--ep-severity-color);
-  flex-basis: 8ch;
+  flex-basis: 1rem;
   font-size: 0.6875rem;
   text-align: center;
   text-transform: uppercase;
+  border-radius: 4px;
 }
 
 .ep-warning__severity-error {

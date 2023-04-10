@@ -51,10 +51,10 @@
   --ep-active-menu-background-color: var(--ep-background-color);
   --ep-color: var(--color-neutral-100);
   --ep-link-color: var(--color-primary-600);
-  --ep-label-color: var(--color-neutral-500);
+  --ep-label-color: var(--color-neutral-300);
   --ep-input-color: var(--color-neutral-100);
   --ep-input-background-color: var(--ep-background-color);
-  --ep-border-color: var(--color-neutral-300);
+  --ep-border-color: var(--color-neutral-500);
   --ep-inactive-color: var(--color-neutral-500);
   --ep-warning-item-hover-background-color: var(--color-primary-800);
   --ep-severity-color: white;
