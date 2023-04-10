@@ -27,6 +27,8 @@ export type MonacoEditor = {
   getEditor: () => editor.IStandaloneCodeEditor;
   /** Register a code action provider. */
   registerCodeActionProvider: (codeActionProvider: CodeActionProvider) => void;
+  /** Set the theme. */
+  setTheme: (theme: "dark" | "light") => void;
   /** Dispose the editor. */
   disposeEditor: () => void;
 };
@@ -50,6 +52,8 @@ export type MonacoDiffEditor = {
   getRightEditor: () => editor.IStandaloneCodeEditor;
   /** Register a code action provider. */
   registerCodeActionProvider: (codeActionProvider: CodeActionProvider) => void;
+  /** Set the theme. */
+  setTheme: (theme: "dark" | "light") => void;
   /** Dispose the all editors. */
   disposeEditor: () => void;
 };
@@ -62,6 +66,8 @@ export type BaseMonacoEditorOptions = {
     value: string;
     /** Code language. */
     language: string;
+    /** theme. */
+    theme: "dark" | "light";
   };
   /** Event listeners. */
   listeners?: {
@@ -104,9 +110,9 @@ export async function setupMonacoEditor({
   element.style.padding = "";
   const language = init.language;
 
-  const options = {
+  const options: editor.IStandaloneEditorConstructionOptions = {
     value: init.value,
-    theme: "vs",
+    theme: init.theme === "dark" ? "vs-dark" : "vs",
     language,
     automaticLayout: true,
     tabSize: 2,
@@ -117,7 +123,7 @@ export async function setupMonacoEditor({
     quickSuggestions: false,
     colorDecorators: false,
     renderControlCharacters: false,
-    renderIndentGuides: false,
+    // renderIndentGuides: false,
     renderValidationDecorations: "on" as const,
     renderWhitespace: "boundary" as const,
     scrollBeyondLastLine: false,
@@ -168,6 +174,14 @@ export async function setupMonacoEditor({
       getRightEditor: () => rightEditor,
       registerCodeActionProvider: (provideCodeActions) =>
         codeActionProvider.register(provideCodeActions),
+      setTheme: (theme: "dark" | "light") => {
+        leftEditor.updateOptions({
+          theme: theme === "dark" ? "vs-dark" : "vs",
+        });
+        rightEditor.updateOptions({
+          theme: theme === "dark" ? "vs-dark" : "vs",
+        });
+      },
       disposeEditor: () => {
         codeActionProvider.dispose();
         leftEditor.getModel()?.dispose();
@@ -209,7 +223,11 @@ export async function setupMonacoEditor({
     getEditor: () => standaloneEditor,
     registerCodeActionProvider: (provideCodeActions) =>
       codeActionProvider.register(provideCodeActions),
-
+    setTheme: (theme: "dark" | "light") => {
+      standaloneEditor.updateOptions({
+        theme: theme === "dark" ? "vs-dark" : "vs",
+      });
+    },
     disposeEditor: () => {
       codeActionProvider.dispose();
       standaloneEditor.getModel()?.dispose();

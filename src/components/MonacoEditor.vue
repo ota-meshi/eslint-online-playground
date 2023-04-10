@@ -8,6 +8,7 @@ import type {
 } from "../monaco-editor/monaco-setup.js";
 import { setupMonacoEditor } from "../monaco-editor/monaco-setup.js";
 import type { Language } from "./lang";
+import { themeValue } from "./ThemeSwitch.vue";
 
 const props = defineProps<{
   modelValue?: string;
@@ -37,6 +38,7 @@ watch([root, () => props.diff], async ([element, useDiffEditor]) => {
     init: {
       value: props.modelValue ?? "",
       language: props.language ?? "javascript",
+      theme: themeValue.value,
     },
     useDiffEditor,
     listeners: {
@@ -58,6 +60,9 @@ watch([root, () => props.diff], async ([element, useDiffEditor]) => {
   }
 });
 
+watch(themeValue, (theme) => {
+  editorRef.value?.setTheme(theme);
+});
 watch(
   () => props.modelValue,
   (value) => {

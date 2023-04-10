@@ -31,12 +31,36 @@
   --ep-link-color: var(--color-primary-600);
   --ep-label-color: var(--color-neutral-500);
   --ep-input-color: var(--color-neutral-900);
-  --ep-border-color: gainsboro;
+  --ep-input-background-color: var(--ep-background-color);
+  --ep-border-color: var(--color-neutral-300);
   --ep-inactive-color: var(--color-neutral-500);
   --ep-warning-item-hover-background-color: var(--color-primary-100);
   --ep-severity-color: white;
   --ep-severity-error-background-color: crimson;
   --ep-severity-warning-background-color: goldenrod;
+
+  --title-color: var(--color-neutral-900);
+  --title-link-color: var(--color-primary-800);
+}
+
+.dark {
+  --body-background-color: var(--color-neutral-800);
+  --ep-background-color: var(--color-neutral-900);
+  --ep-menu-background-color: var(--color-neutral-800);
+  --ep-dialog-background-color: var(--color-neutral-800);
+  --ep-active-menu-background-color: var(--ep-background-color);
+  --ep-color: var(--color-neutral-100);
+  --ep-link-color: var(--color-primary-600);
+  --ep-label-color: var(--color-neutral-500);
+  --ep-input-color: var(--color-neutral-100);
+  --ep-input-background-color: var(--ep-background-color);
+  --ep-border-color: var(--color-neutral-300);
+  --ep-inactive-color: var(--color-neutral-500);
+  --ep-warning-item-hover-background-color: var(--color-primary-800);
+  --ep-severity-color: white;
+
+  --title-color: var(--color-neutral-100);
+  --title-link-color: var(--color-primary-600);
 }
 
 body {

@@ -59,6 +59,7 @@ function handleClickDialog() {
 
 <style scoped>
 .ep-select-example {
+  color: var(--ep-color);
   background-color: var(--ep-dialog-background-color);
   border: 1px solid var(--ep-border-color);
   border-radius: 2px;
@@ -89,7 +90,6 @@ function handleClickDialog() {
 }
 
 .ep-select-example__item-title {
-  color: var(--ep-link-color);
   font-weight: bold;
 }
 </style>

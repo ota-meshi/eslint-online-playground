@@ -3,12 +3,13 @@ import { nextTick, ref, watch } from "vue";
 import ESLintPlayground from "./components/ESLintPlayground.vue";
 import SelectExampleDialog from "./components/SelectExampleDialog.vue";
 import SelectPluginDialog from "./components/SelectPluginDialog.vue";
+import GitHubIcon from "./components/GitHubIcon.vue";
+import ThemeSwitch from "./components/ThemeSwitch.vue";
 import { compress, decompress } from "./utils/compress";
 import { debounce } from "./utils/debounce";
 import defaultJs from "./examples/eslint/src/example.js.txt?raw";
 import defaultConfig from "./examples/eslint/_eslintrc.json.js";
 import defaultPackageJson from "./examples/eslint/package.json.js";
-import github from "./images/github.svg";
 import logo from "./images/logo.png";
 import { CONFIG_FILE_NAMES } from "./utils/eslint-info";
 import type { Example } from "./examples";
@@ -122,20 +123,21 @@ watch(
     <div class="header-menu">
       <button class="ep-button" @click="selectPlugin">More Plugins</button>
       <button class="ep-button" @click="selectExample">More Examples</button>
+      <ThemeSwitch />
       <a
         class="github"
         target="_blank"
         href="https://github.com/ota-meshi/eslint-online-playground"
       >
-        <img :src="github" alt="GitHub" />
+        <GitHubIcon alt="GitHub" />
       </a>
     </div>
   </header>
   <ESLintPlayground v-model:sources="sources" ref="eslintPlayground" />
   <footer class="footer">
-    <a href="https://github.com/eslint-community">
+    <!-- <a href="https://github.com/eslint-community">
       <img class="logo" :src="logo" alt="ESLint Community" />
-    </a>
+    </a> -->
   </footer>
   <SelectExampleDialog
     ref="selectExampleDialog"
@@ -156,14 +158,15 @@ watch(
 }
 .title {
   font-family: system-ui;
-  color: var(--color-neutral-900);
+  color: var(--title-color);
   font-size: 1.2rem;
   font-weight: 500;
 }
 .title a {
-  color: var(--color-primary-800);
+  color: var(--title-link-color);
   text-decoration: none;
 }
+
 .header-menu {
   display: flex;
   gap: 8px;
@@ -172,9 +175,7 @@ watch(
 }
 
 .github {
-  display: block;
-  width: 24px;
-  height: 24px;
+  display: flex;
 }
 
 .footer {

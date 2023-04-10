@@ -2,7 +2,7 @@
 import { ref, computed } from "vue";
 import type { Plugin } from "../plugins";
 import { loadPlugins } from "../plugins";
-import github from "../images/github.svg";
+import GitHubIcon from "./GitHubIcon.vue";
 
 const plugins = ref<Record<string, Plugin>>({});
 const dialogRef = ref<HTMLDialogElement>();
@@ -71,7 +71,7 @@ function handleClickDialog() {
             :href="plugin.repo"
             @click.stop
           >
-            <img :src="github" alt="GitHub" />
+            <GitHubIcon alt="GitHub" />
           </a>
         </div>
       </template>
@@ -90,6 +90,7 @@ function handleClickDialog() {
 
 <style scoped>
 .ep-select-plugin {
+  color: var(--ep-color);
   background-color: var(--ep-dialog-background-color);
   border: 1px solid var(--ep-border-color);
   border-radius: 2px;
@@ -118,13 +119,10 @@ function handleClickDialog() {
 }
 
 .ep-select-plugin__item-title {
-  color: var(--ep-link-color);
   font-weight: bold;
 }
 
 .github {
-  display: block;
-  width: 24px;
-  height: 24px;
+  display: flex;
 }
 </style>

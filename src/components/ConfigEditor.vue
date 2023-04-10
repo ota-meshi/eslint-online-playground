@@ -52,6 +52,8 @@ function handleUpdateModelValue(config: string) {
 <style scoped>
 .ep-config__file-name {
   border: 1px solid var(--ep-border-color);
+  color: var(--ep-input-color);
+  background-color: var(--ep-input-background-color);
   border-radius: 2px;
 }
 </style>
