@@ -11,8 +11,10 @@ export const themeValue = ref<"dark" | "light">(
 
 <script setup lang="ts">
 function switchTheme() {
-  document.body.classList.toggle("dark");
-  const theme = document.body.classList.contains("dark") ? "dark" : "light";
+  document.documentElement.classList.toggle("dark");
+  const theme = document.documentElement.classList.contains("dark")
+    ? "dark"
+    : "light";
   localStorage.setItem("theme", theme);
   themeValue.value = theme;
 }
