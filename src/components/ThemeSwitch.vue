@@ -38,6 +38,7 @@ function switchTheme() {
   border: 1px solid var(--ep-border-color);
   background-color: var(--ep-background-color);
   padding: 1px;
+  cursor: pointer;
 
   --ep-theme-switch-animation-duration: 300ms;
 }
@@ -71,7 +72,6 @@ function switchTheme() {
   margin: auto;
   box-sizing: border-box;
   border-radius: 50%;
-  background-color: var(--ep-background-color);
   transition: height var(--ep-theme-switch-animation-duration),
     width var(--ep-theme-switch-animation-duration),
     box-shadow var(--ep-theme-switch-animation-duration);
