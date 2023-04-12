@@ -22,9 +22,7 @@ function switchTheme() {
 
 <template>
   <button class="ep-theme-switch" @click="switchTheme">
-    <div class="ep-theme-switch__icon-button">
-      <div class="ep-theme-switch__icon"></div>
-    </div>
+    <div class="ep-theme-switch__icon"></div>
   </button>
 </template>
 
@@ -43,38 +41,30 @@ function switchTheme() {
   --ep-theme-switch-animation-duration: 300ms;
 }
 
-.ep-theme-switch__icon-button {
-  box-sizing: border-box;
+.ep-theme-switch__icon {
   height: 18px;
   width: 18px;
+  border: 1px solid var(--ep-border-color);
+  padding: 2px;
+  box-sizing: border-box;
   border-radius: 9px;
   display: flex;
-  justify-content: center;
-  align-items: center;
-  border: 1px solid var(--ep-border-color);
+  /* for move */
   position: absolute;
-  left: 2px;
   transition: left var(--ep-theme-switch-animation-duration);
+  left: 2px;
 }
-.dark .ep-theme-switch__icon-button {
+.dark .ep-theme-switch__icon {
   left: 18px;
 }
 
-.ep-theme-switch__icon {
-  display: flex;
-  height: 12px;
-  width: 12px;
-  box-sizing: border-box;
-}
 .ep-theme-switch__icon:before {
   content: "";
   display: block;
   margin: auto;
   box-sizing: border-box;
   border-radius: 50%;
-  transition: height var(--ep-theme-switch-animation-duration),
-    width var(--ep-theme-switch-animation-duration),
-    box-shadow var(--ep-theme-switch-animation-duration);
+  transition: all var(--ep-theme-switch-animation-duration);
 
   /* sun */
   height: 8px;
@@ -90,9 +80,7 @@ function switchTheme() {
   position: absolute;
   left: calc(50% - 1px);
   top: calc(50% - 1px);
-  transition: box-shadow var(--ep-theme-switch-animation-duration),
-    opacity var(--ep-theme-switch-animation-duration),
-    transform var(--ep-theme-switch-animation-duration);
+  transition: all var(--ep-theme-switch-animation-duration);
 
   /* sun */
   opacity: 1;
