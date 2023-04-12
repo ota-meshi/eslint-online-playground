@@ -28,6 +28,7 @@
     "code-red": "^1.0.0",
     "eslint-scope": "^7.1.1",
     "fflate": "^0.7.4",
+    "shine-and-bright": "^0.1.0",
     "vue": "^3.2.47",
     "yaml": "^2.2.1"
   },
