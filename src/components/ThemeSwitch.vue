@@ -79,36 +79,37 @@ function switchTheme() {
   /* sun */
   height: 8px;
   width: 8px;
-  box-shadow: -12px -12px 0 0 orange inset;
+  box-shadow: 12px -12px 0 0 orange inset;
 }
 .ep-theme-switch__icon:after {
   content: "";
   display: block;
   box-sizing: border-box;
-  border-radius: 50%;
   height: 2px;
   width: 2px;
   position: absolute;
   left: calc(50% - 1px);
   top: calc(50% - 1px);
   transition: box-shadow var(--ep-theme-switch-animation-duration),
-    opacity var(--ep-theme-switch-animation-duration);
+    opacity var(--ep-theme-switch-animation-duration),
+    transform var(--ep-theme-switch-animation-duration);
 
   /* sun */
   opacity: 1;
-  box-shadow: 0 -5.5px 0 0 orange, -4px -4px 0 0 orange, -5.5px 0 0 0 orange,
-    -4px 4px 0 0 orange, 0 5.5px 0 0 orange, 4px 4px 0 0 orange,
-    5.5px 0 0 0 orange, 4px -4px 0 0 orange;
+  box-shadow: 0 -5.5px 0 0 gold, -4px -4px 0 0 orange, -5.5px 0 0 0 gold,
+    -4px 4px 0 0 orange, 0 5.5px 0 0 gold, 4px 4px 0 0 orange, 5.5px 0 0 0 gold,
+    4px -4px 0 0 orange;
+  transform: rotate(45deg);
 }
 
 .dark .ep-theme-switch__icon:before {
   /* moon */
   height: 12px;
   width: 12px;
-  box-shadow: -3px -2px 0 0 yellow inset;
+  box-shadow: 4px -3px 0 0 yellow inset;
 }
 .dark .ep-theme-switch__icon:after {
   opacity: 0;
-  box-shadow: none;
+  transform: rotate(135deg) scale(0.5);
 }
 </style>
