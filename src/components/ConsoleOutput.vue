@@ -3,8 +3,9 @@ import { nextTick, ref } from "vue";
 import ansiRegex from "ansi-regex";
 
 const CHA = "\u001b[1G";
+const EL = "\u001b[K";
 
-let nextCHA = false;
+let nextEraseInLine = false;
 
 const element = ref<HTMLDivElement>();
 const consoleText = ref("");
@@ -20,8 +21,8 @@ function append(string: string) {
   let start = 0;
 
   for (const match of string.matchAll(ansiRe)) {
-    if (match[0] === CHA) {
-      nextCHA = true;
+    if (match[0] === CHA || match[0] === EL) {
+      nextEraseInLine = true;
     }
 
     append(string.slice(start, match.index));
@@ -38,18 +39,22 @@ function append(string: string) {
   });
 
   function append(s: string) {
-    if (!s) return;
+    const str = s.replace(/\r/g, "");
+    if (!str) return;
 
-    if (nextCHA) {
-      const lastLinefeed = consoleText.value.lastIndexOf("\n");
+    if (nextEraseInLine) {
+      eraseInLine();
 
-      if (lastLinefeed > -1)
-        consoleText.value = consoleText.value.slice(0, lastLinefeed + 1);
-
-      nextCHA = false;
+      nextEraseInLine = false;
     }
 
-    consoleText.value += s;
+    consoleText.value += str;
+  }
+
+  function eraseInLine() {
+    const lastLinefeed = consoleText.value.lastIndexOf("\n");
+    if (lastLinefeed > -1)
+      consoleText.value = consoleText.value.slice(0, lastLinefeed + 1);
   }
 }
 

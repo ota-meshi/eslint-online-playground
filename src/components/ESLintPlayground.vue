@@ -672,7 +672,7 @@ function selectOutput(nm: "console" | "warnings") {
           <CodeEditor
             v-model:code="source.code"
             v-model:file-name="source.fileName"
-            :ref="(editor) => (source.editor = editor as never)"
+            :ref="(editor: never) => (source.editor = editor)"
             :right-code="source.resultData?.fixedCode ?? source.code"
             :markers="source.resultData?.markers ?? []"
             :right-markers="source.resultData?.fixedMarkers ?? []"

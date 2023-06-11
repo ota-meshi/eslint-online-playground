@@ -112,7 +112,7 @@ async function startServerInternal(
   ]);
 
   let boot = false;
-  const callbacks: ((json: string) => void)[] = [];
+  const callbacks: ((json: string) => boolean)[] = [];
 
   void serverProcess.output.pipeTo(
     new WritableStream({
@@ -133,7 +133,18 @@ async function startServerInternal(
           return;
         }
 
-        callbacks.forEach((f) => f(output));
+        const lastLength = callbacks.length;
+        const buffer = [...callbacks];
+        callbacks.length = 0;
+        let callback;
+        while ((callback = buffer.shift())) {
+          if (!callback(output)) {
+            callbacks.push(callback);
+          }
+        }
+        if (lastLength === callbacks.length) {
+          console.log("Unused output", str);
+        }
       },
     })
   );
@@ -149,12 +160,10 @@ async function startServerInternal(
     return new Promise((resolve) => {
       function callback(output: string) {
         if (test(output)) {
-          const i = callbacks.indexOf(callback);
-
-          if (i > 0) callbacks.splice(i);
-
           resolve(output);
+          return true;
         }
+        return false;
       }
 
       callbacks.push(callback);
@@ -164,7 +173,7 @@ async function startServerInternal(
   const serverInternal = {
     process: serverProcess,
     request,
-    ready: request("ok?", (res) => res === "ok" || res === "boot").then(() => {
+    ready: request("ok?", (res) => res === "ok").then(() => {
       boot = true;
     }),
     isExit: false,
