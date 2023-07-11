@@ -11,7 +11,7 @@ export type CodeActionProvider = (
   model: editor.ITextModel,
   range: Range,
   context: languages.CodeActionContext,
-  token: CancellationToken
+  token: CancellationToken,
 ) => languages.ProviderResult<languages.CodeActionList>;
 export type MonacoEditor = {
   type: "standalone";
@@ -84,13 +84,13 @@ export type MonacoDiffEditorOptions = BaseMonacoEditorOptions & {
 
 /** Setup editor */
 export async function setupMonacoEditor(
-  options: MonacoEditorOptions
+  options: MonacoEditorOptions,
 ): Promise<MonacoEditor>;
 export async function setupMonacoEditor(
-  options: MonacoDiffEditorOptions
+  options: MonacoDiffEditorOptions,
 ): Promise<MonacoDiffEditor>;
 export async function setupMonacoEditor(
-  options: BaseMonacoEditorOptions & { useDiffEditor: boolean }
+  options: BaseMonacoEditorOptions & { useDiffEditor: boolean },
 ): Promise<MonacoEditor | MonacoDiffEditor>;
 
 export async function setupMonacoEditor({
@@ -249,7 +249,7 @@ export async function setupMonacoEditor({
   /** Update markers */
   function updateMarkers(
     editor: editor.IStandaloneCodeEditor,
-    markers: editor.IMarkerData[]
+    markers: editor.IMarkerData[],
   ) {
     const model = editor.getModel()!;
     const id = editor.getId();
@@ -257,12 +257,12 @@ export async function setupMonacoEditor({
     monaco.editor.setModelMarkers(
       model,
       id,
-      JSON.parse(JSON.stringify(markers)) as editor.IMarkerData[]
+      JSON.parse(JSON.stringify(markers)) as editor.IMarkerData[],
     );
   }
 
   function buildCodeActionProviderContainer(
-    editor: editor.IStandaloneCodeEditor
+    editor: editor.IStandaloneCodeEditor,
   ): {
     register: (codeActionProvider: CodeActionProvider) => void;
     dispose: () => void;

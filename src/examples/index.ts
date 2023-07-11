@@ -28,12 +28,12 @@ export async function loadExamples(): Promise<Record<string, Example>> {
           keys: convertToExampleKeys(fileName),
           content: val,
         };
-      }
+      },
     ),
     ...Object.entries(
       import.meta.glob("./**/*.{txt,js}", {
         as: "raw",
-      })
+      }),
     ).map(async ([fileName, content]) => ({
       keys: convertToExampleKeys(fileName),
       content: await content(),
@@ -54,7 +54,7 @@ export async function loadExamples(): Promise<Record<string, Example>> {
   }
 
   for (const ex of Object.values(examplesMap).sort(({ name: a }, { name: b }) =>
-    a.localeCompare(b)
+    a.localeCompare(b),
   )) {
     allExamples[ex.name] = ex;
   }

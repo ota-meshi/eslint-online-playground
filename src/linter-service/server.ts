@@ -105,7 +105,7 @@ type ServerInternal = {
 };
 
 async function startServerInternal(
-  webContainer: WebContainer
+  webContainer: WebContainer,
 ): Promise<ServerInternal> {
   const serverProcess = await webContainer.spawn("node", [
     "./eslint-online-playground-server.mjs",
@@ -146,14 +146,14 @@ async function startServerInternal(
           console.log("Unused output", str);
         }
       },
-    })
+    }),
   );
 
   const writer = serverProcess.input.getWriter();
 
   async function request(
     data: any,
-    test: (data: any) => boolean
+    test: (data: any) => boolean,
   ): Promise<string> {
     await writer.write(createJsonPayload(data));
 

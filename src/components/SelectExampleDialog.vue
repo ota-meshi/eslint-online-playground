@@ -35,7 +35,8 @@ function handleClickDialog() {
         :key="example.name"
         @click="
           (e) => {
-            (e.target as HTMLElement).tagName !== 'A' && handleClickExample(example);
+            (e.target as HTMLElement).tagName !== 'A' &&
+              handleClickExample(example);
           }
         "
         class="ep-select-example__item"

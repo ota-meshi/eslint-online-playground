@@ -74,7 +74,7 @@ watch(
     } else {
       editorRef.value.setLeftValue(value || "");
     }
-  }
+  },
 );
 watch(
   () => props.language,
@@ -83,7 +83,7 @@ watch(
       return;
     }
     editorRef.value.setModelLanguage(value || "");
-  }
+  },
 );
 watch(
   () => props.markers,
@@ -96,7 +96,7 @@ watch(
     } else {
       editorRef.value.setLeftMarkers(markers || []);
     }
-  }
+  },
 );
 watch(
   () => props.rightValue,
@@ -104,7 +104,7 @@ watch(
     if (editorRef.value?.type === "diff") {
       editorRef.value.setRightValue(rightValue || "");
     }
-  }
+  },
 );
 watch(
   () => props.rightMarkers,
@@ -112,14 +112,14 @@ watch(
     if (editorRef.value?.type === "diff") {
       editorRef.value.setRightMarkers(rightMarkers || []);
     }
-  }
+  },
 );
 watch(
   () => props.codeActionProvider,
   (codeActionProvider) => {
     if (codeActionProvider)
       editorRef.value?.registerCodeActionProvider(codeActionProvider);
-  }
+  },
 );
 
 function setSelection(selection: {

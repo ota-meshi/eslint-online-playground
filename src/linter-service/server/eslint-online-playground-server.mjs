@@ -69,7 +69,7 @@ async function lint(input) {
 
     if (isReservedFileName(targetFile)) {
       throw new Error(
-        "The specified file name cannot be used as a linting file name on this demo site."
+        "The specified file name cannot be used as a linting file name on this demo site.",
       );
     }
 
@@ -109,7 +109,7 @@ async function lint(input) {
         if (key.startsWith("_")) return undefined;
 
         return value;
-      })
+      }),
     );
   } catch (e) {
     // eslint-disable-next-line no-console -- Demo runtime

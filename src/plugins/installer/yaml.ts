@@ -5,7 +5,7 @@ import { toYAMLContent } from "../../utils/yaml-utils";
 
 export async function installPluginForYaml(
   configText: string,
-  plugins: Plugin[]
+  plugins: Plugin[],
 ): Promise<ConfigInstallPluginResult> {
   const yaml = await import("yaml");
 
@@ -43,24 +43,24 @@ function addToSeq(
   yaml: typeof Yaml,
   config: Yaml.YAMLMap<Yaml.Node, Yaml.Node | null>,
   key: string,
-  values: string[]
+  values: string[],
 ) {
   const target = config.get(key);
   if (!target) {
     config.set(
       toYAMLContent(yaml, key),
-      toYAMLContent(yaml, [...new Set(values)])
+      toYAMLContent(yaml, [...new Set(values)]),
     );
     return;
   }
   const seq = toSeqNode(yaml, target);
   const arrayValueJSONs = new Set(
-    seq.items.map((v) => JSON.stringify(v.toJSON()))
+    seq.items.map((v) => JSON.stringify(v.toJSON())),
   );
   seq.items.push(
     ...values
       .filter((v) => !arrayValueJSONs.has(JSON.stringify(v)))
-      .map((v) => toYAMLContent(yaml, v))
+      .map((v) => toYAMLContent(yaml, v)),
   );
   config.set(toYAMLContent(yaml, key), seq);
 }
@@ -71,13 +71,13 @@ function margeOverride(
   override: {
     files: string[];
     parser?: string;
-  }
+  },
 ) {
   const overrides = config.get("overrides");
   if (!overrides) {
     config.set(
       toYAMLContent(yaml, "overrides"),
-      toYAMLContent(yaml, [override])
+      toYAMLContent(yaml, [override]),
     );
     return;
   }

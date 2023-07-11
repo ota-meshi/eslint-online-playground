@@ -77,7 +77,7 @@ const configFileName = computed<ConfigFileName>({
       const configText = await transformConfigFormat(
         props.sources[old],
         old,
-        value
+        value,
       );
       emitUpdateSources({ configFileName: value, configText });
     }
@@ -136,7 +136,7 @@ type SourceData = {
   provideCodeAction: (
     model: editor.ITextModel,
     _range: Range,
-    context: languages.CodeActionContext
+    context: languages.CodeActionContext,
   ) => ReturnType<CodeActionProvider>;
 };
 
@@ -169,7 +169,7 @@ watch(
       activeSource.value = allSourceDataList[0];
     }
   },
-  { immediate: true }
+  { immediate: true },
 );
 
 function createSourceData(initFileName: string, initCode: string): SourceData {
@@ -193,7 +193,7 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
       return marker;
     });
     const fixedMarkers = result.fixResult.messages.map((m) =>
-      messageToMarker(m, result.ruleMetadata, monaco)
+      messageToMarker(m, result.ruleMetadata, monaco),
     );
     const fixedCode = result.output ?? code.value;
     return {
@@ -224,7 +224,7 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
     if (isReservedFileName(newFileName)) {
       // eslint-disable-next-line no-console -- OK
       console.warn(
-        "The specified file name cannot be used as a linting file name on this demo site."
+        "The specified file name cannot be used as a linting file name on this demo site.",
       );
       fileName.value = currFileName;
       return;
@@ -260,7 +260,7 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
   function provideCodeAction(
     model: editor.ITextModel,
     _range: Range,
-    context: languages.CodeActionContext
+    context: languages.CodeActionContext,
   ): ReturnType<CodeActionProvider> {
     if (context.only !== "quickfix") {
       return undefined;
@@ -280,8 +280,8 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
             `Fix this ${message.ruleId} problem`,
             marker,
             model,
-            message.fix
-          )
+            message.fix,
+          ),
         );
       }
       if (message.suggestions) {
@@ -291,8 +291,8 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
               `${suggestion.desc} (${message.ruleId})`,
               marker,
               model,
-              suggestion.fix
-            )
+              suggestion.fix,
+            ),
           );
         }
       }
@@ -312,7 +312,7 @@ function emitUpdateSources(
     configFileName?: string;
     configText?: string;
     packageJson?: string;
-  } = {}
+  } = {},
 ) {
   emit(
     "update:sources",
@@ -326,20 +326,20 @@ function emitUpdateSources(
         option.configText || configText.value,
       ],
       ["package.json", option.packageJson || packageJson.value],
-    ])
+    ]),
   );
 }
 
 function handleActiveName(name: string) {
   const a = displaySourceDataList.value.list.find(
-    (source) => source.fileName === name
+    (source) => source.fileName === name,
   );
   if (a) {
     activeSource.value = a;
     disableBuiltinValidate();
   } else if (
     displaySourceDataList.value.tsconfigs.some(
-      (source) => source.fileName === name
+      (source) => source.fileName === name,
     )
   ) {
     enableBuiltinValidate({ jsonAs: "jsonc" });
@@ -416,7 +416,7 @@ watch(
         configFileName: configFileName.value,
       });
     }
-  }, 300)
+  }, 300),
 );
 
 async function updatePackageJson(packageJson: string) {
@@ -458,7 +458,7 @@ async function updateInstalledPackages() {
   for (const packageName of depsPackageNames) {
     try {
       const json = await lintServer.readFile(
-        `/node_modules/${packageName}/package.json`
+        `/node_modules/${packageName}/package.json`,
       );
       const packageJson = JSON.parse(json);
 
@@ -508,7 +508,7 @@ async function lint({
 function messageToMarker(
   message: Linter.LintMessage,
   ruleMetadata: LinterServiceResultSuccess["ruleMetadata"],
-  monaco: Monaco
+  monaco: Monaco,
 ): editor.IMarkerData {
   const startLineNumber = message.line;
   const startColumn = message.column;
@@ -560,7 +560,7 @@ function createQuickFixCodeAction(
   title: string,
   marker: editor.IMarkerData,
   model: editor.ITextModel,
-  fix: { range: [number, number]; text: string }
+  fix: { range: [number, number]; text: string },
 ): languages.CodeAction {
   const start = model.getPositionAt(fix.range[0]);
   const end = model.getPositionAt(fix.range[1]);

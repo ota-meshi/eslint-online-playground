@@ -18,17 +18,17 @@ import { maybeTSConfig } from "./utils/tsconfig";
 import { prettyStringify } from "./utils/json-utils";
 
 const eslintPlayground = ref<InstanceType<typeof ESLintPlayground> | null>(
-  null
+  null,
 );
 const selectExampleDialog = ref<InstanceType<
   typeof SelectExampleDialog
 > | null>(null);
 const selectPluginDialog = ref<InstanceType<typeof SelectPluginDialog> | null>(
-  null
+  null,
 );
 
 const hashData = window.location.hash.slice(
-  window.location.hash.indexOf("#") + 1
+  window.location.hash.indexOf("#") + 1,
 );
 const queryParam = decompress(hashData);
 
@@ -45,7 +45,7 @@ if (
   Object.keys(sources.value).filter(
     (k) =>
       !(CONFIG_FILE_NAMES as readonly string[]).includes(k) &&
-      k !== "package.json"
+      k !== "package.json",
   ).length === 0
 ) {
   sources.value["src/example.js"] = defaultJs;
@@ -67,7 +67,7 @@ async function handleSelectExample(example: Example) {
       (nm) =>
         nm !== "package.json" &&
         !CONFIG_FILE_NAMES.some((configName) => nm.endsWith(configName)) &&
-        !maybeTSConfig(nm)
+        !maybeTSConfig(nm),
     ) || Object.keys(example.files)[0];
   eslintPlayground.value?.selectFile(fileName);
 }
@@ -84,7 +84,7 @@ async function handleSelectPlugins(plugins: Plugin[]) {
     newSources["package.json"] || "{}",
     newSources[configFileName] || "{}",
     configFileName,
-    plugins
+    plugins,
   );
   if (installResult.error) {
     return;
@@ -109,7 +109,7 @@ watch(
       window.parent.postMessage(query, "*");
     }
   }, 300),
-  { deep: true }
+  { deep: true },
 );
 </script>
 

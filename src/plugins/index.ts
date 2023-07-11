@@ -33,7 +33,7 @@ export async function loadPlugins(): Promise<Record<string, Plugin>> {
         }
         if (!plugin.hasInstalled) {
           plugin.hasInstalled = function hasInstalled(
-            packageJson: any
+            packageJson: any,
           ): boolean {
             return (
               packageJson.devDependencies?.[plugin.name] != null ||
@@ -42,11 +42,11 @@ export async function loadPlugins(): Promise<Record<string, Plugin>> {
           };
         }
         return plugin;
-      }
+      },
     ),
   ]);
   for (const plugin of list.sort(({ name: a }, { name: b }) =>
-    a.localeCompare(b)
+    a.localeCompare(b),
   )) {
     allPlugins[plugin.name] = plugin;
   }

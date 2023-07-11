@@ -37,7 +37,7 @@ export class Installer {
 
     this.installProcess = installDependencies(
       this.webContainer,
-      this.consoleOutput
+      this.consoleOutput,
     );
 
     return (await this.installProcess).exit;
@@ -51,7 +51,7 @@ export class Installer {
 
 async function installDependencies(
   webContainer: WebContainer,
-  consoleOutput: InstanceType<typeof ConsoleOutput>
+  consoleOutput: InstanceType<typeof ConsoleOutput>,
 ) {
   const installProcess = await webContainer.spawn("npm", ["install"]);
 
@@ -60,7 +60,7 @@ async function installDependencies(
       write(data) {
         consoleOutput.append(data);
       },
-    })
+    }),
   );
   void installProcess.exit.then((exitCode) => {
     if (exitCode !== 0) {

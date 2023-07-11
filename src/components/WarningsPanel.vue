@@ -23,7 +23,7 @@ const sortedMessage = computed(() => {
         (a.endColumn != null &&
           b.endColumn != null &&
           a.endColumn - b.endColumn) ||
-        0
+        0,
     )
     .map((msg) => {
       return {
