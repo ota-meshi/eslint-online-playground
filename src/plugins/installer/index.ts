@@ -24,7 +24,7 @@ export async function installPlugin(
   packageJson: string,
   configText: string,
   configFileName: ConfigFileName,
-  plugins: Plugin[]
+  plugins: Plugin[],
 ): Promise<InstallPluginResult> {
   let packageJsonObject: { devDependencies?: Record<string, string> };
   try {

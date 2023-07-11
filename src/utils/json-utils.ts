@@ -11,7 +11,7 @@ function toLines(indent: string, object: unknown): string[] {
     return toLinesObject(
       indent,
       "[]",
-      object.map((element: unknown) => toLines(indent + indentStr, element))
+      object.map((element: unknown) => toLines(indent + indentStr, element)),
     );
   }
   return toLinesObject(
@@ -24,7 +24,7 @@ function toLines(indent: string, object: unknown): string[] {
         ...vs.slice(1),
       ];
     }),
-    true
+    true,
   );
 }
 
@@ -32,7 +32,7 @@ function toLinesObject(
   indent: string,
   [open, close]: string,
   elements: string[][],
-  forceLF = false
+  forceLF = false,
 ): string[] {
   if (elements.some((element) => element.length > 1 || forceLF)) {
     return toLinesWithLineFeed();

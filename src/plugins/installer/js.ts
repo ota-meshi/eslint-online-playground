@@ -5,7 +5,7 @@ import { isModuleExports, toESExpression } from "../../utils/estree-utils";
 
 export async function installPluginForCJS(
   configText: string,
-  plugins: Plugin[]
+  plugins: Plugin[],
 ): Promise<ConfigInstallPluginResult> {
   const codeRead = await import("code-red");
   try {
@@ -82,11 +82,11 @@ export async function installPluginForCJS(
 
 export async function installPluginForMJS(
   _configText: string,
-  _plugins: Plugin[]
+  _plugins: Plugin[],
 ): Promise<ConfigInstallPluginResult> {
   await Promise.resolve();
   alertAndLog(
-    "Flat Config is not yet supported. Failed to add new configuration."
+    "Flat Config is not yet supported. Failed to add new configuration.",
   );
   return { error: true };
 }
@@ -94,7 +94,7 @@ export async function installPluginForMJS(
 function addToArray(
   node: ESTree.ObjectExpression,
   key: string,
-  values: string[]
+  values: string[],
 ): void {
   const target = node.properties.find(buildPropMatch(key));
   if (!target) {
@@ -120,7 +120,7 @@ function margeOverride(
   overrides: {
     files: string[];
     parser?: string;
-  }[]
+  }[],
 ): void {
   const overridesProperty = node.properties.find(buildPropMatch("overrides"));
   if (!overridesProperty) {
@@ -141,7 +141,7 @@ function margeOverride(
   if (overridesProperty.value.type !== "ArrayExpression") {
     overridesProperty.value = toFlatDistinctArray(
       overridesProperty.value,
-      overrides
+      overrides,
     );
     return;
   }
@@ -163,7 +163,7 @@ function margeOverride(
               ? property.value.value
               : property.value.type === "ArrayExpression"
               ? property.value.elements.map((e) =>
-                  e?.type === "Literal" ? e.value : null
+                  e?.type === "Literal" ? e.value : null,
                 )
               : null;
 
@@ -173,7 +173,7 @@ function margeOverride(
         }
 
         return true;
-      }
+      },
     );
     if (target) {
       continue;
@@ -184,7 +184,7 @@ function margeOverride(
 
 function buildPropMatch(name: string) {
   return (
-    p: ESTree.Property | ESTree.SpreadElement
+    p: ESTree.Property | ESTree.SpreadElement,
   ): p is ESTree.Property & { value: ESTree.Expression } =>
     p.type === "Property" &&
     ((!p.computed && p.key.type === "Identifier" && p.key.name === name) ||
@@ -193,7 +193,7 @@ function buildPropMatch(name: string) {
 
 function toFlatDistinctArray(
   element: ESTree.Expression,
-  values: any[]
+  values: any[],
 ): ESTree.Expression {
   if (element.type === "ArrayExpression") {
     const array: ESTree.ArrayExpression = {
@@ -245,7 +245,7 @@ function toFlatDistinctArray(
   return call;
 
   function* flatten(
-    nodes: Iterable<ESTree.Expression | ESTree.SpreadElement | null>
+    nodes: Iterable<ESTree.Expression | ESTree.SpreadElement | null>,
   ): Iterable<ESTree.Expression | ESTree.SpreadElement> {
     for (const node of nodes) {
       if (!node) continue;
@@ -258,7 +258,7 @@ function toFlatDistinctArray(
   }
 
   function distinct(
-    nodes: Iterable<ESTree.Expression | ESTree.SpreadElement>
+    nodes: Iterable<ESTree.Expression | ESTree.SpreadElement>,
   ): (ESTree.Expression | ESTree.SpreadElement)[] {
     const map = new Map<any, ESTree.Expression | ESTree.SpreadElement>();
     for (const node of nodes) {

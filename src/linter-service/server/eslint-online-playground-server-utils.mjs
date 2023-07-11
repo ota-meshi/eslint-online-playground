@@ -52,6 +52,6 @@ export function isReservedFileName(fileName) {
     (f) =>
       fileName.endsWith(f) ||
       fileName.includes(`/${f}/`) ||
-      fileName.includes(`\\${f}\\`)
+      fileName.includes(`\\${f}\\`),
   );
 }

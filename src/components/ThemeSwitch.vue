@@ -5,7 +5,7 @@ export const themeValue = ref<"dark" | "light">(
   (localStorage.getItem("theme") as never) ||
     (window.matchMedia("(prefers-color-scheme: dark)").matches
       ? "dark"
-      : "light")
+      : "light"),
 );
 </script>
 
@@ -16,7 +16,7 @@ function switchTheme() {
   themeValue.value = themeValue.value === "dark" ? "light" : "dark";
   document.documentElement.classList.toggle(
     "dark",
-    themeValue.value === "dark"
+    themeValue.value === "dark",
   );
   localStorage.setItem("theme", themeValue.value);
 }

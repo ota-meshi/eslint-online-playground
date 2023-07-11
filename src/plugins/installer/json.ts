@@ -5,7 +5,7 @@ import type { Linter } from "eslint";
 
 export function installPluginForJson(
   configText: string,
-  plugins: Plugin[]
+  plugins: Plugin[],
 ): ConfigInstallPluginResult {
   let config: Linter.Config;
   try {

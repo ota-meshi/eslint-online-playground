@@ -2,7 +2,7 @@ import type * as Yaml from "yaml";
 
 export function toYAMLContent(
   yaml: typeof Yaml,
-  object: any
+  object: any,
 ): Yaml.Scalar | Yaml.YAMLMap<Yaml.Node, Yaml.Node> | Yaml.YAMLSeq<Yaml.Node> {
   if (!object || typeof object !== "object") {
     return new yaml.Scalar(object);

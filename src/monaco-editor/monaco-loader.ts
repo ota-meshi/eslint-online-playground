@@ -10,7 +10,7 @@ export function loadMonaco(): Promise<Monaco> {
     monacoPromise ||
     (monacoPromise = (async () => {
       const monaco: Monaco = await loadModuleFromMonaco(
-        "vs/editor/editor.main"
+        "vs/editor/editor.main",
       );
       // monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
       //   allowComments: true,
@@ -111,7 +111,7 @@ async function setupMonaco(): Promise<void> {
         (script) =>
           script.src &&
           script.src.includes("monaco") &&
-          script.src.includes("vs/loader")
+          script.src.includes("vs/loader"),
       ) ||
       // If the script tag that loads the Monaco editor is not found, insert the script tag.
       (await appendMonacoEditorScript());

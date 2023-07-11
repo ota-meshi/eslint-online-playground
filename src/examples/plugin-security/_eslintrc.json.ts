@@ -9,6 +9,6 @@ export default {
   },
   env: { node: true },
   rules: Object.fromEntries(
-    Object.keys(rules).map((rule) => [`security/${rule}`, "error"])
+    Object.keys(rules).map((rule) => [`security/${rule}`, "error"]),
   ),
 };

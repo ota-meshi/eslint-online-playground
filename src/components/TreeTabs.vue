@@ -55,7 +55,7 @@ const treeTabs = computed(() => {
     let leaf = pathNames.pop()!;
     for (const target of pathNames) {
       const targetNode = targetTree.children.find(
-        (child) => child.name === target
+        (child) => child.name === target,
       );
       if (targetNode) {
         targetTree = targetNode;

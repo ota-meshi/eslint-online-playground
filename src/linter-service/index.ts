@@ -71,7 +71,7 @@ export async function setupLintServer({
   const serverFiles: FileSystemTree = {};
 
   for (const [file, contents] of Object.entries(
-    import.meta.glob("./server/**/*.mjs", { as: "raw" })
+    import.meta.glob("./server/**/*.mjs", { as: "raw" }),
   ).map(([file, load]) => {
     return [file.slice(9), load()] as const;
   })) {
@@ -104,7 +104,7 @@ export async function setupLintServer({
   let last: Promise<LinterServiceResult> | null = null;
 
   async function setLintProcess(
-    run: () => Promise<LinterServiceResult>
+    run: () => Promise<LinterServiceResult>,
   ): Promise<LinterServiceResult> {
     if (processing) {
       next = run;
@@ -146,7 +146,7 @@ export async function setupLintServer({
     async updatePackageJson(pkg) {
       updatingPackageJson = webContainer.fs.writeFile(
         "/package.json",
-        prettyStringify(pkg)
+        prettyStringify(pkg),
       );
       await updatingPackageJson;
     },
@@ -186,7 +186,7 @@ export async function setupLintServer({
 async function lint(server: Server, input: LintInput) {
   const content = await server.request(
     input,
-    (content) => content.version >= input.version
+    (content) => content.version >= input.version,
   );
 
   return content;

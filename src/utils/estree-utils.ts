@@ -4,7 +4,7 @@ import type { ScopeManager } from "eslint-scope";
 type ESLintUtils = typeof _eslintUtils;
 
 export function isModuleExports(
-  node: ESTree.Node
+  node: ESTree.Node,
 ): node is ESTree.ExpressionStatement & {
   expression: ESTree.AssignmentExpression & {
     left: ESTree.MemberExpression & {
@@ -61,7 +61,7 @@ export function toESExpression(object: any): ESTree.Expression {
 
 export async function toValueFromESExpression(
   object: ESTree.Expression,
-  scopeManager: ScopeManager
+  scopeManager: ScopeManager,
 ): Promise<unknown> {
   const eslintUtils: ESLintUtils = await import(
     // @ts-expect-error -- ignore
@@ -75,7 +75,7 @@ export async function toValueFromESExpression(
 }
 
 export async function analyzeScope(
-  program: ESTree.Program
+  program: ESTree.Program,
 ): Promise<ScopeManager> {
   const { analyze } = await import("eslint-scope");
 

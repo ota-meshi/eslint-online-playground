@@ -15,7 +15,7 @@ type ESLintUtils = typeof _eslintUtils;
 export async function transformConfigFormat(
   configText: string,
   from: ConfigFileName,
-  to: ConfigFileName
+  to: ConfigFileName,
 ): Promise<Promise<string> | string> {
   if (from === to) return configText;
   try {
@@ -64,7 +64,7 @@ async function transformCjsToJson(configText: string) {
   if (exportNode) {
     const value = await toValueFromESExpression(
       exportNode.expression.right,
-      scopeManager
+      scopeManager,
     );
     if (value !== undefined) {
       return prettyStringify(value);
@@ -89,7 +89,7 @@ async function transformCjsToYaml(configText: string) {
     const value = await jsExpressionToYaml(
       yaml,
       exportNode.expression.right,
-      ast
+      ast,
     );
     if (value != null) {
       const doc = new yaml.Document(value);
@@ -125,7 +125,7 @@ async function transformJsonToCjs(configText: string) {
 async function jsExpressionToYaml(
   yaml: typeof Yaml,
   node: ESTree.Expression | null,
-  program: ESTree.Program
+  program: ESTree.Program,
 ): Promise<
   | Yaml.Scalar
   | Yaml.YAMLMap<Yaml.Node, Yaml.Node>
@@ -141,7 +141,7 @@ async function jsExpressionToYaml(
   return toYaml(node);
 
   async function toYaml(
-    node: ESTree.Expression | null
+    node: ESTree.Expression | null,
   ): Promise<
     | Yaml.Scalar
     | Yaml.YAMLMap<Yaml.Node, Yaml.Node>
@@ -173,7 +173,7 @@ async function jsExpressionToYaml(
         }
         const keyValue = eslintUtils.getPropertyName(
           prop,
-          scopeManager.globalScope
+          scopeManager.globalScope,
         );
         if (keyValue == null) return null;
         const keyNode = toYAMLContent(yaml, keyValue);
@@ -189,7 +189,7 @@ async function jsExpressionToYaml(
     }
     const content = toYAMLContent(
       yaml,
-      await toValueFromESExpression(node, scopeManager)
+      await toValueFromESExpression(node, scopeManager),
     );
     attachComments(content, node);
     return content;
@@ -209,7 +209,7 @@ async function jsExpressionToYaml(
 
 function yamlToJsExpression(
   yaml: typeof Yaml,
-  node: Yaml.ParsedNode | null
+  node: Yaml.ParsedNode | null,
 ): ESTree.Expression {
   if (node == null) {
     return { type: "Literal", value: null };

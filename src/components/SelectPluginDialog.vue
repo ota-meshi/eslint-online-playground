@@ -10,7 +10,7 @@ const selectPlugins = ref<string[]>([]);
 const packageJson = ref({});
 const availablePlugins = computed(() => {
   return Object.values(plugins.value).filter(
-    (p) => !p.hasInstalled(packageJson.value)
+    (p) => !p.hasInstalled(packageJson.value),
   );
 });
 
@@ -32,7 +32,7 @@ function handleOk() {
     "select",
     selectPlugins.value
       .map((nm) => plugins.value?.[nm])
-      .filter((p): p is Plugin => Boolean(p))
+      .filter((p): p is Plugin => Boolean(p)),
   );
   selectPlugins.value = [];
 }
