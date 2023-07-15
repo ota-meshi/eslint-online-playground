@@ -51,7 +51,6 @@ const treeTabs = computed(() => {
   for (const tab of tabs.value) {
     const pathNames = tab.value.title.split(/[/\\]/u);
     let targetTree = tree;
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion -- OK
     let leaf = pathNames.pop()!;
     for (const target of pathNames) {
       const targetNode = targetTree.children.find(
