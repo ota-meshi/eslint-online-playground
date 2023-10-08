@@ -130,7 +130,7 @@ async function appendMonacoEditorScript(): Promise<HTMLScriptElement> {
   const script = document.createElement("script");
 
   return new Promise((resolve) => {
-    script.src = `https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/${monacoVersion}/min/vs/loader.min.js`;
+    script.src = `https://unpkg.com/monaco-editor/${monacoVersion}/min/vs/loader.min.js`;
     script.onload = () => {
       script.onload = null;
 
