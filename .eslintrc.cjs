@@ -24,7 +24,6 @@ module.exports = {
     "require-jsdoc": "off",
     "no-shadow": "off",
     "no-unused-vars": "off",
-    "json-schema-validator/no-invalid": "off",
   },
   overrides: [
     {
