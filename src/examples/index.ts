@@ -1,5 +1,6 @@
 import type { Component } from "vue";
 import { prettyStringify } from "../utils/json-utils";
+import { customCompare } from "../utils/compare";
 
 export type Example = {
   name: string;
@@ -54,7 +55,7 @@ export async function loadExamples(): Promise<Record<string, Example>> {
   }
 
   for (const ex of Object.values(examplesMap).sort(({ name: a }, { name: b }) =>
-    a.localeCompare(b),
+    customCompare(a, b),
   )) {
     allExamples[ex.name] = ex;
   }

@@ -12,6 +12,9 @@
     "vue"
   ],
   "editor.formatOnSave": true,
+  "[typescript]": {
+    "editor.formatOnSave": false
+  },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
     "source.fixAll": true,

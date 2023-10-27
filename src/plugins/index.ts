@@ -1,3 +1,5 @@
+import { customCompare } from "../utils/compare";
+
 export type Plugin = {
   name: string;
   description?: string;
@@ -46,7 +48,7 @@ export async function loadPlugins(): Promise<Record<string, Plugin>> {
     ),
   ]);
   for (const plugin of list.sort(({ name: a }, { name: b }) =>
-    a.localeCompare(b),
+    customCompare(a, b),
   )) {
     allPlugins[plugin.name] = plugin;
   }

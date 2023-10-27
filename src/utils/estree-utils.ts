@@ -1,7 +1,7 @@
 import type * as ESTree from "estree";
-import type * as _eslintUtils from "eslint-utils";
+import type * as eslintUtils from "eslint-utils";
 import type { ScopeManager } from "eslint-scope";
-type ESLintUtils = typeof _eslintUtils;
+type ESLintUtils = typeof eslintUtils;
 
 export function isModuleExports(
   node: ESTree.Node,

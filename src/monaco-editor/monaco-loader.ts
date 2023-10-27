@@ -1,5 +1,5 @@
-import type * as _monaco from "monaco-editor";
-export type Monaco = typeof _monaco;
+import type * as monaco from "monaco-editor";
+export type Monaco = typeof monaco;
 import { version as monacoVersion } from "monaco-editor/package.json";
 
 let monacoPromise: Promise<Monaco> | null = null;

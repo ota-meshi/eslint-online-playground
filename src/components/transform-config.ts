@@ -8,9 +8,9 @@ import {
   analyzeScope,
 } from "../utils/estree-utils";
 import { toYAMLContent } from "../utils/yaml-utils";
-import type * as _eslintUtils from "eslint-utils";
+import type * as eslintUtils from "eslint-utils";
 import { prettyStringify } from "../utils/json-utils";
-type ESLintUtils = typeof _eslintUtils;
+type ESLintUtils = typeof eslintUtils;
 
 export async function transformConfigFormat(
   configText: string,
