@@ -50,7 +50,7 @@
     "eslint-plugin-node-dependencies": "^0.11.0",
     "eslint-plugin-prettier": "^5.0.0",
     "eslint-plugin-security": "~1.7.1",
-    "eslint-plugin-toml": "^0.6.0",
+    "eslint-plugin-toml": "^0.7.0",
     "eslint-plugin-vue": "^9.10.0",
     "eslint-plugin-yml": "^1.2.0",
     "monaco-editor": "^0.44.0",
