@@ -7,6 +7,10 @@ const pluginName = name;
 <template>
   <div>
     Example to try
-    <a href="https://www.npmjs.com/package/@sap/eslint-plugin-cds" target="_blank">{{ pluginName }}</a>
+    <a
+      href="https://www.npmjs.com/package/@sap/eslint-plugin-cds"
+      target="_blank"
+      >{{ pluginName }}</a
+    >
   </div>
 </template>

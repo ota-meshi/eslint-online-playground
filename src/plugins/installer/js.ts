@@ -162,10 +162,10 @@ function margeOverride(
             property.value.type === "Literal"
               ? property.value.value
               : property.value.type === "ArrayExpression"
-              ? property.value.elements.map((e) =>
-                  e?.type === "Literal" ? e.value : null,
-                )
-              : null;
+                ? property.value.elements.map((e) =>
+                    e?.type === "Literal" ? e.value : null,
+                  )
+                : null;
 
           if (JSON.stringify(nodeValue) !== JSON.stringify(value)) {
             return false;
