@@ -32,7 +32,7 @@ import type { CodeActionProvider } from "../monaco-editor/monaco-setup";
 import { debounce } from "../utils/debounce";
 import type { ConfigFileName } from "../utils/eslint-info";
 import { CONFIG_FILE_NAMES } from "../utils/eslint-info";
-import { maybeTSConfig } from "../utils/tsconfig";
+import { maybeTSConfig, maybeNestingTSConfig } from "../utils/tsconfig";
 import { transformConfigFormat } from "./transform-config";
 import {
   disableBuiltinValidate,
@@ -60,6 +60,7 @@ const installedPackages = reactive<PackageJsonData[]>([]);
 
 const allSourceDataList = reactive<SourceData[]>([]);
 const activeSource = shallowRef<SourceData | null>(null);
+const enableRestart = ref(false);
 
 const configFileName = computed<ConfigFileName>({
   get: () => {
@@ -104,7 +105,7 @@ const displaySourceDataList = computed(() => {
   const list: SourceData[] = [];
   const tsconfigs: SourceData[] = [];
   for (const sourceData of allSourceDataList) {
-    if (maybeTSConfig(sourceData.fileName)) {
+    if (sourceData.maybeTSConfig) {
       tsconfigs.push(sourceData);
     } else {
       list.push(sourceData);
@@ -138,6 +139,10 @@ type SourceData = {
     _range: Range,
     context: languages.CodeActionContext,
   ) => ReturnType<CodeActionProvider>;
+  maybeTSConfig: boolean;
+  disableLint: boolean;
+  isJsonc: boolean;
+  isDependency: boolean;
 };
 
 watch(
@@ -203,6 +208,31 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
       messageMap,
     };
   });
+
+  function maybePackageJson(s: string) {
+    return /(?:^|\/|\\)package\.json$/u.test(s);
+  }
+
+  const maybeTSConfigFile = computed(() => maybeTSConfig(fileName.value));
+  const maybeNestingTSConfigFile = computed(() =>
+    maybeNestingTSConfig(fileName.value),
+  );
+  const packageJsonPath = computed(() => {
+    let p = fileName.value.replaceAll("\\", "/");
+    if (p && maybePackageJson(p)) {
+      return p;
+    }
+    while (p) {
+      if (props.sources[`${p}/package.json`]) {
+        return `${p}/package.json`;
+      }
+      if (!p.includes("/")) {
+        return null;
+      }
+      p = p.slice(0, p.lastIndexOf("/"));
+    }
+    return null;
+  });
   const sourceData = reactive({
     id: seq++,
     fileName,
@@ -210,6 +240,38 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
     linterServiceResult,
     resultData,
     provideCodeAction,
+    maybeTSConfig: maybeTSConfigFile,
+    disableLint: computed(
+      () =>
+        /(?:^|\/|\\)package\.json$/u.test(fileName.value) ||
+        maybeTSConfigFile.value ||
+        maybeNestingTSConfigFile.value,
+    ),
+    isJsonc: computed(
+      () => maybeTSConfigFile.value || maybeNestingTSConfigFile.value,
+    ),
+    isDependency: computed(() => {
+      const pp = packageJsonPath.value;
+      if (!pp) {
+        return false;
+      }
+      const pkg = JSON.parse(packageJson.value);
+      const values = [
+        ...Object.values(pkg.dependencies ?? {}),
+        ...Object.values(pkg.devDependencies ?? {}),
+      ];
+      return values.some((dep) => {
+        if (!dep || typeof dep !== "string" || !dep.startsWith("file:")) {
+          return false;
+        }
+        const depPath = dep.slice("file:".length);
+        return normalize(`${depPath}/package.json`) === normalize(pp);
+
+        function normalize(s: string) {
+          return s.replaceAll("\\", "/").replace(/^\.\//u, "");
+        }
+      });
+    }),
   });
 
   watch(fileName, async (newFileName) => {
@@ -222,8 +284,8 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
       return;
     }
     if (isReservedFileName(newFileName)) {
-      // eslint-disable-next-line no-console -- OK
-      console.warn(
+      // eslint-disable-next-line no-alert -- OK
+      alert(
         "The specified file name cannot be used as a linting file name on this demo site.",
       );
       fileName.value = currFileName;
@@ -249,6 +311,10 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
 
   function update() {
     emitUpdateSources();
+
+    if (sourceData.isDependency) {
+      enableRestart.value = true;
+    }
 
     void lint({
       source: sourceData,
@@ -336,15 +402,20 @@ function handleActiveName(name: string) {
   );
   if (a) {
     activeSource.value = a;
-    disableBuiltinValidate();
-  } else if (
-    displaySourceDataList.value.tsconfigs.some(
-      (source) => source.fileName === name,
-    )
-  ) {
-    enableBuiltinValidate({ jsonAs: "jsonc" });
+    if (a.disableLint) {
+      enableBuiltinValidate(
+        a.isJsonc ? { jsonAs: "jsonc" } : { jsonAs: "json" },
+      );
+    } else {
+      disableBuiltinValidate();
+    }
   } else {
-    enableBuiltinValidate({ jsonAs: "json" });
+    const b = displaySourceDataList.value.tsconfigs.find(
+      (source) => source.fileName === name,
+    );
+    enableBuiltinValidate(
+      b && b.isJsonc ? { jsonAs: "jsonc" } : { jsonAs: "json" },
+    );
   }
 }
 
@@ -419,6 +490,19 @@ watch(
   }, 300),
 );
 
+async function onDemandRestart() {
+  enableRestart.value = false;
+  const linterServer = await getLintServer();
+  await linterServer.restart();
+  for (const source of allSourceDataList) {
+    await lint({
+      source: source as SourceData,
+      config: configText.value,
+      configFileName: configFileName.value,
+    });
+  }
+}
+
 async function updatePackageJson(packageJson: string) {
   const lintServer = await getLintServer();
   try {
@@ -485,6 +569,10 @@ async function lint({
   const version = seq++;
 
   source.linterServiceResult = null;
+
+  if (source.disableLint) {
+    return;
+  }
 
   const result = await lintServer.lint({
     version,
@@ -649,6 +737,9 @@ function selectOutput(nm: "console" | "warnings") {
 
 <template>
   <div class="ep">
+    <button v-if="enableRestart" @click="onDemandRestart">
+      Restart ESLint Server
+    </button>
     <TreeTabs
       @active="handleActiveName"
       ref="inputTabs"

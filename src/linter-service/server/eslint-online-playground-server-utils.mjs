@@ -15,7 +15,6 @@ export const CONFIG_FILE_NAMES = [
 const RESERVED_FILE_NAMES = [
   "eslint-online-playground-server.mjs",
   "eslint-online-playground-server-utils.mjs",
-  "package.json",
   "package-lock.json",
   "node_modules",
   ...CONFIG_FILE_NAMES,
@@ -48,6 +47,13 @@ export function createJsonPayload(payload, replacer) {
  * @returns {boolean}
  */
 export function isReservedFileName(fileName) {
+  if (
+    fileName === "package.json" ||
+    fileName.includes(`/package.json/`) ||
+    fileName.includes(`\\package.json\\`)
+  ) {
+    return true;
+  }
   return RESERVED_FILE_NAMES.some(
     (f) =>
       fileName.endsWith(f) ||
