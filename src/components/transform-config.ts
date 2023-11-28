@@ -238,12 +238,19 @@ function yamlToJsExpression(
           type: "Property",
           key:
             key.type === "Literal"
-              ? {
-                  type: "Identifier",
-                  name: String(key.value),
-                  leadingComments: key.leadingComments,
-                  trailingComments: key.trailingComments,
-                }
+              ? /^\w+$/u.test(String(key.value))
+                ? {
+                    type: "Identifier",
+                    name: String(key.value),
+                    leadingComments: key.leadingComments,
+                    trailingComments: key.trailingComments,
+                  }
+                : {
+                    type: "Literal",
+                    value: String(key.value),
+                    leadingComments: key.leadingComments,
+                    trailingComments: key.trailingComments,
+                  }
               : key,
           value,
           computed: key.type !== "Literal",

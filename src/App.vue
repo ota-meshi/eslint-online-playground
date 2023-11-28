@@ -4,7 +4,7 @@ import ESLintPlayground from "./components/ESLintPlayground.vue";
 import SelectExampleDialog from "./components/SelectExampleDialog.vue";
 import SelectPluginDialog from "./components/SelectPluginDialog.vue";
 import GitHubIcon from "./components/GitHubIcon.vue";
-import NetlifyLight from "./components/NetlifyLight.vue";
+import NetlifyBadge from "./components/NetlifyBadge.vue";
 import ThemeSwitch from "./components/ThemeSwitch.vue";
 import { compress, decompress } from "./utils/compress";
 import { debounce } from "./utils/debounce";
@@ -132,7 +132,7 @@ watch(
         <GitHubIcon alt="GitHub" />
       </a>
       <a class="netlify" href="https://www.netlify.com" target="_blank">
-        <NetlifyLight alt="Deploys by Netlify" />
+        <NetlifyBadge alt="Deploys by Netlify" />
       </a>
     </div>
   </header>
@@ -174,7 +174,7 @@ watch(
   display: flex;
   gap: 8px;
   align-items: center;
-  padding: 4px 0;
+  padding: 4px;
 }
 
 .github {

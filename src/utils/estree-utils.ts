@@ -47,10 +47,15 @@ export function toESExpression(object: any): ESTree.Expression {
         type: "Property",
         kind: "init",
         computed: false,
-        key: {
-          type: "Identifier",
-          name: k,
-        },
+        key: /^\w+$/u.test(k)
+          ? {
+              type: "Identifier",
+              name: k,
+            }
+          : {
+              type: "Literal",
+              value: k,
+            },
         value: expr,
         method: false,
         shorthand: false,

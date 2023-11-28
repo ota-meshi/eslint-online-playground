@@ -206,5 +206,6 @@ defineExpose({ setChecked });
   height: 100%;
   background-color: var(--ep-background-color);
   border-left: 1px solid var(--ep-border-color);
+  min-width: 0;
 }
 </style>
