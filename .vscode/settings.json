@@ -15,6 +15,9 @@
   "[typescript]": {
     "editor.formatOnSave": false
   },
+  "[vue]": {
+    "editor.formatOnSave": false
+  },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
     "source.fixAll": true,

@@ -117,6 +117,9 @@ watch(
 <template>
   <header class="header">
     <div class="title">
+      <a href="https://github.com/eslint-community/">
+        <img class="community-logo" src="/icon.svg" />
+      </a>
       <a href="https://eslint.org/"> ESLint </a>
       Online Playground
     </div>
@@ -168,6 +171,11 @@ watch(
 .title a {
   color: var(--title-link-color);
   text-decoration: none;
+}
+
+.community-logo {
+  height: 22px;
+  vertical-align: bottom;
 }
 
 .header-menu {
