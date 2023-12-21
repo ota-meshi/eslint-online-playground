@@ -3,6 +3,7 @@ import type { Ref } from "vue";
 import { provide, ref, watch } from "vue";
 import type { Tab } from "./tabs";
 import { sortTabs, getUniqueName } from "./tabs";
+defineOptions({ inheritAttrs: false });
 defineProps<{
   contentTopShadow?: boolean;
 }>();
@@ -58,12 +59,7 @@ defineExpose({ setChecked });
       </label>
     </template>
   </div>
-  <div
-    class="ep-tab__panels"
-    :class="{
-      'ep-tab__panels--top-shadow': contentTopShadow,
-    }"
-  >
+  <div class="ep-tab__panels" :class="[$attrs.class]">
     <slot />
   </div>
 </template>
@@ -103,8 +99,5 @@ defineExpose({ setChecked });
 .ep-tab__panels {
   height: 100%;
   background-color: var(--ep-background-color);
-}
-.ep-tab__panels--top-shadow {
-  box-shadow: inset 0 0 6px 0 hsl(0deg 0% 0% / 15%);
 }
 </style>

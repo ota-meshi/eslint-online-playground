@@ -38,6 +38,7 @@ import {
   disableBuiltinValidate,
   enableBuiltinValidate,
 } from "../monaco-editor/monaco-loader";
+import NetlifyBadge from "./NetlifyBadge.vue";
 
 const props = defineProps<{
   sources: Record<string, string>;
@@ -722,7 +723,7 @@ function selectOutput(nm: "console" | "warnings") {
         </TabPanel>
       </template>
     </TreeTabs>
-    <TabsPanel ref="outputTabs" content-top-shadow>
+    <TabsPanel ref="outputTabs" class="ep__output-tabs">
       <TabPanel title="Problems" name="warnings" :order="1">
         <WarningsPanel
           :result="activeSource?.linterServiceResult"
@@ -732,6 +733,11 @@ function selectOutput(nm: "console" | "warnings") {
       <TabPanel title="Console" name="console" :order="2">
         <ConsoleOutput ref="consoleOutput" />
       </TabPanel>
+      <div class="ep__banners">
+        <a class="netlify" href="https://www.netlify.com" target="_blank">
+          <NetlifyBadge alt="Deploys by Netlify" />
+        </a>
+      </div>
     </TabsPanel>
   </div>
 </template>
@@ -778,5 +784,21 @@ function selectOutput(nm: "console" | "warnings") {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.ep :deep(.ep__output-tabs) {
+  display: grid;
+  grid-template-columns: 1fr 130px;
+  grid-template-rows: 100%;
+  box-shadow: inset 0 0 6px 0 hsl(0deg 0% 0% / 15%);
+}
+
+.ep__banners {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.5rem 0.5rem 1rem;
+  justify-content: flex-end;
+  box-sizing: border-box;
 }
 </style>
