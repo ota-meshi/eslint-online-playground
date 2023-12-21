@@ -40,7 +40,9 @@
       <clipPath id="a_light">
         <rect width="114" height="50" rx="4" fill="#fff" />
       </clipPath>
-      <clipPath id="b_light"><path fill="#fff" d="M28 10h72v30.462H28z" /></clipPath>
+      <clipPath id="b_light">
+        <path fill="#fff" d="M28 10h72v30.462H28z" />
+      </clipPath>
     </defs>
   </svg>
   <svg
@@ -83,7 +85,9 @@
       <clipPath id="a_dark">
         <rect width="114" height="50" rx="4" fill="#fff" />
       </clipPath>
-      <clipPath id="b_dark"><path fill="#fff" d="M28 10h72v30.462H28z" /></clipPath>
+      <clipPath id="b_dark">
+        <path fill="#fff" d="M28 10h72v30.462H28z" />
+      </clipPath>
     </defs>
   </svg>
 </template>
