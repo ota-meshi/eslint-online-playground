@@ -1,11 +1,12 @@
 <template>
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="92"
-    height="40"
+    width="114"
+    height="50"
     viewBox="0 0 114 50"
     fill="none"
     class="netlify-light-badge"
+    v-bind="$attrs"
   >
     <g clip-path="url(#a)">
       <rect width="114" height="50" rx="4" fill="#05BDBA" />
@@ -44,11 +45,12 @@
   </svg>
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="92"
-    height="40"
+    width="114"
+    height="50"
     viewBox="0 0 114 50"
     fill="none"
     class="netlify-dark-badge"
+    v-bind="$attrs"
   >
     <g clip-path="url(#a)">
       <path fill="#0C2A2A" d="M0 0h114v51H0z" />
