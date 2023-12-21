@@ -3,6 +3,9 @@ name: 👔 Format
 on:
   workflow_dispatch: null
 
+permissions:
+  contents: write
+
 jobs:
   format:
     runs-on: ubuntu-latest
