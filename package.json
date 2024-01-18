@@ -5,7 +5,7 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "dev": "vite",
+    "dev": "vite --open",
     "build": "vue-tsc && vite build",
     "preview": "vite preview",
     "open-site": "npx http-server ./build",

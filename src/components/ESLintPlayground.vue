@@ -38,7 +38,7 @@ import {
   disableBuiltinValidate,
   enableBuiltinValidate,
 } from "../monaco-editor/monaco-loader";
-import NetlifyBadge from "./NetlifyBadge.vue";
+import NetlifyBadge from "./badges/NetlifyBadge.vue";
 
 const props = defineProps<{
   sources: Record<string, string>;

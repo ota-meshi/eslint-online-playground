@@ -8,6 +8,17 @@ const element = ref<HTMLDivElement>();
 const termBuffer: (() => void)[] = [];
 let term: Terminal | null = null;
 
+const fitAddon = new FitAddon();
+// eslint-disable-next-line no-undef -- ignore
+let fitTermTimeout: NodeJS.Timeout;
+
+function fitTerm() {
+  clearTimeout(fitTermTimeout);
+  fitTermTimeout = setTimeout(() => {
+    fitAddon.fit();
+  }, 200);
+}
+
 watch(element, (el) => {
   if (!el) return;
 
@@ -15,17 +26,18 @@ watch(element, (el) => {
     fontSize: 12,
   });
 
-  const fitAddon = new FitAddon();
   term.loadAddon(fitAddon);
 
   term.open(el);
-  fitAddon.fit();
+  fitTerm();
   for (const fn of termBuffer) {
     fn();
   }
 
   const resizeObserver = new ResizeObserver(() => {
-    if (el.clientWidth) fitAddon.fit();
+    if (el.clientWidth) {
+      fitTerm();
+    }
   });
   resizeObserver.observe(el);
 });
@@ -41,6 +53,7 @@ function appendLine(string: string) {
 function append(string: string) {
   if (term) {
     term.write(string);
+    fitTerm();
   } else {
     termBuffer.push(() => append(string));
   }
