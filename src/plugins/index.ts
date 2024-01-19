@@ -1,18 +1,38 @@
 import { customCompare } from "../utils/compare";
+import type * as ESTree from "estree";
+
+export type ESLintLegacyConfig = {
+  plugins?: string[];
+  extends?: string[];
+  overrides?: {
+    files: string[];
+    extends?: string[];
+    parser?: string;
+  }[];
+};
+export type BuildESLintConfigHelper = {
+  x(code: string): ESTree.Expression;
+  spread(expression: ESTree.Expression): ESTree.SpreadElement;
+  i(code: string): ESTree.ImportDeclaration;
+  type: "module" | "script";
+};
+export type ESLintConfig<N extends string> = {
+  imports: (
+    helper: BuildESLintConfigHelper,
+  ) => Iterable<ESTree.ImportDeclaration>;
+  expression: (
+    names: Record<N, string>,
+    helper: BuildESLintConfigHelper,
+  ) => Iterable<ESTree.Expression | ESTree.SpreadElement>;
+};
 
 export type Plugin = {
   name: string;
   description?: string;
   repo?: string;
   devDependencies: Record<string, string>;
-  eslintConfig: {
-    plugins?: string[];
-    extends?: string[];
-    overrides?: {
-      files: string[];
-      parser?: string;
-    }[];
-  };
+  eslintLegacyConfig?: ESLintLegacyConfig;
+  eslintConfig?: ESLintConfig<string>;
   hasInstalled: (packageJson: any) => boolean;
 };
 

@@ -60,14 +60,20 @@ export async function installPluginForCJS(
     }
 
     for (const plugin of plugins) {
+      if (!plugin.eslintLegacyConfig) {
+        alertAndLog(
+          "Contains plugins that do not support legacy configurations.",
+        );
+        return { error: true };
+      }
       for (const key of ["plugins", "extends"] as const) {
-        const values = plugin.eslintConfig[key];
+        const values = plugin.eslintLegacyConfig[key];
         if (values) {
           addToArray(targetNode, key, values);
         }
       }
-      if (plugin.eslintConfig.overrides) {
-        margeOverride(targetNode, plugin.eslintConfig.overrides);
+      if (plugin.eslintLegacyConfig.overrides) {
+        margeOverride(targetNode, plugin.eslintLegacyConfig.overrides);
       }
     }
 
@@ -78,17 +84,6 @@ export async function installPluginForCJS(
     alertAndLog("Failed to parse CJS. Failed to add new configuration.");
     return { error: true };
   }
-}
-
-export async function installPluginForMJS(
-  _configText: string,
-  _plugins: Plugin[],
-): Promise<ConfigInstallPluginResult> {
-  await Promise.resolve();
-  alertAndLog(
-    "Flat Config is not yet supported. Failed to add new configuration.",
-  );
-  return { error: true };
 }
 
 function addToArray(

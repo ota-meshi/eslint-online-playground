@@ -53,7 +53,7 @@ async function installDependencies(
   webContainer: WebContainer,
   consoleOutput: InstanceType<typeof ConsoleOutput>,
 ) {
-  const installProcess = await webContainer.spawn("npm", ["install"]);
+  const installProcess = await webContainer.spawn("npm", ["install", "-f"]);
 
   void installProcess.output.pipeTo(
     new WritableStream({

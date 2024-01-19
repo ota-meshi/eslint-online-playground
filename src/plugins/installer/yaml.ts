@@ -17,14 +17,20 @@ export async function installPluginForYaml(
       return { error: true };
     }
     for (const plugin of plugins) {
+      if (!plugin.eslintLegacyConfig) {
+        alertAndLog(
+          "Contains plugins that do not support legacy configurations.",
+        );
+        return { error: true };
+      }
       for (const key of ["plugins", "extends"] as const) {
-        const values = plugin.eslintConfig[key];
+        const values = plugin.eslintLegacyConfig[key];
         if (values) {
           addToSeq(yaml, ast.contents, key, values);
         }
       }
-      if (plugin.eslintConfig.overrides) {
-        for (const override of plugin.eslintConfig.overrides) {
+      if (plugin.eslintLegacyConfig.overrides) {
+        for (const override of plugin.eslintLegacyConfig.overrides) {
           margeOverride(yaml, ast.contents, override);
         }
       }

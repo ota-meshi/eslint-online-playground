@@ -2,9 +2,11 @@
 import { markRaw, ref } from "vue";
 import type { Example } from "../examples";
 import { loadExamples } from "../examples";
+import Loading from "./Loading.vue";
 
 const examples = ref<Record<string, Example>>();
 const dialogRef = ref<HTMLDialogElement>();
+const loading = ref<InstanceType<typeof Loading> | null>(null);
 
 const emit = defineEmits<(type: "select", example: Example) => void>();
 
@@ -13,8 +15,13 @@ defineExpose({
 });
 
 async function open() {
-  examples.value = markRaw(await loadExamples());
-  dialogRef.value?.showModal();
+  loading.value?.open();
+  try {
+    examples.value = markRaw(await loadExamples());
+    dialogRef.value?.showModal();
+  } finally {
+    loading.value?.close();
+  }
 }
 
 function handleClickExample(example: Example) {
@@ -56,6 +63,7 @@ function handleClickDialog() {
       </div>
     </div>
   </dialog>
+  <Loading ref="loading" />
 </template>
 
 <style scoped>

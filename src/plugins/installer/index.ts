@@ -2,9 +2,10 @@ import type { Plugin } from "..";
 import type { ConfigFileName } from "../../utils/eslint-info";
 import { alertAndLog } from "./error";
 import { installPluginForYaml } from "./yaml";
-import { installPluginForCJS, installPluginForMJS } from "./js";
+import { installPluginForCJS } from "./js";
 import { installPluginForJson } from "./json";
 import { prettyStringify } from "../../utils/json-utils";
+import { installPluginForFlatConfig } from "./new-config";
 
 export type InstallPluginResult =
   | {
@@ -71,9 +72,13 @@ export async function installPlugin(
         packageJson: packageJsonResult,
       };
     }
-    if (configFileName === "eslint.config.js") {
+    if (
+      configFileName === "eslint.config.js" ||
+      configFileName === "eslint.config.cjs" ||
+      configFileName === "eslint.config.mjs"
+    ) {
       return {
-        ...(await installPluginForMJS(configText, plugins)),
+        ...(await installPluginForFlatConfig(configText, plugins)),
         packageJson: packageJsonResult,
       };
     }
