@@ -7,7 +7,7 @@ export const devDependencies = {
   "@typescript-eslint/eslint-plugin": "latest",
   typescript: "latest",
 };
-export const eslintConfig = {
+export const eslintLegacyConfig = {
   plugins: ["@typescript-eslint"],
   extends: ["eslint:recommended"],
   overrides: [

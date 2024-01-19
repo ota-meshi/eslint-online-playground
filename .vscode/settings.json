@@ -15,12 +15,15 @@
   "[typescript]": {
     "editor.formatOnSave": false
   },
+  "[javascript]": {
+    "editor.formatOnSave": false
+  },
   "[vue]": {
     "editor.formatOnSave": false
   },
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "editor.codeActionsOnSave": {
-    "source.fixAll": true,
-    "source.fixAll.stylelint": true
+    "source.fixAll": "explicit",
+    "source.fixAll.stylelint": "explicit"
   }
 }

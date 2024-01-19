@@ -2,7 +2,7 @@
 import { rules } from "eslint-plugin-security";
 export default {
   plugins: ["security"],
-  extends: ["plugin:security/recommended"],
+  extends: ["plugin:security/recommended-legacy"],
   parserOptions: {
     ecmaVersion: "latest",
     sourceType: "module",

@@ -3,21 +3,14 @@ import { nextTick, ref, watch } from "vue";
 import "xterm/css/xterm.css";
 import { Terminal } from "xterm";
 import { FitAddon } from "xterm-addon-fit";
+import { debounce } from "../utils/debounce";
 
 const element = ref<HTMLDivElement>();
 const termBuffer: (() => void)[] = [];
 let term: Terminal | null = null;
 
 const fitAddon = new FitAddon();
-// eslint-disable-next-line no-undef -- ignore
-let fitTermTimeout: NodeJS.Timeout;
-
-function fitTerm() {
-  clearTimeout(fitTermTimeout);
-  fitTermTimeout = setTimeout(() => {
-    fitAddon.fit();
-  }, 200);
-}
+const fitTerm = debounce(() => fitAddon.fit(), 200);
 
 watch(element, (el) => {
   if (!el) return;

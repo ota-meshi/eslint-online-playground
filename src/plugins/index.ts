@@ -5,7 +5,7 @@ export type Plugin = {
   description?: string;
   repo?: string;
   devDependencies: Record<string, string>;
-  eslintConfig: {
+  eslintLegacyConfig: {
     plugins?: string[];
     extends?: string[];
     overrides?: {

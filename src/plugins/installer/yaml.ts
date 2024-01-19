@@ -18,13 +18,13 @@ export async function installPluginForYaml(
     }
     for (const plugin of plugins) {
       for (const key of ["plugins", "extends"] as const) {
-        const values = plugin.eslintConfig[key];
+        const values = plugin.eslintLegacyConfig[key];
         if (values) {
           addToSeq(yaml, ast.contents, key, values);
         }
       }
-      if (plugin.eslintConfig.overrides) {
-        for (const override of plugin.eslintConfig.overrides) {
+      if (plugin.eslintLegacyConfig.overrides) {
+        for (const override of plugin.eslintLegacyConfig.overrides) {
           margeOverride(yaml, ast.contents, override);
         }
       }

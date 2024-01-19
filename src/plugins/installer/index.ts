@@ -71,7 +71,11 @@ export async function installPlugin(
         packageJson: packageJsonResult,
       };
     }
-    if (configFileName === "eslint.config.js") {
+    if (
+      configFileName === "eslint.config.js" ||
+      configFileName === "eslint.config.cjs" ||
+      configFileName === "eslint.config.mjs"
+    ) {
       return {
         ...(await installPluginForMJS(configText, plugins)),
         packageJson: packageJsonResult,

@@ -61,13 +61,13 @@ export async function installPluginForCJS(
 
     for (const plugin of plugins) {
       for (const key of ["plugins", "extends"] as const) {
-        const values = plugin.eslintConfig[key];
+        const values = plugin.eslintLegacyConfig[key];
         if (values) {
           addToArray(targetNode, key, values);
         }
       }
-      if (plugin.eslintConfig.overrides) {
-        margeOverride(targetNode, plugin.eslintConfig.overrides);
+      if (plugin.eslintLegacyConfig.overrides) {
+        margeOverride(targetNode, plugin.eslintLegacyConfig.overrides);
       }
     }
 

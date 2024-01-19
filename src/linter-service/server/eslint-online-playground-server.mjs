@@ -125,12 +125,32 @@ async function lint(input) {
   }
 
   async function newESLint(options) {
-    if (input.configFileName !== "eslint.config.js") {
+    const version = Number(ESLint.version.split(".")[0]);
+    if (version >= 9) {
+      // For ESLint v9+
+      if (useLegacyConfig()) {
+        const mod = await import("eslint/use-at-your-own-risk");
+        const { LegacyESLint } = mod.default;
+        return new LegacyESLint(options);
+      }
+      return new ESLint(options);
+    }
+
+    // For Old ESLint
+    if (useLegacyConfig()) {
       return new ESLint(options);
     }
 
     const mod = await import("eslint/use-at-your-own-risk");
     const { FlatESLint } = mod.default;
     return new FlatESLint(options);
+  }
+
+  function useLegacyConfig() {
+    return (
+      input.configFileName !== "eslint.config.js" &&
+      input.configFileName !== "eslint.config.cjs" &&
+      input.configFileName !== "eslint.config.mjs"
+    );
   }
 }

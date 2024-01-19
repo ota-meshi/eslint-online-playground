@@ -7,6 +7,6 @@ export const devDependencies = {
   "@stylistic/eslint-plugin-ts": "latest",
   "@stylistic/eslint-plugin-jsx": "latest",
 };
-export const eslintConfig = {
+export const eslintLegacyConfig = {
   plugins: ["@stylistic", "@stylistic/js", "@stylistic/ts", "@stylistic/jsx"],
 };

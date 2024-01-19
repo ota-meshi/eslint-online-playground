@@ -16,7 +16,7 @@ export function installPluginForJson(
   }
   for (const plugin of plugins) {
     for (const key of ["plugins", "extends"] as const) {
-      const values = plugin.eslintConfig[key];
+      const values = plugin.eslintLegacyConfig[key];
       if (values)
         config[key] = [
           ...new Set([
@@ -27,11 +27,11 @@ export function installPluginForJson(
           ]),
         ];
     }
-    if (plugin.eslintConfig.overrides) {
+    if (plugin.eslintLegacyConfig.overrides) {
       if (!config.overrides) {
         config.overrides = [];
       }
-      for (const override of plugin.eslintConfig.overrides) {
+      for (const override of plugin.eslintLegacyConfig.overrides) {
         const target = config.overrides.find((o) => {
           if (
             JSON.stringify(override.files) === JSON.stringify([o?.files].flat())
