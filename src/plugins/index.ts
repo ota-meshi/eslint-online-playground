@@ -14,6 +14,7 @@ export type BuildESLintConfigHelper = {
   x(code: string): ESTree.Expression;
   spread(expression: ESTree.Expression): ESTree.SpreadElement;
   i(code: string): ESTree.ImportDeclaration;
+  require(def: { local: string; source: string }): ESTree.ImportDeclaration;
   type: "module" | "script";
 };
 export type ESLintConfig<N extends string> = {

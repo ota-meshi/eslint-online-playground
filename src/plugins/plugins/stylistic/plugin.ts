@@ -8,9 +8,16 @@ export const devDependencies = {
   "@stylistic/eslint-plugin-js": "latest",
   "@stylistic/eslint-plugin-ts": "latest",
   "@stylistic/eslint-plugin-jsx": "latest",
+  "@stylistic/eslint-plugin-plus": "latest",
 };
 export const eslintLegacyConfig: ESLintLegacyConfig = {
-  plugins: ["@stylistic", "@stylistic/js", "@stylistic/ts", "@stylistic/jsx"],
+  plugins: [
+    "@stylistic",
+    "@stylistic/js",
+    "@stylistic/ts",
+    "@stylistic/jsx",
+    "@stylistic/plus",
+  ],
   extends: ["plugin:@stylistic/recommended-extends"],
 };
 export const eslintConfig: ESLintConfig<"stylistic"> = {
@@ -18,7 +25,10 @@ export const eslintConfig: ESLintConfig<"stylistic"> = {
     if (helper.type === "module") {
       yield helper.i("import stylistic from '@stylistic/eslint-plugin'");
     } else {
-      yield helper.i("import * as stylistic from '@stylistic/eslint-plugin'");
+      yield helper.require({
+        local: "stylistic",
+        source: "@stylistic/eslint-plugin",
+      });
     }
   },
   *expression(names, helper) {

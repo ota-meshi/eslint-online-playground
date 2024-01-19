@@ -14,9 +14,10 @@ export const eslintConfig: ESLintConfig<"pluginSecurity"> = {
     if (helper.type === "module") {
       yield helper.i("import pluginSecurity from 'eslint-plugin-security'");
     } else {
-      yield helper.i(
-        "import * as pluginSecurity from 'eslint-plugin-security'",
-      );
+      yield helper.require({
+        local: "pluginSecurity",
+        source: "eslint-plugin-security",
+      });
     }
   },
   *expression(names, helper) {

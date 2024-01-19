@@ -99,6 +99,15 @@ export async function installPluginForFlatConfig(
         }
         throw new Error("Failed to parse import declaration.");
       },
+      require(def) {
+        return codeRead.parse(
+          `import * as ${def.local} from ${JSON.stringify(def.source)}`,
+          {
+            ecmaVersion: "latest",
+            sourceType: "module",
+          },
+        ).body[0];
+      },
       spread(expression) {
         return {
           type: "SpreadElement",
@@ -367,10 +376,14 @@ function margeRequire(
   }
 
   function insertRequireFromSource() {
-    const localName = resolveName(
-      toId(String(decl.source.value).replace(/^eslint-/u, "")),
-      usedIds,
-    );
+    const preferName =
+      decl.specifiers.find(
+        (spec) =>
+          spec.type === "ImportDefaultSpecifier" ||
+          spec.type === "ImportNamespaceSpecifier",
+      )?.local.name ?? toId(String(decl.source.value).replace(/^eslint-/u, ""));
+
+    const localName = resolveName(preferName, usedIds);
     usedIds.add(localName);
     const id: ESTree.Identifier = {
       type: "Identifier",
