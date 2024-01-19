@@ -1,3 +1,5 @@
+import type { ESLintLegacyConfig } from "../..";
+
 export const name = "typescript-eslint";
 export const description =
   "The tooling that enables ESLint and Prettier to support TypeScript";
@@ -7,7 +9,7 @@ export const devDependencies = {
   "@typescript-eslint/eslint-plugin": "latest",
   typescript: "latest",
 };
-export const eslintLegacyConfig = {
+export const eslintLegacyConfig: ESLintLegacyConfig = {
   plugins: ["@typescript-eslint"],
   extends: ["eslint:recommended"],
   overrides: [

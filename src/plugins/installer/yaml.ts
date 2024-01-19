@@ -17,6 +17,12 @@ export async function installPluginForYaml(
       return { error: true };
     }
     for (const plugin of plugins) {
+      if (!plugin.eslintLegacyConfig) {
+        alertAndLog(
+          "Contains plugins that do not support legacy configurations.",
+        );
+        return { error: true };
+      }
       for (const key of ["plugins", "extends"] as const) {
         const values = plugin.eslintLegacyConfig[key];
         if (values) {

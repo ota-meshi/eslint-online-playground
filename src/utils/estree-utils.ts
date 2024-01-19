@@ -26,6 +26,47 @@ export function isModuleExports(
   );
 }
 
+export function* iterateRequireDeclarator(node: ESTree.Node): Iterable<
+  ESTree.VariableDeclarator & {
+    init: ESTree.CallExpression & {
+      callee: ESTree.Identifier & { name: "require" };
+    };
+  }
+> {
+  if (node.type !== "VariableDeclaration") {
+    return;
+  }
+  for (const decl of node.declarations) {
+    if (
+      decl.init?.type === "CallExpression" &&
+      decl.init.callee.type === "Identifier" &&
+      decl.init.callee.name === "require"
+    ) {
+      yield decl as any;
+    }
+  }
+}
+export function isRequireDeclaration(node: ESTree.Node): boolean {
+  for (const _ of iterateRequireDeclarator(node)) {
+    return true;
+  }
+  return false;
+}
+
+export function isExportDefault(
+  node: ESTree.Node,
+): node is ESTree.ExportDefaultDeclaration {
+  return node.type === "ExportDefaultDeclaration";
+}
+
+export function isDirective(node: ESTree.Node): node is ESTree.Directive {
+  return (
+    node.type === "ExpressionStatement" &&
+    node.expression.type === "Literal" &&
+    typeof node.expression.value === "string"
+  );
+}
+
 export function toESExpression(object: any): ESTree.Expression {
   if (!object || typeof object !== "object") {
     return {
