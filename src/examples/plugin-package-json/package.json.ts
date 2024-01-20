@@ -1,7 +1,7 @@
 export default {
   devDependencies: {
     eslint: "latest",
-    "eslint-plugin-package-json": ">=0.3.0",
+    "eslint-plugin-package-json": "latest",
     "jsonc-eslint-parser": "latest",
   },
 };

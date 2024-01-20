@@ -3,11 +3,10 @@ import { ref, computed } from "vue";
 import type { Plugin } from "../plugins";
 import { loadPlugins } from "../plugins";
 import GitHubIcon from "./GitHubIcon.vue";
-import Loading from "./Loading.vue";
+import * as loading from "./loading";
 
 const plugins = ref<Record<string, Plugin>>({});
 const dialogRef = ref<HTMLDialogElement>();
-const loading = ref<InstanceType<typeof Loading> | null>(null);
 const selectPlugins = ref<string[]>([]);
 const packageJson = ref({});
 const availablePlugins = computed(() => {
@@ -23,13 +22,13 @@ defineExpose({
 });
 
 async function open(packageJsonText: string) {
-  loading.value?.open();
+  loading.open();
   try {
     plugins.value = await loadPlugins();
     packageJson.value = packageJsonText ? JSON.parse(packageJsonText) : {};
     dialogRef.value?.showModal();
   } finally {
-    loading.value?.close();
+    loading.close();
   }
 }
 
@@ -93,7 +92,6 @@ function handleClickDialog() {
       <button class="ep-button" @click="handleOk">OK</button>
     </div>
   </dialog>
-  <Loading ref="loading" />
 </template>
 
 <style scoped>
