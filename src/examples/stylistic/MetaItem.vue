@@ -1,7 +1,7 @@
 <script lang="ts">
 export const name = "ESLintStylistic";
+export default {};
 </script>
-<script setup lang="ts"></script>
 <template>
   <div>
     Example to try
