@@ -5,17 +5,22 @@ import SelectExampleDialog from "./components/SelectExampleDialog.vue";
 import SelectPluginDialog from "./components/SelectPluginDialog.vue";
 import GitHubIcon from "./components/GitHubIcon.vue";
 import ThemeSwitch from "./components/ThemeSwitch.vue";
-import { compress, decompress } from "./utils/compress";
+import { compress } from "./utils/compress";
 import { debounce } from "./utils/debounce";
 import defaultJs from "./examples/eslint/src/example.js.txt?raw";
 import defaultConfig from "./examples/eslint/_eslintrc.json.js";
 import defaultPackageJson from "./examples/eslint/package.json.js";
 import { CONFIG_FILE_NAMES } from "./utils/eslint-info";
-import type { Example } from "./examples";
+import { type Example } from "./examples";
 import { installPlugin } from "./plugins";
 import type { Plugin } from "./plugins";
 import { maybeTSConfig } from "./utils/tsconfig";
 import { prettyStringify } from "./utils/json-utils";
+import * as hash from "./utils/hash";
+
+const props = defineProps<{
+  sources?: Record<string, string>;
+}>();
 
 const eslintPlayground = ref<InstanceType<typeof ESLintPlayground> | null>(
   null,
@@ -27,12 +32,7 @@ const selectPluginDialog = ref<InstanceType<typeof SelectPluginDialog> | null>(
   null,
 );
 
-const hashData = window.location.hash.slice(
-  window.location.hash.indexOf("#") + 1,
-);
-const queryParam = decompress(hashData);
-
-const sources = ref<Record<string, string>>({ ...queryParam });
+const sources = ref<Record<string, string>>({ ...(props.sources || {}) });
 
 if (CONFIG_FILE_NAMES.every((nm) => !sources.value[nm])) {
   sources.value[".eslintrc.json"] = prettyStringify(defaultConfig);
@@ -59,16 +59,20 @@ function selectPlugin() {
   selectPluginDialog.value?.open(sources.value["package.json"]);
 }
 
-async function handleSelectExample(example: Example) {
-  sources.value = { ...example.files };
+function handleSelectExample(example: Example) {
+  return setSources(example.files);
+}
+
+async function setSources(newSources: Record<string, string>) {
+  sources.value = { ...newSources };
   await nextTick();
   const fileName =
-    Object.keys(example.files).find(
+    Object.keys(newSources).find(
       (nm) =>
         nm !== "package.json" &&
         !CONFIG_FILE_NAMES.some((configName) => nm.endsWith(configName)) &&
         !maybeTSConfig(nm),
-    ) || Object.keys(example.files)[0];
+    ) || Object.keys(newSources)[0];
   eslintPlayground.value?.selectFile(fileName);
 }
 
@@ -98,19 +102,33 @@ async function handleSelectPlugins(plugins: Plugin[]) {
   sources.value = newSources;
 }
 
+let lastHashData = hash.getHashData();
+
 watch(
   sources,
   debounce(() => {
-    const query = compress(sources.value);
-
-    window.location.hash = query;
-
+    const hashData = compress(sources.value);
+    lastHashData = hashData;
+    window.location.hash = hashData;
     if (window.parent) {
-      window.parent.postMessage(query, "*");
+      window.parent.postMessage(hashData, "*");
     }
   }, 300),
   { deep: true },
 );
+
+if (typeof window !== "undefined") {
+  window.addEventListener("hashchange", () => {
+    const hashData = hash.getHashData();
+    if (hashData && hashData !== lastHashData) {
+      void hash.toSources(hashData).then((sources) => {
+        if (sources) {
+          void setSources(sources);
+        }
+      });
+    }
+  });
+}
 </script>
 
 <template>
@@ -144,11 +162,8 @@ watch(
   <SelectExampleDialog
     ref="selectExampleDialog"
     @select="handleSelectExample"
-  ></SelectExampleDialog>
-  <SelectPluginDialog
-    ref="selectPluginDialog"
-    @select="handleSelectPlugins"
-  ></SelectPluginDialog>
+  />
+  <SelectPluginDialog ref="selectPluginDialog" @select="handleSelectPlugins" />
 </template>
 
 <style scoped>

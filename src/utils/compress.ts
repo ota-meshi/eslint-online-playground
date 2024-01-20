@@ -9,14 +9,14 @@ export function compress(data: any): string {
   }
 }
 
-export function decompress(str: string): any {
+export function decompress(str: string): unknown | null {
   try {
     const data = JSON.parse(atou(str));
 
     return typeof data !== "object" || data === null ? {} : data;
   } catch {
     // return silently
-    return {};
+    return null;
   }
 }
 
