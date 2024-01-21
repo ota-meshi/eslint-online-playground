@@ -754,7 +754,7 @@ function selectOutput(nm: "console" | "warnings") {
   display: grid;
   font-family: system-ui;
   font-size: 0.875rem;
-  grid-template-rows: 70% min-content max(10rem, 33%);
+  grid-template-rows: minmax(33vb, 1fr) min-content max(10rem, 33vb);
   min-height: 0;
 }
 
