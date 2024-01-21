@@ -1,7 +1,9 @@
 export function isRepoEnvFile(fileName: string): boolean {
   if (
     // Repository documentations
-    /^(?:readme|changelog|contributing)(?:\.[a-z]+)*\.md$/iu.test(fileName) ||
+    /^(?:readme|changelog|contributing|code_of_conduct)(?:\.[a-z]+)*\.md$/iu.test(
+      fileName,
+    ) ||
     /^license(?:\.[a-z]+)?$/iu.test(fileName)
   )
     return true;
