@@ -8,7 +8,7 @@ export function isRepoEnvFile(fileName: string): boolean {
   )
     return true;
 
-  if (fileName.startsWith(".")) return true; // Dot files
+  if (fileName.startsWith(".") && !fileName.includes("/")) return true; // Dot files
   return (
     // Maybe config file
     fileName.includes(".config.") &&
