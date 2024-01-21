@@ -1,8 +1,12 @@
 import { loadingWith } from "./loading";
 
-type File = { type: "file"; download_url: string; path: string };
-type Dir = { type: "dir"; url: string };
-type Response = (File | Dir)[] | File;
+type ContentFile = { type: "file"; download_url: string; path: string };
+type ContentDir = { type: "dir"; url: string };
+type ContentsResponse = (ContentFile | ContentDir)[] | ContentFile;
+type RepoResponse = { default_branch: string };
+type TreeFile = { type: "blob"; url: string; path: string };
+type TreeDir = { type: "tree"; url: string; path: string };
+type TreeResponse = { tree: (TreeFile | TreeDir)[] };
 export function parseGitHubURL(
   url: string,
 ): { owner: string; repo: string; path: string; ref?: string } | null {
@@ -37,25 +41,78 @@ export async function loadFilesFromGitHub(
   path: string,
   ref?: string,
 ): Promise<Record<string, string>> {
+  try {
+    return await loadFilesFromGitHubTreesAPI(owner, repo, path, ref);
+  } catch {
+    // ignore
+  }
+  return loadFilesFromGitHubContentsAPI(owner, repo, path, ref);
+}
+
+async function loadFilesFromGitHubTreesAPI(
+  owner: string,
+  repo: string,
+  path: string,
+  ref?: string,
+): Promise<Record<string, string>> {
+  const treeSha =
+    ref ||
+    (await (async () => {
+      const res: RepoResponse = await fetch(
+        `https://api.github.com/repos/${owner}/${repo}`,
+      ).then((res) => res.json());
+      return res.default_branch;
+    })());
+  const response: TreeResponse = await fetch(
+    `https://api.github.com/repos/${owner}/${repo}/git/trees/${treeSha}?recursive=true`,
+  ).then((res) => res.json());
+  const result: Record<string, string> = {};
+  const prefix = path ? `${path}/` : "";
+  await Promise.all(
+    response.tree.map(async (file) => {
+      if (file.type === "blob") {
+        if (!file.path.startsWith(prefix)) return;
+        if (
+          // Ignore .gitignore and binary files
+          file.path === ".gitignore" ||
+          file.path.endsWith("/.gitignore") ||
+          maybeBinaryFile(file.path)
+        )
+          return;
+        result[file.path] = await fetch(
+          `https://raw.githubusercontent.com/${owner}/${repo}/${treeSha}/${file.path}`,
+        ).then((res) => res.text());
+      }
+    }),
+  );
+  return result;
+}
+
+async function loadFilesFromGitHubContentsAPI(
+  owner: string,
+  repo: string,
+  path: string,
+  ref?: string,
+): Promise<Record<string, string>> {
   const url = new URL(
     `https://api.github.com/repos/${owner}/${repo}/contents/${path}`,
   );
   if (ref) {
     url.searchParams.set("ref", ref);
   }
-  return loadingWith(() => loadFilesFromURL(url));
+  return loadingWith(() => loadFilesFromGitHubContentsURL(url));
 }
 
-async function loadFilesFromURL(
+async function loadFilesFromGitHubContentsURL(
   url: string | URL,
 ): Promise<Record<string, string>> {
-  const response: Response = await fetch(url).then((res) => res.json());
+  const response: ContentsResponse = await fetch(url).then((res) => res.json());
   const result: Record<string, string> = {};
   await Promise.all(
     (Array.isArray(response) ? response : [response]).map(async (file) => {
       if (file.type === "file") {
         if (
-          //
+          // Ignore .gitignore and binary files
           file.path === ".gitignore" ||
           file.path.endsWith("/.gitignore") ||
           maybeBinaryFile(file.path)
@@ -65,7 +122,7 @@ async function loadFilesFromURL(
           res.text(),
         );
       } else if (file.type === "dir") {
-        Object.assign(result, await loadFilesFromURL(file.url));
+        Object.assign(result, await loadFilesFromGitHubContentsURL(file.url));
       }
     }),
   );
