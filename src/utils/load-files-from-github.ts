@@ -54,7 +54,12 @@ async function loadFilesFromURL(
   await Promise.all(
     (Array.isArray(response) ? response : [response]).map(async (file) => {
       if (file.type === "file") {
-        if (file.path === ".gitignore" || file.path.endsWith("/.gitignore"))
+        if (
+          //
+          file.path === ".gitignore" ||
+          file.path.endsWith("/.gitignore") ||
+          maybeBinaryFile(file.path)
+        )
           return;
         result[file.path] = await fetch(file.download_url).then((res) =>
           res.text(),
@@ -65,4 +70,58 @@ async function loadFilesFromURL(
     }),
   );
   return result;
+}
+
+function maybeBinaryFile(filePath: string): boolean {
+  const EXTS = [
+    ".3g2",
+    ".3gp",
+    ".aac",
+    ".aac",
+    ".apng",
+    ".avif",
+    ".bmp",
+    ".cur",
+    ".flac",
+    ".flac",
+    ".gif",
+    ".ico",
+    ".jfif",
+    ".jpeg",
+    ".jpg",
+    ".m1a",
+    ".m1v",
+    ".m2a",
+    ".m2v",
+    ".m4p",
+    ".mov",
+    ".mp1",
+    ".mp2",
+    ".mp3",
+    ".mp4",
+    ".mpa",
+    ".mpe",
+    ".mpeg",
+    ".mpg",
+    ".mpv",
+    ".oga",
+    ".ogg",
+    ".ogm",
+    ".ogv",
+    ".ogx",
+    ".opus",
+    ".pjp",
+    ".pjpeg",
+    ".png",
+    ".spx",
+    ".tif",
+    ".tiff",
+    ".ttf",
+    ".wav",
+    ".webm",
+    ".webp",
+    ".woff",
+    ".woff2",
+  ];
+  return EXTS.some((ext) => filePath.endsWith(ext));
 }
