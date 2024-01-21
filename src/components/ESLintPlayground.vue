@@ -475,6 +475,22 @@ async function updateInstalledPackages() {
       console.warn(e);
     }
   }
+
+  for (const sourceData of displaySourceDataList.value.envList) {
+    if (
+      sourceData.fileName !== "pnpm-lock.yaml" &&
+      sourceData.fileName !== "yarn.lock"
+    ) {
+      continue;
+    }
+    try {
+      const content = await lintServer.readFile(sourceData.fileName);
+      sourceData.code = content;
+    } catch (e) {
+      // eslint-disable-next-line no-console -- Demo runtime
+      console.warn(e);
+    }
+  }
 }
 
 /** Run the linting and display the results in the results panel and as markers in the editor. */
