@@ -17,6 +17,7 @@ function open(): void {
     dialog.style.border = "none";
     dialog.style.backgroundColor = "transparent";
     dialog.style.overflow = "visible";
+    dialog.style.outline = "none";
     dialog.addEventListener("cancel", (e) => e.preventDefault());
     const loading = document.createElement("div");
     loading.className = "loader";
