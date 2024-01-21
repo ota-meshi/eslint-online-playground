@@ -1,11 +1,15 @@
 import type { Component } from "vue";
 import { prettyStringify } from "../utils/json-utils";
 import { customCompare } from "../utils/compare";
+import {
+  loadFilesFromGitHub,
+  parseGitHubURL,
+} from "../utils/load-files-from-github";
 
 export type Example = {
   name: string;
   description?: string | Component;
-  files: Record<string, string>;
+  getFiles(): Promise<Record<string, string>>;
 };
 
 let allExamples: Record<string, Example> | null = null;
@@ -15,16 +19,18 @@ export async function loadExamples(): Promise<Record<string, Example>> {
     return allExamples;
   }
   allExamples = {};
-  const examplesMap: Record<string, Example> = {};
+
+  type ExampleTS = {
+    default?: any;
+    name?: string;
+    description?: string;
+    githubResources?: string;
+  };
 
   const list = await Promise.all([
     ...Object.entries(import.meta.glob("./**/*.ts")).map(
       async ([fileName, content]) => {
-        const val = (await content()) as {
-          default?: any;
-          name?: string;
-          description?: string;
-        };
+        const val = (await content()) as ExampleTS;
         return {
           keys: convertToExampleKeys(fileName),
           content: val,
@@ -40,15 +46,20 @@ export async function loadExamples(): Promise<Record<string, Example>> {
       content: await content(),
     })),
   ]);
+
+  const examplesMap: Record<
+    string,
+    { name: string; meta?: ExampleTS; resources: Record<string, string> }
+  > = {};
   for (const { keys, content } of list) {
-    const ex = (examplesMap[keys.name] ??= { name: keys.name, files: {} });
+    const ex = (examplesMap[keys.name] ??= { name: keys.name, resources: {} });
     if (keys.fileName === "meta" && typeof content === "object") {
       const meta = content;
       ex.name = meta.name || ex.name;
-      ex.description = meta.description;
+      ex.meta = meta;
       continue;
     }
-    ex.files[keys.fileName] =
+    ex.resources[keys.fileName] =
       typeof content === "string"
         ? content
         : prettyStringify(content.default ?? content);
@@ -57,7 +68,28 @@ export async function loadExamples(): Promise<Record<string, Example>> {
   for (const ex of Object.values(examplesMap).sort(({ name: a }, { name: b }) =>
     customCompare(a, b),
   )) {
-    allExamples[ex.name] = ex;
+    let loaded = false;
+    allExamples[ex.name] = {
+      name: ex.name,
+      description: ex.meta?.description,
+      async getFiles() {
+        if (ex.meta?.githubResources && !loaded) {
+          loaded = true;
+          const github = parseGitHubURL(ex.meta.githubResources);
+          if (github)
+            Object.assign(
+              ex.resources,
+              await loadFilesFromGitHub(
+                github.owner,
+                github.repo,
+                github.path,
+                github.ref,
+              ),
+            );
+        }
+        return Promise.resolve(ex.resources);
+      },
+    };
   }
   return allExamples;
 }

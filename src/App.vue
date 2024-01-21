@@ -17,6 +17,7 @@ import type { Plugin } from "./plugins";
 import { maybeTSConfig } from "./utils/tsconfig";
 import { prettyStringify } from "./utils/json-utils";
 import * as hash from "./utils/hash";
+import { isLockFile } from "./utils/lock-file";
 
 const props = defineProps<{
   sources?: Record<string, string>;
@@ -59,8 +60,8 @@ function selectPlugin() {
   selectPluginDialog.value?.open(sources.value["package.json"]);
 }
 
-function handleSelectExample(example: Example) {
-  return setSources(example.files);
+async function handleSelectExample(example: Example) {
+  return setSources(await example.getFiles());
 }
 
 async function setSources(newSources: Record<string, string>) {
@@ -71,7 +72,8 @@ async function setSources(newSources: Record<string, string>) {
       (nm) =>
         nm !== "package.json" &&
         !CONFIG_FILE_NAMES.some((configName) => nm.endsWith(configName)) &&
-        !maybeTSConfig(nm),
+        !maybeTSConfig(nm) &&
+        !isLockFile(nm),
     ) || Object.keys(newSources)[0];
   eslintPlayground.value?.selectFile(fileName);
 }
