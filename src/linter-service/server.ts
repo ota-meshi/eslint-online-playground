@@ -128,7 +128,7 @@ async function startServerInternal(
 
         if (!output) {
           // eslint-disable-next-line no-console -- Demo runtime
-          if (!boot) console.log(str);
+          console.log(str);
 
           return;
         }

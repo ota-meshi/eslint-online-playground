@@ -86,8 +86,8 @@ const configFileName = computed<ConfigFileName>({
     }
 
     async function remove() {
-      const linterServer = await getLintServer();
-      await linterServer.removeFile(old);
+      const lintServer = await getLintServer();
+      await lintServer.removeFile(old);
     }
   },
 });
@@ -153,9 +153,12 @@ watch(
     if (newSources === oldSources) {
       return;
     }
+    const promises: Promise<void>[] = [];
+    const postProcesses: (() => void)[] = [];
     for (const source of [...allSourceDataList]) {
       if (newSources[source.fileName] == null) {
         allSourceDataList.splice(allSourceDataList.indexOf(source), 1);
+        promises.push(remove(source.fileName));
       }
     }
     for (const [fileName, code] of Object.entries(newSources)) {
@@ -165,15 +168,32 @@ watch(
       ) {
         continue;
       }
+      promises.push(write(fileName, code));
       const sourceData = allSourceDataList.find((d) => d.fileName === fileName);
       if (sourceData) {
-        sourceData.code = code;
+        postProcesses.push(() => (sourceData.code = code));
       } else {
         allSourceDataList.push(createSourceData(fileName, code));
       }
     }
     if (!activeSource.value) {
       activeSource.value = allSourceDataList[0];
+    }
+
+    void Promise.all(promises).then(() => {
+      for (const postProcess of postProcesses) {
+        postProcess();
+      }
+    });
+
+    async function remove(filePath: string) {
+      const lintServer = lintServerRef.value;
+      if (lintServer) await lintServer.removeFile(filePath);
+    }
+
+    async function write(filePath: string, code: string) {
+      const lintServer = lintServerRef.value;
+      if (lintServer) await lintServer.writeFile(filePath, code);
     }
   },
   { immediate: true },
@@ -238,8 +258,8 @@ function createSourceData(initFileName: string, initCode: string): SourceData {
     }
     const old = currFileName;
     currFileName = newFileName;
-    const linterServer = await getLintServer();
-    await linterServer.removeFile(old);
+    const lintServer = await getLintServer();
+    await lintServer.removeFile(old);
     update();
     await nextTick();
     inputTabs.value?.setChecked(newFileName);
@@ -644,8 +664,8 @@ async function handleAddFile() {
     [newFileName]: content,
   });
   await nextTick();
-  const linterServer = await getLintServer();
-  await linterServer.writeFile(newFileName, content);
+  const lintServer = await getLintServer();
+  await lintServer.writeFile(newFileName, content);
   inputTabs.value?.setChecked(newFileName);
 }
 
@@ -654,8 +674,8 @@ async function handleRemoveSource(name: string) {
   if (!confirm(`Are you sure you want to delete '${name}'?`)) {
     return;
   }
-  const linterServer = await getLintServer();
-  await linterServer.removeFile(name);
+  const lintServer = await getLintServer();
+  await lintServer.removeFile(name);
   const newSources = { ...props.sources };
   delete newSources[name];
   emit("update:sources", newSources);
