@@ -141,9 +141,11 @@ defineExpose({ setChecked });
 .ep-tree-tabs__menu {
   grid-area: menu;
   height: 100%;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   background-color: var(--ep-menu-background-color);
+  overflow-y: auto;
 }
 
 .ep-tree-tabs__menu-item {

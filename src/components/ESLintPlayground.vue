@@ -40,6 +40,7 @@ import {
 } from "../monaco-editor/monaco-loader";
 import NetlifyBadge from "./badges/NetlifyBadge.vue";
 import { isLockFile } from "../utils/lock-file";
+import { isRepoEnvFile } from "../utils/evn-file";
 
 const props = defineProps<{
   sources: Record<string, string>;
@@ -109,7 +110,7 @@ const displaySourceDataList = computed(() => {
     if (
       maybeTSConfig(sourceData.fileName) ||
       isLockFile(sourceData.fileName) ||
-      sourceData.fileName === "README.md"
+      isRepoEnvFile(sourceData.fileName)
     ) {
       envList.push(sourceData);
     } else {
@@ -753,7 +754,8 @@ function selectOutput(nm: "console" | "warnings") {
   display: grid;
   font-family: system-ui;
   font-size: 0.875rem;
-  grid-template-rows: 1fr min-content max(10rem, 33vb);
+  grid-template-rows: 70% min-content max(10rem, 33%);
+  min-height: 0;
 }
 
 .ep :deep(a) {

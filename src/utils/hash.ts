@@ -1,7 +1,7 @@
 import { decompress } from "./compress";
-import * as loading from "../components/loading";
 import { loadExamples } from "../examples";
 import { loadFilesFromGitHub, parseGitHubURL } from "./load-files-from-github";
+import { loadingWith } from "./loading";
 
 export async function toSources(
   hashData: string,
@@ -14,12 +14,7 @@ export async function toSources(
     return null;
   }
   const name = decodeURIComponent(hashData);
-  loading.open();
-  try {
-    return loadFiles(name);
-  } finally {
-    loading.close();
-  }
+  return loadingWith(() => loadFiles(name));
 }
 
 export function getHashData(): string {

@@ -11,13 +11,13 @@ import defaultJs from "./examples/eslint/src/example.js.txt?raw";
 import defaultConfig from "./examples/eslint/_eslintrc.json.js";
 import defaultPackageJson from "./examples/eslint/package.json.js";
 import { CONFIG_FILE_NAMES } from "./utils/eslint-info";
-import { type Example } from "./examples";
 import { installPlugin } from "./plugins";
 import type { Plugin } from "./plugins";
 import { maybeTSConfig } from "./utils/tsconfig";
 import { prettyStringify } from "./utils/json-utils";
 import * as hash from "./utils/hash";
 import { isLockFile } from "./utils/lock-file";
+import { isRepoEnvFile } from "./utils/evn-file";
 
 const props = defineProps<{
   sources?: Record<string, string>;
@@ -60,10 +60,6 @@ function selectPlugin() {
   selectPluginDialog.value?.open(sources.value["package.json"]);
 }
 
-async function handleSelectExample(example: Example) {
-  return setSources(await example.getFiles());
-}
-
 async function setSources(newSources: Record<string, string>) {
   sources.value = { ...newSources };
   await nextTick();
@@ -73,7 +69,8 @@ async function setSources(newSources: Record<string, string>) {
         nm !== "package.json" &&
         !CONFIG_FILE_NAMES.some((configName) => nm.endsWith(configName)) &&
         !maybeTSConfig(nm) &&
-        !isLockFile(nm),
+        !isLockFile(nm) &&
+        !isRepoEnvFile(nm),
     ) || Object.keys(newSources)[0];
   eslintPlayground.value?.selectFile(fileName);
 }
@@ -161,10 +158,7 @@ if (typeof window !== "undefined") {
       <img class="logo" :src="logo" alt="ESLint Community" />
     </a> -->
   </footer>
-  <SelectExampleDialog
-    ref="selectExampleDialog"
-    @select="handleSelectExample"
-  />
+  <SelectExampleDialog ref="selectExampleDialog" @select="setSources" />
   <SelectPluginDialog ref="selectPluginDialog" @select="handleSelectPlugins" />
 </template>
 

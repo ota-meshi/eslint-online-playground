@@ -38,6 +38,7 @@ const normalizeLevel = computed(() => props.level || 0);
   letter-spacing: 0.01em;
   padding-block: 0.5rem;
   padding-inline: 1rem;
+  position: relative;
 }
 
 .tree-item__parent-label::before {

@@ -20,7 +20,7 @@ export async function transformConfigFormat(
   if (from === to) return configText;
   try {
     // From JSON
-    if (from === ".eslintrc.json" && to === ".eslintrc.js") {
+    if (from === ".eslintrc.json" && /^\.eslintrc\.c?js$/u.test(to)) {
       return await transformJsonToCjs(configText);
     }
     if (from === ".eslintrc.json" && to === ".eslintrc.yaml") {
@@ -28,10 +28,10 @@ export async function transformConfigFormat(
     }
 
     // From CJS
-    if (from === ".eslintrc.js" && to === ".eslintrc.json") {
+    if (/^\.eslintrc\.c?js$/u.test(from) && to === ".eslintrc.json") {
       return await transformCjsToJson(configText);
     }
-    if (from === ".eslintrc.js" && to === ".eslintrc.yaml") {
+    if (/^\.eslintrc\.c?js$/u.test(from) && to === ".eslintrc.yaml") {
       return await transformCjsToYaml(configText);
     }
 
@@ -39,7 +39,7 @@ export async function transformConfigFormat(
     if (from === ".eslintrc.yaml" && to === ".eslintrc.json") {
       return await transformYamlToJson(configText);
     }
-    if (from === ".eslintrc.yaml" && to === ".eslintrc.js") {
+    if (from === ".eslintrc.yaml" && /^\.eslintrc\.c?js$/u.test(to)) {
       return await transformYamlToCjs(configText);
     }
   } catch (e) {

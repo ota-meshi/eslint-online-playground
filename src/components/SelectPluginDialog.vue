@@ -3,7 +3,7 @@ import { ref, computed } from "vue";
 import type { Plugin } from "../plugins";
 import { loadPlugins } from "../plugins";
 import GitHubIcon from "./GitHubIcon.vue";
-import * as loading from "./loading";
+import { loadingWith } from "../utils/loading";
 
 const plugins = ref<Record<string, Plugin>>({});
 const dialogRef = ref<HTMLDialogElement>();
@@ -22,14 +22,11 @@ defineExpose({
 });
 
 async function open(packageJsonText: string) {
-  loading.open();
-  try {
+  await loadingWith(async () => {
     plugins.value = await loadPlugins();
     packageJson.value = packageJsonText ? JSON.parse(packageJsonText) : {};
     dialogRef.value?.showModal();
-  } finally {
-    loading.close();
-  }
+  });
 }
 
 function handleOk() {

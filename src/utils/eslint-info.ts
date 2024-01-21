@@ -1,5 +1,6 @@
 export const CONFIG_FILE_NAMES = [
   ".eslintrc.js",
+  ".eslintrc.cjs",
   ".eslintrc.json",
   ".eslintrc.yaml",
   "eslint.config.js",

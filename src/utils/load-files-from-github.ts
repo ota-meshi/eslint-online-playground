@@ -1,3 +1,5 @@
+import { loadingWith } from "./loading";
+
 type File = { type: "file"; download_url: string; path: string };
 type Dir = { type: "dir"; url: string };
 type Response = (File | Dir)[] | File;
@@ -41,7 +43,7 @@ export async function loadFilesFromGitHub(
   if (ref) {
     url.searchParams.set("ref", ref);
   }
-  return loadFilesFromURL(url);
+  return loadingWith(() => loadFilesFromURL(url));
 }
 
 async function loadFilesFromURL(
