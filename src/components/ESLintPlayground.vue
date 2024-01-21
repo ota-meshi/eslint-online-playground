@@ -497,10 +497,7 @@ async function updateInstalledPackages() {
   }
 
   for (const sourceData of displaySourceDataList.value.envList) {
-    if (
-      sourceData.fileName !== "pnpm-lock.yaml" &&
-      sourceData.fileName !== "yarn.lock"
-    ) {
+    if (!isLockFile(sourceData.fileName)) {
       continue;
     }
     try {
