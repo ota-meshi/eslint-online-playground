@@ -100,4 +100,7 @@ defineExpose({ setChecked });
   height: 100%;
   background-color: var(--ep-background-color);
 }
+.ep-tab__panels > :deep(*) {
+  min-width: 0;
+}
 </style>

@@ -66,7 +66,10 @@ export async function installPlugin(
         packageJson: packageJsonResult,
       };
     }
-    if (configFileName === ".eslintrc.js") {
+    if (
+      configFileName === ".eslintrc.js" ||
+      configFileName === ".eslintrc.cjs"
+    ) {
       return {
         ...(await installPluginForCJS(configText, plugins)),
         packageJson: packageJsonResult,

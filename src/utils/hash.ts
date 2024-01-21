@@ -1,6 +1,7 @@
 import { decompress } from "./compress";
-import * as loading from "../components/loading";
 import { loadExamples } from "../examples";
+import { loadFilesFromGitHub, parseGitHubURL } from "./load-files-from-github";
+import { loadingWith } from "./loading";
 
 export async function toSources(
   hashData: string,
@@ -13,15 +14,23 @@ export async function toSources(
     return null;
   }
   const name = decodeURIComponent(hashData);
-  loading.open();
-  try {
-    const examples = await loadExamples();
-    return examples[name]?.files ?? null;
-  } finally {
-    loading.close();
-  }
+  return loadingWith(() => loadFiles(name));
 }
 
 export function getHashData(): string {
   return window.location.hash.slice(window.location.hash.indexOf("#") + 1);
+}
+
+async function loadFiles(name: string) {
+  const githubData = parseGitHubURL(name);
+  if (githubData) {
+    return loadFilesFromGitHub(
+      githubData.owner,
+      githubData.repo,
+      githubData.path,
+      githubData.ref,
+    );
+  }
+  const examples = await loadExamples();
+  return examples[name]?.getFiles() ?? null;
 }

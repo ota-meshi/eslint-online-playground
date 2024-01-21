@@ -39,6 +39,8 @@ import {
   enableBuiltinValidate,
 } from "../monaco-editor/monaco-loader";
 import NetlifyBadge from "./badges/NetlifyBadge.vue";
+import { isLockFile } from "../utils/lock-file";
+import { isRepoEnvFile } from "../utils/evn-file";
 
 const props = defineProps<{
   sources: Record<string, string>;
@@ -103,17 +105,21 @@ const packageJson = computed({
 });
 const displaySourceDataList = computed(() => {
   const list: SourceData[] = [];
-  const tsconfigs: SourceData[] = [];
+  const envList: SourceData[] = [];
   for (const sourceData of allSourceDataList) {
-    if (maybeTSConfig(sourceData.fileName)) {
-      tsconfigs.push(sourceData);
+    if (
+      maybeTSConfig(sourceData.fileName) ||
+      isLockFile(sourceData.fileName) ||
+      isRepoEnvFile(sourceData.fileName)
+    ) {
+      envList.push(sourceData);
     } else {
       list.push(sourceData);
     }
   }
   return {
     list: list.sort((a, b) => a.fileName.localeCompare(b.fileName)),
-    tsconfigs: tsconfigs.sort((a, b) => a.fileName.localeCompare(b.fileName)),
+    envList: envList.sort((a, b) => a.fileName.localeCompare(b.fileName)),
   };
 });
 defineExpose({
@@ -339,7 +345,7 @@ function handleActiveName(name: string) {
     activeSource.value = a;
     disableBuiltinValidate();
   } else if (
-    displaySourceDataList.value.tsconfigs.some(
+    displaySourceDataList.value.envList.some(
       (source) => source.fileName === name,
     )
   ) {
@@ -706,7 +712,7 @@ function selectOutput(nm: "console" | "warnings") {
         />
       </TabPanel>
       <template
-        v-for="(source, index) in displaySourceDataList.tsconfigs"
+        v-for="(source, index) in displaySourceDataList.envList"
         :key="source.id"
       >
         <TabPanel
@@ -748,7 +754,8 @@ function selectOutput(nm: "console" | "warnings") {
   display: grid;
   font-family: system-ui;
   font-size: 0.875rem;
-  grid-template-rows: 1fr min-content max(10rem, 33vb);
+  grid-template-rows: minmax(33vb, 1fr) min-content max(10rem, 33vb);
+  min-height: 0;
 }
 
 .ep :deep(a) {
@@ -791,6 +798,7 @@ function selectOutput(nm: "console" | "warnings") {
   grid-template-columns: 1fr 130px;
   grid-template-rows: 100%;
   box-shadow: inset 0 0 6px 0 hsl(0deg 0% 0% / 15%);
+  min-width: 0;
 }
 
 .ep__banners {

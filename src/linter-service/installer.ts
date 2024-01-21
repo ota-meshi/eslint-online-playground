@@ -2,6 +2,7 @@ import type { WebContainer, WebContainerProcess } from "@webcontainer/api";
 
 import type ConsoleOutput from "../components/ConsoleOutput.vue";
 import type TabsPanel from "../components/TabsPanel.vue";
+import { detectPackageManager } from "../utils/lock-file";
 
 export class Installer {
   private readonly webContainer: WebContainer;
@@ -53,7 +54,14 @@ async function installDependencies(
   webContainer: WebContainer,
   consoleOutput: InstanceType<typeof ConsoleOutput>,
 ) {
-  const installProcess = await webContainer.spawn("npm", ["install", "-f"]);
+  const packageManager = detectPackageManager(
+    await webContainer.fs.readdir(""),
+  );
+
+  const installProcess = await webContainer.spawn(packageManager, [
+    "install",
+    "-f",
+  ]);
 
   void installProcess.output.pipeTo(
     new WritableStream({

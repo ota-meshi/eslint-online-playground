@@ -1,5 +1,16 @@
+export async function loadingWith<R>(fn: () => Promise<R> | R): Promise<R> {
+  open();
+  try {
+    const result = await fn();
+    return result;
+  } finally {
+    close();
+  }
+}
+
 let dialog: HTMLDialogElement | null = null;
-export function open(): void {
+
+function open(): void {
   if (!dialog) {
     dialog = document.createElement("dialog");
     dialog.style.padding = "0";
@@ -45,6 +56,7 @@ export function open(): void {
   }
   dialog.showModal();
 }
-export function close(): void {
+
+function close(): void {
   dialog?.close();
 }
