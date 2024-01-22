@@ -1,4 +1,4 @@
-import { loadingWith } from "./loading";
+import { loadingWith, messageWith } from "./loading";
 
 type ContentFile = { type: "file"; download_url: string; path: string };
 type ContentDir = { type: "dir"; url: string };
@@ -6,7 +6,7 @@ type ContentsResponse = (ContentFile | ContentDir)[] | ContentFile;
 type RepoResponse = { default_branch: string };
 type TreeFile = { type: "blob"; url: string; path: string };
 type TreeDir = { type: "tree"; url: string; path: string };
-type TreeResponse = { tree: (TreeFile | TreeDir)[] };
+type TreeResponse = { tree: (TreeFile | TreeDir)[]; truncated: boolean };
 export function parseGitHubURL(
   url: string,
 ): { owner: string; repo: string; path: string; ref?: string } | null {
@@ -41,12 +41,14 @@ export async function loadFilesFromGitHub(
   path: string,
   ref?: string,
 ): Promise<Record<string, string>> {
-  try {
-    return await loadFilesFromGitHubTreesAPI(owner, repo, path, ref);
-  } catch {
-    // ignore
-  }
-  return loadFilesFromGitHubContentsAPI(owner, repo, path, ref);
+  return loadingWith(async () => {
+    try {
+      return await loadFilesFromGitHubTreesAPI(owner, repo, path, ref);
+    } catch {
+      // ignore
+    }
+    return loadFilesFromGitHubContentsAPI(owner, repo, path, ref);
+  });
 }
 
 async function loadFilesFromGitHubTreesAPI(
@@ -58,14 +60,17 @@ async function loadFilesFromGitHubTreesAPI(
   const treeSha =
     ref ||
     (await (async () => {
-      const res: RepoResponse = await fetch(
+      const res: RepoResponse = await sequentialFetch(
         `https://api.github.com/repos/${owner}/${repo}`,
       ).then((res) => res.json());
       return res.default_branch;
     })());
-  const response: TreeResponse = await fetch(
+  const response: TreeResponse = await sequentialFetch(
     `https://api.github.com/repos/${owner}/${repo}/git/trees/${treeSha}?recursive=true`,
   ).then((res) => res.json());
+  if (response.truncated) {
+    throw new Error("Tree is too large");
+  }
   const result: Record<string, string> = {};
   const prefix = path ? `${path}/` : "";
   await Promise.all(
@@ -79,7 +84,7 @@ async function loadFilesFromGitHubTreesAPI(
           maybeBinaryFile(file.path)
         )
           return;
-        result[file.path] = await fetch(
+        result[file.path] = await sequentialFetch(
           `https://raw.githubusercontent.com/${owner}/${repo}/${treeSha}/${file.path}`,
         ).then((res) => res.text());
       }
@@ -100,13 +105,15 @@ async function loadFilesFromGitHubContentsAPI(
   if (ref) {
     url.searchParams.set("ref", ref);
   }
-  return loadingWith(() => loadFilesFromGitHubContentsURL(url));
+  return loadFilesFromGitHubContentsURL(url);
 }
 
 async function loadFilesFromGitHubContentsURL(
   url: string | URL,
 ): Promise<Record<string, string>> {
-  const response: ContentsResponse = await fetch(url).then((res) => res.json());
+  const response: ContentsResponse = await sequentialFetch(url).then((res) =>
+    res.json(),
+  );
   const result: Record<string, string> = {};
   await Promise.all(
     (Array.isArray(response) ? response : [response]).map(async (file) => {
@@ -118,8 +125,8 @@ async function loadFilesFromGitHubContentsURL(
           maybeBinaryFile(file.path)
         )
           return;
-        result[file.path] = await fetch(file.download_url).then((res) =>
-          res.text(),
+        result[file.path] = await sequentialFetch(file.download_url).then(
+          (res) => res.text(),
         );
       } else if (file.type === "dir") {
         Object.assign(result, await loadFilesFromGitHubContentsURL(file.url));
@@ -181,4 +188,14 @@ function maybeBinaryFile(filePath: string): boolean {
     ".woff2",
   ];
   return EXTS.some((ext) => filePath.endsWith(ext));
+}
+
+let queue: Promise<any> = Promise.resolve();
+
+function sequentialFetch(url: string | URL): Promise<any> {
+  queue = queue.then(
+    () => messageWith(`Request to\n${url}`, () => fetch(url)),
+    () => messageWith(`Request to\n${url}`, () => fetch(url)),
+  );
+  return queue;
 }

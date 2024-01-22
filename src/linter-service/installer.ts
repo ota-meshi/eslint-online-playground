@@ -11,6 +11,8 @@ export class Installer {
 
   private readonly outputTabs: InstanceType<typeof TabsPanel>;
 
+  private running = false;
+
   private installProcess: Promise<WebContainerProcess> | undefined;
 
   public constructor({
@@ -33,13 +35,14 @@ export class Installer {
     this.consoleOutput.appendLine("Installing dependencies...");
 
     if (this.installProcess != null) {
+      if (this.running)
+        this.consoleOutput.appendLine(
+          "Kill the previous installation process.",
+        );
       (await this.installProcess).kill();
     }
 
-    this.installProcess = installDependencies(
-      this.webContainer,
-      this.consoleOutput,
-    );
+    this.installProcess = this.#installDependencies();
 
     return (await this.installProcess).exit;
   }
@@ -48,35 +51,34 @@ export class Installer {
   public async getExitCode(): Promise<number> {
     return (await this.installProcess!).exit;
   }
-}
 
-async function installDependencies(
-  webContainer: WebContainer,
-  consoleOutput: InstanceType<typeof ConsoleOutput>,
-) {
-  const packageManager = detectPackageManager(
-    await webContainer.fs.readdir(""),
-  );
+  async #installDependencies() {
+    const packageManager = detectPackageManager(
+      await this.webContainer.fs.readdir(""),
+    );
 
-  const installProcess = await webContainer.spawn(packageManager, [
-    "install",
-    "-f",
-  ]);
+    this.running = true;
+    const installProcess = await this.webContainer.spawn(packageManager, [
+      "install",
+      "-f",
+    ]);
 
-  void installProcess.output.pipeTo(
-    new WritableStream({
-      write(data) {
-        consoleOutput.append(data);
-      },
-    }),
-  );
-  void installProcess.exit.then((exitCode) => {
-    if (exitCode !== 0) {
-      consoleOutput.appendLine("Installation failed");
-    } else {
-      consoleOutput.appendLine("Installation succeeded");
-    }
-  });
+    void installProcess.output.pipeTo(
+      new WritableStream({
+        write: (data) => {
+          this.consoleOutput.append(data);
+        },
+      }),
+    );
+    void installProcess.exit.then((exitCode) => {
+      this.running = false;
+      if (exitCode !== 0) {
+        this.consoleOutput.appendLine("Installation failed.");
+      } else {
+        this.consoleOutput.appendLine("Installation succeeded.");
+      }
+    });
 
-  return installProcess;
+    return installProcess;
+  }
 }
