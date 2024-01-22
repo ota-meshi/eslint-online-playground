@@ -7,8 +7,29 @@ export async function loadingWith<R>(fn: () => Promise<R> | R): Promise<R> {
     close();
   }
 }
+export async function messageWith<R>(
+  message: string,
+  fn: () => Promise<R> | R,
+): Promise<R> {
+  if (messageElement) {
+    messageElement.textContent = message;
+  }
+  try {
+    const result = await fn();
+    // debug
+    // await new Promise((resolve) => {
+    //   window.resolve = resolve;
+    // });
+    return result;
+  } finally {
+    if (messageElement?.textContent === message) {
+      messageElement.textContent = "";
+    }
+  }
+}
 
 let dialog: HTMLDialogElement | null = null;
+let messageElement: HTMLDivElement | null = null;
 
 function open(): void {
   if (!dialog) {
@@ -18,10 +39,21 @@ function open(): void {
     dialog.style.backgroundColor = "transparent";
     dialog.style.overflow = "visible";
     dialog.style.outline = "none";
+    dialog.style.marginTop = "40dvh";
     dialog.addEventListener("cancel", (e) => e.preventDefault());
+    const wrapper = document.createElement("div");
+    wrapper.style.display = "flex";
+    wrapper.style.flexDirection = "column";
+    wrapper.style.alignItems = "center";
+    dialog.appendChild(wrapper);
     const loading = document.createElement("div");
     loading.className = "loader";
-    dialog.appendChild(loading);
+    wrapper.appendChild(loading);
+    messageElement = document.createElement("div");
+    messageElement.style.textAlign = "center";
+    messageElement.style.backgroundColor = "#fff9";
+    messageElement.style.whiteSpace = "pre-wrap";
+    wrapper.appendChild(messageElement);
     document.body.appendChild(dialog);
 
     const style = document.createElement("style");
