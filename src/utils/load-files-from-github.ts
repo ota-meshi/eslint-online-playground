@@ -192,10 +192,18 @@ function maybeBinaryFile(filePath: string): boolean {
 
 let queue: Promise<any> = Promise.resolve();
 
-function sequentialFetch(url: string | URL): Promise<any> {
+function sequentialFetch(url: string | URL): Promise<Response> {
   queue = queue.then(
-    () => messageWith(`Request to\n${url}`, () => fetch(url)),
-    () => messageWith(`Request to\n${url}`, () => fetch(url)),
+    () => messageWith(`Request to\n${url}`, nextFetch),
+    () => messageWith(`Request to\n${url}`, nextFetch),
   );
   return queue;
+
+  function nextFetch() {
+    return fetch(url).then((res) => {
+      if (res.status !== 200)
+        throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
+      return res;
+    });
+  }
 }
