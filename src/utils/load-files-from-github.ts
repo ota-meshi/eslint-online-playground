@@ -42,12 +42,8 @@ export async function loadFilesFromGitHub(
   ref?: string,
 ): Promise<Record<string, string>> {
   return loadingWith(async () => {
-    try {
-      return await loadFilesFromGitHubTreesAPI(owner, repo, path, ref);
-    } catch {
-      // ignore
-    }
-    return loadFilesFromGitHubContentsAPI(owner, repo, path, ref);
+    const result = await loadFilesFromGitHubTreesAPI(owner, repo, path, ref);
+    return result ?? loadFilesFromGitHubContentsAPI(owner, repo, path, ref);
   });
 }
 
@@ -56,7 +52,7 @@ async function loadFilesFromGitHubTreesAPI(
   repo: string,
   path: string,
   ref?: string,
-): Promise<Record<string, string>> {
+): Promise<Record<string, string> | null> {
   const treeSha =
     ref ||
     (await (async () => {
@@ -69,7 +65,7 @@ async function loadFilesFromGitHubTreesAPI(
     `https://api.github.com/repos/${owner}/${repo}/git/trees/${treeSha}?recursive=true`,
   ).then((res) => res.json());
   if (response.truncated) {
-    throw new Error("Tree is too large");
+    return null;
   }
   const result: Record<string, string> = {};
   const prefix = path ? `${path}/` : "";
