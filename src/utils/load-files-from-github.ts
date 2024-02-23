@@ -7,6 +7,7 @@ type RepoResponse = { default_branch: string };
 type TreeFile = { type: "blob"; url: string; path: string };
 type TreeDir = { type: "tree"; url: string; path: string };
 type TreeResponse = { tree: (TreeFile | TreeDir)[]; truncated: boolean };
+type RateLimitResponse = { rate: { limit: number; remaining: number } };
 export function parseGitHubURL(
   url: string,
 ): { owner: string; repo: string; path: string; ref?: string } | null {
@@ -56,12 +57,12 @@ async function loadFilesFromGitHubTreesAPI(
   const treeSha =
     ref ||
     (await (async () => {
-      const res: RepoResponse = await sequentialFetch(
+      const res: RepoResponse = await fetchForGitHub(
         `https://api.github.com/repos/${owner}/${repo}`,
       ).then((res) => res.json());
       return res.default_branch;
     })());
-  const response: TreeResponse = await sequentialFetch(
+  const response: TreeResponse = await fetchForGitHub(
     `https://api.github.com/repos/${owner}/${repo}/git/trees/${treeSha}?recursive=true`,
   ).then((res) => res.json());
   if (response.truncated) {
@@ -80,7 +81,7 @@ async function loadFilesFromGitHubTreesAPI(
           maybeBinaryFile(file.path)
         )
           return;
-        result[file.path] = await sequentialFetch(
+        result[file.path] = await fetchForGitHub(
           `https://raw.githubusercontent.com/${owner}/${repo}/${treeSha}/${file.path}`,
         ).then((res) => res.text());
       }
@@ -107,7 +108,7 @@ async function loadFilesFromGitHubContentsAPI(
 async function loadFilesFromGitHubContentsURL(
   url: string | URL,
 ): Promise<Record<string, string>> {
-  const response: ContentsResponse = await sequentialFetch(url).then((res) =>
+  const response: ContentsResponse = await fetchForGitHub(url).then((res) =>
     res.json(),
   );
   const result: Record<string, string> = {};
@@ -121,7 +122,7 @@ async function loadFilesFromGitHubContentsURL(
           maybeBinaryFile(file.path)
         )
           return;
-        result[file.path] = await sequentialFetch(file.download_url).then(
+        result[file.path] = await fetchForGitHub(file.download_url).then(
           (res) => res.text(),
         );
       } else if (file.type === "dir") {
@@ -188,7 +189,16 @@ function maybeBinaryFile(filePath: string): boolean {
 
 let queue: Promise<any> = Promise.resolve();
 
-function sequentialFetch(url: string | URL): Promise<Response> {
+let githubToken = "";
+
+async function fetchForGitHub(url: string | URL): Promise<Response> {
+  // debug
+  // if (!githubToken) {
+  //   await retryFetchForGitHubWithRequestToken(
+  //     { rate: { limit: 2, remaining: 0 } },
+  //     new Error(`Failed to fetch ${url}: ${2}`),
+  //   );
+  // }
   queue = queue.then(
     () => messageWith(`Request to\n${url}`, nextFetch),
     () => messageWith(`Request to\n${url}`, nextFetch),
@@ -196,10 +206,83 @@ function sequentialFetch(url: string | URL): Promise<Response> {
   return queue;
 
   function nextFetch() {
-    return fetch(url).then((res) => {
-      if (res.status !== 200)
+    return (
+      githubToken
+        ? fetch(url, {
+            headers: {
+              Authorization: `Bearer ${githubToken}`,
+            },
+          })
+        : fetch(url)
+    ).then(async (res) => {
+      if (res.status !== 200) {
+        if (`${res.status}`.startsWith("4")) {
+          const rlRes: RateLimitResponse = await fetch(
+            `https://api.github.com/rate_limit`,
+          ).then((res) => {
+            if (res.status !== 200) {
+              throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
+            }
+            return res.json();
+          });
+          if (rlRes.rate.remaining > 0) {
+            throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
+          }
+          return retryFetchForGitHubWithRequestToken(
+            rlRes,
+            new Error(`Failed to fetch ${url}: ${res.statusText}`),
+          );
+        }
+
         throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
+      }
       return res;
+    });
+  }
+
+  function retryFetchForGitHubWithRequestToken(
+    rlRes: RateLimitResponse,
+    error: Error,
+  ): Promise<Response> {
+    const dialog = document.createElement("dialog");
+    dialog.style.display = "flex";
+    dialog.style.flexDirection = "column";
+    dialog.style.alignItems = "stretch";
+    // Message element
+    dialog.innerHTML = `<div style="text-align: center; background-color: #fff9">Rate limit exceeded. (${rlRes.rate.remaining}/${rlRes.rate.limit})<br>
+You may be able to continue processing by entering <a href="https://docs.github.com/ja/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens" target="_blank">GITHUB_TOKEN</a>.
+</div>
+`;
+
+    // Input
+    const input = document.createElement("input");
+    dialog.appendChild(input);
+    const comment = document.createElement("div");
+    comment.style.fontSize = "70%";
+    comment.innerHTML = `We do not store it or use it for any purpose other than calling GitHub API,<br>
+but IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM.<br>
+See also <a href="https://github.com/ota-meshi/eslint-online-playground/blob/main/LICENSE" target="_blank">LICENSE</a>.
+`;
+    dialog.appendChild(comment);
+    // OK button
+    const button = document.createElement("button");
+    button.style.alignSelf = "flex-start";
+    button.textContent = "OK";
+    dialog.appendChild(button);
+    document.body.appendChild(dialog);
+
+    dialog.showModal();
+
+    return new Promise((resolve, reject) => {
+      button.addEventListener("click", () => {
+        if (input.value) {
+          dialog.close();
+          document.body.removeChild(dialog);
+          githubToken = input.value;
+          resolve(nextFetch());
+        }
+      });
+      dialog.addEventListener("cancel", () => reject(error));
     });
   }
 }
