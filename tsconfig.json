@@ -13,17 +13,17 @@
     "skipLibCheck": true,
     "noEmit": true,
     "checkJs": true,
-    "allowJs": true,
+    "allowJs": true
   },
   "include": [
     "src/**/*.ts",
     "src/**/*.js",
     "src/**/*.d.ts",
     "src/**/*.tsx",
-    "src/**/*.vue",
+    "src/**/*.vue"
   ],
   "references": [{ "path": "./tsconfig.node.json" }],
   "vueCompilerOptions": {
-    "target": 3,
-  },
+    "target": 3
+  }
 }
