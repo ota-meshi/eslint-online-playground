@@ -1,8 +1,10 @@
-# eslint-online-playground
+# [eslint-online-playground]
 
 [ESLint](https://eslint.org/) online playground.
 
 This playground allows you to check the behavior in combination with the plugins.
+
+[eslint-online-playground]: https://eslint-online-playground.netlify.app/
 
 ## Examples
 
