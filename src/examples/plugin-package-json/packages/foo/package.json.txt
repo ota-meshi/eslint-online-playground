@@ -1,4 +1,6 @@
 {
+	"name": "@my-package/foo",
+	"version": "0.1.0",
 	"scripts": {
 		"lint": "eslint .",
 		"test": "jest",
