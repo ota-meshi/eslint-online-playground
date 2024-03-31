@@ -153,12 +153,10 @@ watch(
     if (newSources === oldSources) {
       return;
     }
-    const promises: Promise<void>[] = [];
-    const postProcesses: (() => void)[] = [];
     for (const source of [...allSourceDataList]) {
       if (newSources[source.fileName] == null) {
         allSourceDataList.splice(allSourceDataList.indexOf(source), 1);
-        promises.push(remove(source.fileName));
+        void remove(source.fileName);
       }
     }
     for (const [fileName, code] of Object.entries(newSources)) {
@@ -168,10 +166,10 @@ watch(
       ) {
         continue;
       }
-      promises.push(write(fileName, code));
+      void write(fileName, code);
       const sourceData = allSourceDataList.find((d) => d.fileName === fileName);
       if (sourceData) {
-        postProcesses.push(() => (sourceData.code = code));
+        sourceData.code = code;
       } else {
         allSourceDataList.push(createSourceData(fileName, code));
       }
@@ -179,12 +177,6 @@ watch(
     if (!activeSource.value) {
       activeSource.value = allSourceDataList[0];
     }
-
-    void Promise.all(promises).then(() => {
-      for (const postProcess of postProcesses) {
-        postProcess();
-      }
-    });
 
     async function remove(filePath: string) {
       const lintServer = lintServerRef.value;
