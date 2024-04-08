@@ -1,5 +1,8 @@
 {
   "eslint.validate": [
+    "cds",
+    "csv",
+    "csv (semicolon)",
     "javascript",
     "javascriptreact",
     "typescript",
