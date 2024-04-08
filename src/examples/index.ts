@@ -38,7 +38,7 @@ export async function loadExamples(): Promise<Record<string, Example>> {
       },
     ),
     ...Object.entries(
-      import.meta.glob("./**/*.{txt,js}", {
+      import.meta.glob("./**/*.{txt,js,cds,csv}", {
         as: "raw",
       }),
     ).map(async ([fileName, content]) => ({
