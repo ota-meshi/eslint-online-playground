@@ -74,13 +74,7 @@ async function loadFilesFromGitHubTreesAPI(
     response.tree.map(async (file) => {
       if (file.type === "blob") {
         if (!file.path.startsWith(prefix)) return;
-        if (
-          // Ignore .gitignore and binary files
-          file.path === ".gitignore" ||
-          file.path.endsWith("/.gitignore") ||
-          maybeBinaryFile(file.path)
-        )
-          return;
+        if (ignore(file)) return;
         result[file.path] = await fetchForGitHub(
           `https://raw.githubusercontent.com/${owner}/${repo}/${treeSha}/${file.path}`,
         ).then((res) => res.text());
@@ -115,13 +109,7 @@ async function loadFilesFromGitHubContentsURL(
   await Promise.all(
     (Array.isArray(response) ? response : [response]).map(async (file) => {
       if (file.type === "file") {
-        if (
-          // Ignore .gitignore and binary files
-          file.path === ".gitignore" ||
-          file.path.endsWith("/.gitignore") ||
-          maybeBinaryFile(file.path)
-        )
-          return;
+        if (ignore(file)) return;
         result[file.path] = await fetchForGitHub(file.download_url).then(
           (res) => res.text(),
         );
@@ -131,6 +119,19 @@ async function loadFilesFromGitHubContentsURL(
     }),
   );
   return result;
+}
+
+function ignore(file: ContentFile | TreeFile): boolean {
+  return (
+    // Ignore .gitignore, .github, .vscode, .devcontainer
+    // and binary files
+    file.path === ".gitignore" ||
+    file.path.endsWith("/.gitignore") ||
+    file.path.startsWith(".github/") ||
+    file.path.startsWith(".vscode/") ||
+    file.path.startsWith(".devcontainer/") ||
+    maybeBinaryFile(file.path)
+  );
 }
 
 function maybeBinaryFile(filePath: string): boolean {
