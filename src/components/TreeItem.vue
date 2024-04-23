@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import type { TreeNode } from "./TreeTabs.vue";
+import type { Tab } from "./tabs";
 
 const props = defineProps<{
   node: TreeNode;
@@ -18,8 +19,12 @@ const normalizeLevel = computed(() => props.level || 0);
     >
     <div class="tree-item__nest">
       <template v-for="n in node.children">
-        <TreeItem :node="n" :level="normalizeLevel + 1" v-slot="{ level, tab }">
-          <slot :level="level" :tab="tab" />
+        <TreeItem
+          :node="n"
+          :level="normalizeLevel + 1"
+          v-slot="params: { level: number; tab: Tab }"
+        >
+          <slot :level="params.level" :tab="params.tab" />
         </TreeItem>
       </template>
     </div>
