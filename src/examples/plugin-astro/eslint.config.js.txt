@@ -1,0 +1,9 @@
+import js from "@eslint/js";
+import eslintPluginAstro from "eslint-plugin-astro";
+import tseslint from "typescript-eslint";
+export default tseslint.config(
+  js.configs.recommended,
+  ...tseslint.configs.recommended,
+  ...eslintPluginAstro.configs.recommended,
+  ...eslintPluginAstro.configs["jsx-a11y-strict"],
+);

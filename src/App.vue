@@ -8,7 +8,7 @@ import ThemeSwitch from "./components/ThemeSwitch.vue";
 import { compress } from "./utils/compress";
 import { debounce } from "./utils/debounce";
 import defaultJs from "./examples/eslint/src/example.js.txt?raw";
-import defaultConfig from "./examples/eslint/_eslintrc.json.js";
+import defaultConfig from "./examples/eslint/eslint.config.js.txt?raw";
 import defaultPackageJson from "./examples/eslint/package.json.js";
 import { CONFIG_FILE_NAMES } from "./utils/eslint-info";
 import { installPlugin } from "./plugins";
@@ -36,7 +36,7 @@ const selectPluginDialog = ref<InstanceType<typeof SelectPluginDialog> | null>(
 const sources = ref<Record<string, string>>({ ...(props.sources || {}) });
 
 if (CONFIG_FILE_NAMES.every((nm) => !sources.value[nm])) {
-  sources.value[".eslintrc.json"] = prettyStringify(defaultConfig);
+  sources.value["eslint.config.js"] = defaultConfig;
 }
 if (sources.value["package.json"] === undefined) {
   sources.value["package.json"] = prettyStringify(defaultPackageJson);

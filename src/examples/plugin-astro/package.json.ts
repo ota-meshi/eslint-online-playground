@@ -1,4 +1,5 @@
 export default {
+  type: "module",
   devDependencies: {
     "@typescript-eslint/parser": "latest",
     "@typescript-eslint/eslint-plugin": "latest",
@@ -6,5 +7,6 @@ export default {
     "eslint-plugin-astro": "latest",
     "eslint-plugin-jsx-a11y": "latest",
     typescript: "latest",
+    "typescript-eslint": "latest",
   },
 };
