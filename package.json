@@ -35,7 +35,7 @@
     "yaml": "^2.2.1"
   },
   "devDependencies": {
-    "@ota-meshi/eslint-plugin": "^0.15.0",
+    "@ota-meshi/eslint-plugin": "^0.17.0",
     "@types/eslint": "^8.21.3",
     "@types/eslint-scope": "^3.7.4",
     "@types/eslint-utils": "^3.0.2",
