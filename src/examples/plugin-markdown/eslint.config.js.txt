@@ -1,11 +1,11 @@
 import js from "@eslint/js";
 import markdown from "eslint-plugin-markdown";
 export default [
-    js.configs.recommended,
-    ...markdown.configs.recommended,
-    {
-      rules: {
-        "no-console": "error",
-      },
-    }
+  js.configs.recommended,
+  ...markdown.configs.recommended,
+  {
+    rules: {
+      "no-console": "error",
+    },
+  }
 ];

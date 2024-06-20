@@ -87,7 +87,7 @@ defineExpose({ setChecked });
     </div>
     <div class="ep-tree-tabs__menu">
       <template v-for="node in treeTabs.children" :key="node.name">
-        <TreeItem :node="node" v-slot="{ level, tab }">
+        <TreeItem v-slot="{ level, tab }" :node="node">
           <div class="ep-tree-tabs__menu-item">
             <label :style="{ 'padding-inline-start': level + 1 + 'rem' }">
               <input

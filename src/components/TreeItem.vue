@@ -18,11 +18,11 @@ const normalizeLevel = computed(() => props.level || 0);
       >{{ node.name }}</label
     >
     <div class="tree-item__nest">
-      <template v-for="n in node.children">
+      <template v-for="n in node.children" :key="n.name">
         <TreeItem
+          v-slot="params: { level: number; tab: Tab }"
           :node="n"
           :level="normalizeLevel + 1"
-          v-slot="params: { level: number; tab: Tab }"
         >
           <slot :level="params.level" :tab="params.tab" />
         </TreeItem>

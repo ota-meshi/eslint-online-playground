@@ -152,7 +152,7 @@ if (typeof window !== "undefined") {
       </a>
     </div>
   </header>
-  <ESLintPlayground v-model:sources="sources" ref="eslintPlayground" />
+  <ESLintPlayground ref="eslintPlayground" v-model:sources="sources" />
   <footer class="footer">
     <!-- <a href="https://github.com/eslint-community">
       <img class="logo" :src="logo" alt="ESLint Community" />

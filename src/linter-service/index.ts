@@ -108,7 +108,7 @@ export async function setupLintServer({
   ): Promise<LinterServiceResult> {
     if (processing) {
       next = run;
-      // eslint-disable-next-line @typescript-eslint/no-misused-promises, no-unmodified-loop-condition -- OK
+      // eslint-disable-next-line no-unmodified-loop-condition -- OK
       while (processing) {
         await processing;
       }

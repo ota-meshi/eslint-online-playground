@@ -71,13 +71,13 @@ defineExpose({
         type="text"
         class="ep-code__file-name"
         :value="fileName"
+        :style="{ width: fileName.length + 1 + 'ch' }"
         @keydown.enter="handleFileNameInput"
         @blur="handleFileNameInput"
-        :style="{ width: fileName.length + 1 + 'ch' }"
     /></label>
     <MonacoEditor
-      class="ep-code__monaco"
       ref="monacoEditor"
+      class="ep-code__monaco"
       :model-value="code"
       :language="language"
       :diff="showPreview"
@@ -87,15 +87,15 @@ defineExpose({
       :code-action-provider="codeActionProvider"
       @update:model-value="handleUpdateModelValue"
     />
-    <div class="ep-code__tools" v-if="!props.disableFix">
+    <div v-if="!props.disableFix" class="ep-code__tools">
       <label class="ep-button">
-        <input type="checkbox" v-model="showPreview" />
+        <input v-model="showPreview" type="checkbox" />
         Preview
       </label>
       <button
         class="ep-button"
-        @click="applyFix"
         :disabled="rightCode == null || rightCode === code"
+        @click="applyFix"
       >
         Apply Fix
       </button>
