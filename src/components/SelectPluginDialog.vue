@@ -46,8 +46,8 @@ function handleClickDialog() {
 </script>
 
 <template>
-  <dialog ref="dialogRef" @click="handleClickDialog" class="ep-select-plugin">
-    <div @click.stop class="ep-select-plugin__list">
+  <dialog ref="dialogRef" class="ep-select-plugin" @click="handleClickDialog">
+    <div class="ep-select-plugin__list" @click.stop>
       <template v-if="availablePlugins.length">
         <div
           v-for="plugin in availablePlugins"
@@ -56,8 +56,8 @@ function handleClickDialog() {
         >
           <label class="ep-select-plugin__item-meta">
             <input
-              type="checkbox"
               v-model="selectPlugins"
+              type="checkbox"
               :value="plugin.name"
             />
             <div class="ep-select-plugin__item-title">{{ plugin.name }}</div>

@@ -682,13 +682,13 @@ function selectOutput(nm: "console" | "warnings") {
 <template>
   <div class="ep">
     <TreeTabs
-      @active="handleActiveName"
       ref="inputTabs"
+      @active="handleActiveName"
       @remove="handleRemoveSource"
     >
-      <template v-slot:tools>
+      <template #tools>
         <div class="ep__menu-tools">
-          <button @click="handleAddFile" class="ep__tool-button">+</button>
+          <button class="ep__tool-button" @click="handleAddFile">+</button>
         </div>
       </template>
       <template
@@ -702,13 +702,13 @@ function selectOutput(nm: "console" | "warnings") {
           :removable="displaySourceDataList.list.length > 1"
         >
           <CodeEditor
-            v-model:code="source.code"
-            v-model:file-name="source.fileName"
             :ref="
               (editor: unknown) => {
                 source.editor = editor as never;
               }
             "
+            v-model:code="source.code"
+            v-model:file-name="source.fileName"
             :right-code="source.resultData?.fixedCode ?? source.code"
             :markers="source.resultData?.markers ?? []"
             :right-markers="source.resultData?.fixedMarkers ?? []"

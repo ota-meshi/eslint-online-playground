@@ -59,8 +59,8 @@ async function handleClickRepo() {
 </script>
 
 <template>
-  <dialog ref="dialogRef" @click="handleClickDialog" class="ep-select-example">
-    <div @click.stop class="ep-select-example__list">
+  <dialog ref="dialogRef" class="ep-select-example" @click="handleClickDialog">
+    <div class="ep-select-example__list" @click.stop>
       <div class="ep-select-example__repo-item">
         <div class="ep-select-example__item-title">Your Repo</div>
         <div class="ep-select-example__repo-form">
@@ -71,13 +71,13 @@ async function handleClickRepo() {
       <div
         v-for="example in examples"
         :key="example.name"
+        class="ep-select-example__item"
         @click="
           (e) => {
             (e.target as HTMLElement).tagName !== 'A' &&
               handleClickExample(example);
           }
         "
-        class="ep-select-example__item"
       >
         <div class="ep-select-example__item-title">{{ example.name }}</div>
         <template v-if="example.description">

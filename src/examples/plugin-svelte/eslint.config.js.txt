@@ -1,0 +1,13 @@
+import js from "@eslint/js";
+import sveltePlugin from "eslint-plugin-svelte";
+import svelteParser from "svelte-eslint-parser";
+export default [
+  js.configs.recommended,
+  ...sveltePlugin.configs["flat/recommended"],
+  {
+    files: ["**/*.svelte.js", "*.svelte.js"],
+    languageOptions: {
+      parser: svelteParser,
+    }
+  },
+];

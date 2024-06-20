@@ -39,11 +39,11 @@ export default [
       ecmaVersion: "latest",
       sourceType: "module",
     },
-
     rules: {
-      "require-jsdoc": "off",
+      "jsdoc/require-jsdoc": "off",
       "no-shadow": "off",
       "no-unused-vars": "off",
+      "@typescript-eslint/no-shadow": "off",
     },
   },
   ...compat
@@ -57,29 +57,32 @@ export default [
     })),
   {
     files: ["**/*.ts"],
-
     plugins: {
       "@typescript-eslint": typescriptEslint,
     },
-
     languageOptions: {
       parser: tsParser,
       parserOptions: {
         project: "./tsconfig.eslint.json",
       },
     },
-
     rules: {
       "@typescript-eslint/no-non-null-assertion": "off",
       "@typescript-eslint/no-explicit-any": "off",
       "@typescript-eslint/no-use-before-define": "off",
+      "@typescript-eslint/no-shadow": "off",
     },
   },
   {
     files: ["**/*.d.ts"],
-
     rules: {
       "spaced-comment": "off",
+    },
+  },
+  {
+    files: ["**/*.toml"],
+    rules: {
+      "prettier/prettier": "off",
     },
   },
 ];
