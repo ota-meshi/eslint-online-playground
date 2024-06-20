@@ -42,7 +42,7 @@
     "@types/node": "^20.0.0",
     "@typescript-eslint/eslint-plugin": "^7.0.0",
     "@vitejs/plugin-vue": "^5.0.0",
-    "eslint": "^8.37.0",
+    "eslint": "^9.5.0",
     "eslint-config-prettier": "^9.0.0",
     "eslint-plugin-json-schema-validator": "^5.0.0",
     "eslint-plugin-jsonc": "^2.4.0",
