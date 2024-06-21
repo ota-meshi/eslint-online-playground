@@ -1,4 +1,4 @@
-import type { ESLintLegacyConfig } from "../..";
+import type { ESLintConfig, ESLintLegacyConfig } from "../..";
 
 export const name = "typescript-eslint";
 export const description =
@@ -8,6 +8,7 @@ export const devDependencies = {
   "@typescript-eslint/parser": "latest",
   "@typescript-eslint/eslint-plugin": "latest",
   typescript: "latest",
+  "typescript-eslint": "latest",
 };
 export const eslintLegacyConfig: ESLintLegacyConfig = {
   plugins: ["@typescript-eslint"],
@@ -23,10 +24,30 @@ export const eslintLegacyConfig: ESLintLegacyConfig = {
     },
   ],
 };
+export const eslintConfig: ESLintConfig<"tseslint"> = {
+  *imports(helper) {
+    if (helper.type === "module") {
+      yield helper.i(`import tseslint from 'typescript-eslint'`);
+    } else {
+      yield helper.require({
+        local: "tseslint",
+        source: "typescript-eslint",
+      });
+    }
+  },
+  *expression(names, helper) {
+    yield helper.spread(
+      helper.x(
+        `${names.tseslint}.config(...${names.tseslint}.configs.recommended)`,
+      ),
+    );
+  },
+};
 export function hasInstalled(packageJson: any): boolean {
-  const pluginName = "@typescript-eslint/eslint-plugin";
-  return (
-    packageJson.devDependencies?.[pluginName] != null ||
-    packageJson.dependencies?.[pluginName] != null
+  const pluginNames = ["@typescript-eslint/eslint-plugin", "typescript-eslint"];
+  return pluginNames.some(
+    (pluginName) =>
+      packageJson.devDependencies?.[pluginName] != null ||
+      packageJson.dependencies?.[pluginName] != null,
   );
 }

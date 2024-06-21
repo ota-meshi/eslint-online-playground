@@ -84,6 +84,7 @@ function formatPosition(message: Linter.LintMessage) {
   gap: 0.25rem;
   list-style: none;
   margin-block: 0;
+  white-space: inherit;
 }
 
 .ep-warning__item {
@@ -99,6 +100,8 @@ function formatPosition(message: Linter.LintMessage) {
   text-align: center;
   text-transform: uppercase;
   border-radius: 4px;
+  flex-shrink: 0;
+  align-self: flex-start;
 }
 
 .ep-warning__severity-error {

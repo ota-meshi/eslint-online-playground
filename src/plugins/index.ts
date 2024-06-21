@@ -18,9 +18,11 @@ export type BuildESLintConfigHelper = {
   type: "module" | "script";
 };
 export type ESLintConfig<N extends string> = {
+  /** Return an ImportDeclaration that imports the plugin. */
   imports: (
     helper: BuildESLintConfigHelper,
   ) => Iterable<ESTree.ImportDeclaration>;
+  /** Return an Expression or SpreadElement that represents the element to configure. */
   expression: (
     names: Record<N, string>,
     helper: BuildESLintConfigHelper,
