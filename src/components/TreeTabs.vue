@@ -91,7 +91,9 @@ defineExpose({ setChecked });
           <div class="ep-tree-tabs__menu-item">
             <label :style="{ 'padding-inline-start': level + 1 + 'rem' }">
               <input
-                :ref="(el) => (radios[tab.name] = el as HTMLInputElement)"
+                :ref="
+                  (el: unknown) => (radios[tab.name] = el as HTMLInputElement)
+                "
                 v-model="activeName"
                 type="radio"
                 :name="name"

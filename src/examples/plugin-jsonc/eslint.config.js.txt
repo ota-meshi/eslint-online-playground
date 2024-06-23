@@ -1,0 +1,6 @@
+import js from "@eslint/js";
+import eslintPluginJsonc from "eslint-plugin-jsonc";
+export default [
+  js.configs.recommended,
+  ...eslintPluginJsonc.configs["flat/recommended-with-jsonc"],
+];

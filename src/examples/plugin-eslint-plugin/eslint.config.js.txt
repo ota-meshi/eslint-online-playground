@@ -1,0 +1,4 @@
+import eslintPlugin from "eslint-plugin-eslint-plugin";
+export default [
+  eslintPlugin.configs["flat/recommended"],
+];
