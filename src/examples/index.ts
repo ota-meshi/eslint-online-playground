@@ -1,4 +1,4 @@
-import type { Component } from "vue";
+import { type Component } from "vue";
 import { prettyStringify } from "../utils/json-utils";
 import { customCompare } from "../utils/compare";
 import {
@@ -27,10 +27,10 @@ export async function loadExamples(): Promise<Record<string, Example>> {
     githubResources?: string;
   };
 
-  const list = await Promise.all([
+  const list = [
     ...Object.entries(import.meta.glob("./**/*.ts")).map(
-      async ([fileName, content]) => {
-        const val = (await content()) as ExampleTS;
+      ([fileName, content]) => {
+        const val = content() as Promise<ExampleTS>;
         return {
           keys: convertToExampleKeys(fileName),
           content: val,
@@ -41,28 +41,36 @@ export async function loadExamples(): Promise<Record<string, Example>> {
       import.meta.glob("./**/*.{txt,js,cds,csv}", {
         as: "raw",
       }),
-    ).map(async ([fileName, content]) => ({
+    ).map(([fileName, content]) => ({
       keys: convertToExampleKeys(fileName),
-      content: await content(),
+      content: content(),
     })),
-  ]);
+  ];
 
   const examplesMap: Record<
     string,
-    { name: string; meta?: ExampleTS; resources: Record<string, string> }
+    {
+      name: string;
+      meta?: ExampleTS;
+      resources: Record<string, Promise<string>>;
+    }
   > = {};
   for (const { keys, content } of list) {
     const ex = (examplesMap[keys.name] ??= { name: keys.name, resources: {} });
-    if (keys.fileName === "meta" && typeof content === "object") {
-      const meta = content;
-      ex.name = meta.name || ex.name;
-      ex.meta = meta;
-      continue;
+    if (keys.fileName === "meta") {
+      const metaContent = await content;
+      if (typeof metaContent === "object") {
+        const meta = metaContent;
+        ex.name = meta.name || ex.name;
+        ex.meta = meta;
+        continue;
+      }
     }
-    ex.resources[keys.fileName] =
+    ex.resources[keys.fileName] = content.then((content) =>
       typeof content === "string"
         ? content
-        : prettyStringify(content.default ?? content);
+        : prettyStringify(content.default ?? content),
+    );
   }
 
   for (const ex of Object.values(examplesMap).sort(({ name: a }, { name: b }) =>
@@ -87,7 +95,13 @@ export async function loadExamples(): Promise<Record<string, Example>> {
               ),
             );
         }
-        return Promise.resolve(ex.resources);
+        const files = await Promise.all(
+          Object.entries(ex.resources).map(async ([name, content]) => [
+            name,
+            await content,
+          ]),
+        );
+        return Object.fromEntries(files);
       },
     };
   }
