@@ -73,7 +73,7 @@ async function handleClickRepo() {
         :key="example.name"
         class="ep-select-example__item"
         @click="
-          (e) => {
+          (e: MouseEvent) => {
             (e.target as HTMLElement).tagName !== 'A' &&
               handleClickExample(example);
           }
