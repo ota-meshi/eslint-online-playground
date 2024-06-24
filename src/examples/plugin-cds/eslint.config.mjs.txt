@@ -1,0 +1,16 @@
+import cds from '@sap/eslint-plugin-cds'
+
+export default [
+  cds.configs.recommended,
+  {
+    plugins: {
+      '@sap/cds': cds
+    },
+    rules: {
+      // ...cds.configs.recommended.rules,
+      "@sap/cds/auth-valid-restrict-keys": ["warn","show"],
+      "@sap/cds/auth-valid-restrict-grant": ["warn","show"],
+      "@sap/cds/no-dollar-prefixed-names": ["error","show"]
+    }
+  }
+]
