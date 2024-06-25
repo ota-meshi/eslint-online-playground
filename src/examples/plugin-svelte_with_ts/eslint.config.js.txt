@@ -14,6 +14,7 @@ export default tseslint.config(
         parser: {
           ts: "@typescript-eslint/parser",
         },
+        extraFileExtensions: [".svelte"],
       },
     }
   },

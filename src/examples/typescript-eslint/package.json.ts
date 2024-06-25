@@ -1,8 +1,8 @@
 export default {
+  type: "module",
   devDependencies: {
-    "@typescript-eslint/parser": "latest",
-    "@typescript-eslint/eslint-plugin": "latest",
     eslint: "latest",
     typescript: "latest",
+    "typescript-eslint": "latest",
   },
 };

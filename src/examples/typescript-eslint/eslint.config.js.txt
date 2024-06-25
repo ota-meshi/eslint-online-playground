@@ -1,0 +1,22 @@
+import js from "@eslint/js";
+import tseslint from "typescript-eslint";
+export default tseslint.config(
+  js.configs.recommended,
+  {
+    files: ["**/*.{ts,mts,cts,tsx}", "*.{ts,mts,cts,tsx}"],
+    extends: [
+      tseslint.configs["eslint-recommended"],
+      ...tseslint.configs.recommended,
+      tseslint.configs["recommended-requiring-type-checking"],
+      ...tseslint.configs.strict,
+      {
+        languageOptions: {
+          parserOptions: {
+            tsconfigRootDir: import.meta.dirname,
+            project: true,
+          }
+        }
+      }
+    ]
+  },
+);
