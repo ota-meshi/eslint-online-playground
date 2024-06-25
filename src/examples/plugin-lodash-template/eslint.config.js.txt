@@ -1,0 +1,18 @@
+import js from "@eslint/js";
+import lodashTemplate from "eslint-plugin-lodash-template";
+export default [
+  js.configs.recommended,
+  {
+    files: ["**/*.html"],
+    ...lodashTemplate.configs["flat/recommended-with-html"]
+  },
+  {
+    files: ["**/*.ejs"],
+    ...lodashTemplate.configs["flat/base-with-ejs"],
+    ...lodashTemplate.configs["flat/recommended-with-html"]
+  },
+  {
+    files: ["**/*.js"],
+    ...lodashTemplate.configs["flat/recommended-with-script"]
+  }
+];
