@@ -1,0 +1,6 @@
+// import js from "@eslint/js";
+import pluginPromise from "eslint-plugin-promise"
+export default [
+  // js.configs.recommended,
+  pluginPromise.configs["flat/recommended"]
+];
