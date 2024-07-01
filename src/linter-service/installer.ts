@@ -15,6 +15,8 @@ export class Installer {
 
   private installProcess: Promise<WebContainerProcess> | undefined;
 
+  private lastPackageManager: "npm" | "yarn" | "pnpm" | undefined;
+
   public constructor({
     consoleOutput,
     outputTabs,
@@ -56,6 +58,14 @@ export class Installer {
     const packageManager = detectPackageManager(
       await this.webContainer.fs.readdir(""),
     );
+
+    if (this.lastPackageManager !== packageManager) {
+      this.lastPackageManager = packageManager;
+      await this.webContainer.fs.rm("node_modules", {
+        recursive: true,
+        force: true,
+      });
+    }
 
     this.running = true;
     const installProcess = await this.webContainer.spawn(packageManager, [
