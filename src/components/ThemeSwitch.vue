@@ -27,7 +27,7 @@ function switchTheme() {
     class="ep-theme-switch snb-shine-and-bright-switch"
     @click="switchTheme"
   >
-    <span class="snb-shine-and-bright"></span>
+    <span class="snb-shine-and-bright snb-twinkle-on-hover"></span>
   </button>
 </template>
 

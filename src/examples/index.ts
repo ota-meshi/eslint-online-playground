@@ -38,8 +38,8 @@ export async function loadExamples(): Promise<Record<string, Example>> {
       },
     ),
     ...Object.entries(
-      import.meta.glob("./**/*.{txt,js,cds,csv}", {
-        as: "raw",
+      import.meta.glob<string>("./**/*.{txt,js,cds,csv}", {
+        query: "?raw",
       }),
     ).map(([fileName, content]) => ({
       keys: convertToExampleKeys(fileName),
