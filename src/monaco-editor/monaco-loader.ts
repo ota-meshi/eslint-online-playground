@@ -187,24 +187,44 @@ function setupEnhancedLanguages(monaco: Monaco) {
   monaco.languages.registerTokensProviderFactory("astro", {
     async create() {
       const astro = await import("./monarch-syntaxes/astro");
-
       return astro.language;
+    },
+  });
+  monaco.languages.setLanguageConfiguration("astro", {
+    comments: {
+      blockComment: ["<!--", "-->"],
     },
   });
   monaco.languages.register({ id: "svelte" });
   monaco.languages.registerTokensProviderFactory("svelte", {
     async create() {
       const svelte = await import("./monarch-syntaxes/svelte");
-
       return svelte.language;
+    },
+  });
+  monaco.languages.setLanguageConfiguration("svelte", {
+    comments: {
+      blockComment: ["<!--", "-->"],
     },
   });
   monaco.languages.register({ id: "toml" });
   monaco.languages.registerTokensProviderFactory("toml", {
     async create() {
       const toml = await import("./monarch-syntaxes/toml");
-
       return toml.language;
     },
+  });
+  monaco.languages.setLanguageConfiguration("toml", {
+    comments: {
+      lineComment: "#",
+    },
+    brackets: [
+      ["{", "}"],
+      ["[", "]"],
+    ],
+    autoClosingPairs: [
+      { open: "{", close: "}" },
+      { open: "[", close: "]" },
+    ],
   });
 }
