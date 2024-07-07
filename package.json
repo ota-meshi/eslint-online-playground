@@ -24,6 +24,7 @@
   "homepage": "https://github.com/ota-meshi/eslint-online-playground#readme",
   "dependencies": {
     "@eslint-community/eslint-utils": "^4.4.0",
+    "@ota-meshi/site-kit-monarch-syntaxes": "^0.6.0",
     "@webcontainer/api": "^1.2.0",
     "code-red": "^1.0.4",
     "eslint-scope": "^8.0.1",

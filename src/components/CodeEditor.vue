@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import type { editor } from "monaco-editor";
 import { computed, ref } from "vue";
+import { loadMonaco } from "../monaco-editor";
+import type { Monaco } from "../monaco-editor";
 import type { CodeActionProvider } from "../monaco-editor/monaco-setup";
 import MonacoEditor from "./MonacoEditor.vue";
 import { getLang } from "./lang";
@@ -20,8 +22,12 @@ const emit =
 const fileNameInput = ref<HTMLInputElement>();
 const monacoEditor = ref<InstanceType<typeof MonacoEditor> | null>(null);
 const showPreview = ref(false);
+const monaco = ref<Monaco | null>(null);
+void loadMonaco().then((value) => {
+  monaco.value = value;
+});
 const language = computed(() => {
-  return getLang(props.fileName);
+  return getLang(monaco.value, props.fileName);
 });
 
 function handleUpdateModelValue(code: string) {
