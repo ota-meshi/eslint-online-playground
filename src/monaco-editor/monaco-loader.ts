@@ -183,48 +183,24 @@ async function appendScript(src: string): Promise<HTMLScriptElement> {
 }
 
 function setupEnhancedLanguages(monaco: Monaco) {
-  monaco.languages.register({ id: "astro" });
-  monaco.languages.registerTokensProviderFactory("astro", {
-    async create() {
-      const astro = await import("./monarch-syntaxes/astro");
-      return astro.language;
-    },
-  });
-  monaco.languages.setLanguageConfiguration("astro", {
-    comments: {
-      blockComment: ["<!--", "-->"],
-    },
-  });
-  monaco.languages.register({ id: "svelte" });
-  monaco.languages.registerTokensProviderFactory("svelte", {
-    async create() {
-      const svelte = await import("./monarch-syntaxes/svelte");
-      return svelte.language;
-    },
-  });
-  monaco.languages.setLanguageConfiguration("svelte", {
-    comments: {
-      blockComment: ["<!--", "-->"],
-    },
-  });
-  monaco.languages.register({ id: "toml" });
-  monaco.languages.registerTokensProviderFactory("toml", {
-    async create() {
-      const toml = await import("./monarch-syntaxes/toml");
-      return toml.language;
-    },
-  });
-  monaco.languages.setLanguageConfiguration("toml", {
-    comments: {
-      lineComment: "#",
-    },
-    brackets: [
-      ["{", "}"],
-      ["[", "]"],
-    ],
-    autoClosingPairs: [
-      { open: "{", close: "}" },
-      { open: "[", close: "]" },
-    ],
-  });
+  const dynamicImport: <M>(file: string) => Promise<M> = new Function(
+    "file",
+    "return import(file)",
+  ) as any;
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
+  dynamicImport<typeof import("@ota-meshi/site-kit-monarch-syntaxes/astro")>(
+    "https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/astro",
+  ).then((module) => module.setupAstroLanguage(monaco));
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
+  dynamicImport<typeof import("@ota-meshi/site-kit-monarch-syntaxes/stylus")>(
+    "https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/stylus",
+  ).then((module) => module.setupStylusLanguage(monaco));
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
+  dynamicImport<typeof import("@ota-meshi/site-kit-monarch-syntaxes/svelte")>(
+    "https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/svelte",
+  ).then((module) => module.setupSvelteLanguage(monaco));
+  // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
+  dynamicImport<typeof import("@ota-meshi/site-kit-monarch-syntaxes/toml")>(
+    "https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/toml",
+  ).then((module) => module.setupTomlLanguage(monaco));
 }
