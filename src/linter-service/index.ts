@@ -71,13 +71,15 @@ export async function setupLintServer({
   const serverFiles: FileSystemTree = {};
 
   for (const [file, contents] of Object.entries(
-    import.meta.glob<string>("./server/**/*.mjs", { query: "?raw" }),
+    import.meta.glob<{ default: string }>("./server/**/*.mjs", {
+      query: "?raw",
+    }),
   ).map(([file, load]) => {
     return [file.slice(9), load()] as const;
   })) {
     serverFiles[file] = {
       file: {
-        contents: await contents,
+        contents: await contents.then((m) => m.default),
       },
     };
   }

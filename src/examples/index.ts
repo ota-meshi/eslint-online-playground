@@ -38,12 +38,12 @@ export async function loadExamples(): Promise<Record<string, Example>> {
       },
     ),
     ...Object.entries(
-      import.meta.glob<string>("./**/*.{txt,js,cds,csv}", {
+      import.meta.glob<{ default: string }>("./**/*.{txt,js,cds,csv}", {
         query: "?raw",
       }),
-    ).map(([fileName, content]) => ({
+    ).map(([fileName, loadContent]) => ({
       keys: convertToExampleKeys(fileName),
-      content: content(),
+      content: loadContent().then((m) => m.default),
     })),
   ];
 
