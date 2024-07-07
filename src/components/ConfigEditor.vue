@@ -1,9 +1,15 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import { CONFIG_FILE_NAMES } from "../utils/eslint-info";
 import type { ConfigFileName } from "../utils/eslint-info";
+import { loadMonaco } from "../monaco-editor";
+import type { Monaco } from "../monaco-editor";
 import MonacoEditor from "./MonacoEditor.vue";
 import { getLang } from "./lang";
+const monaco = ref<Monaco | null>(null);
+void loadMonaco().then((value) => {
+  monaco.value = value;
+});
 const props = defineProps<{
   config: string;
   fileName: ConfigFileName;
@@ -21,7 +27,7 @@ const computedFileName = computed({
   },
 });
 const language = computed(() => {
-  return getLang(props.fileName);
+  return getLang(monaco.value, props.fileName);
 });
 
 function handleUpdateModelValue(config: string) {
