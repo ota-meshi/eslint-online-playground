@@ -12,24 +12,6 @@ export function loadMonaco(): Promise<Monaco> {
       const monaco: Monaco = await loadModuleFromMonaco(
         "vs/editor/editor.main",
       );
-      // monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-      //   allowComments: true,
-      //   trailingCommas: "ignore",
-      // });
-
-      // Turn off built-in validation.
-      monaco.languages.typescript.typescriptDefaults.setCompilerOptions({
-        validate: false,
-      });
-      // monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-      //   validate: false,
-      // });
-      // monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-      //   validate: false,
-      // });
-      // monaco.languages.css.cssDefaults.setOptions({
-      //   validate: false,
-      // });
 
       setupEnhancedLanguages(monaco);
 
@@ -46,32 +28,11 @@ export function enableBuiltinValidate({
 }): void {
   validateStateQueue = validateStateQueue.then(async () => {
     const monaco = await loadMonaco();
-    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-      validate: true,
-    });
-    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-      validate: true,
-      ...(jsonAs === "jsonc"
-        ? { allowComments: true, trailingCommas: "ignore" }
-        : {}),
-    });
-    monaco.languages.css.cssDefaults.setOptions({
-      validate: true,
-    });
-  });
-}
-
-export function enableJsoncValidate(): void {
-  validateStateQueue = validateStateQueue.then(async () => {
-    const monaco = await loadMonaco();
-    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-      validate: false,
-    });
-    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-      validate: false,
-    });
-    monaco.languages.css.cssDefaults.setOptions({
-      validate: false,
+    setAllValidations(monaco, true, {
+      json:
+        jsonAs === "jsonc"
+          ? { allowComments: true, trailingCommas: "ignore" }
+          : { allowComments: false, trailingCommas: "error" },
     });
   });
 }
@@ -79,15 +40,43 @@ export function enableJsoncValidate(): void {
 export function disableBuiltinValidate(): void {
   validateStateQueue = validateStateQueue.then(async () => {
     const monaco = await loadMonaco();
-    monaco.languages.typescript.javascriptDefaults.setCompilerOptions({
-      validate: false,
-    });
-    monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-      validate: false,
-    });
-    monaco.languages.css.cssDefaults.setOptions({
-      validate: false,
-    });
+    setAllValidations(monaco, false);
+  });
+}
+
+function setAllValidations(
+  monaco: Monaco,
+  validate: boolean,
+  languageOptions?: {
+    json?: monaco.languages.json.DiagnosticsOptions;
+  },
+) {
+  monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
+    ...monaco.languages.typescript.javascriptDefaults.getDiagnosticsOptions(),
+    noSemanticValidation: !validate,
+    noSyntaxValidation: !validate,
+  });
+  monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
+    ...monaco.languages.typescript.typescriptDefaults.getDiagnosticsOptions(),
+    noSemanticValidation: !validate,
+    noSyntaxValidation: !validate,
+  });
+  monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
+    ...monaco.languages.json.jsonDefaults.diagnosticsOptions,
+    validate,
+    ...languageOptions?.json,
+  });
+  monaco.languages.css.cssDefaults.setOptions({
+    ...monaco.languages.css.cssDefaults.options,
+    validate,
+  });
+  monaco.languages.css.scssDefaults.setOptions({
+    ...monaco.languages.css.scssDefaults.options,
+    validate,
+  });
+  monaco.languages.css.lessDefaults.setOptions({
+    ...monaco.languages.css.lessDefaults.options,
+    validate,
   });
 }
 
