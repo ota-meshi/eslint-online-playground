@@ -7,7 +7,7 @@ export function installPluginForJson(
   configText: string,
   plugins: Plugin[],
 ): ConfigInstallPluginResult {
-  let config: Linter.Config;
+  let config: Linter.LegacyConfig;
   try {
     config = JSON.parse(configText);
   } catch {
