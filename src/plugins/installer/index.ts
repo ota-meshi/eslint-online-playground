@@ -30,7 +30,7 @@ export async function installPlugin(
   let packageJsonObject: { devDependencies?: Record<string, string> };
   try {
     packageJsonObject = JSON.parse(packageJson);
-  } catch (_e) {
+  } catch {
     alertAndLog(`Cannot parse package.json`);
     return {
       error: true,
@@ -85,7 +85,7 @@ export async function installPlugin(
         packageJson: packageJsonResult,
       };
     }
-  } catch (_e) {
+  } catch {
     return {
       error: true,
     };
