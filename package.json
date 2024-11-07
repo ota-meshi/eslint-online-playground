@@ -26,6 +26,7 @@
     "@eslint-community/eslint-utils": "^4.4.0",
     "@ota-meshi/site-kit-monarch-syntaxes": "^0.7.0",
     "@webcontainer/api": "^1.2.0",
+    "ansi-regex": "^6.1.0",
     "code-red": "^1.0.4",
     "eslint-scope": "^8.0.1",
     "fflate": "^0.8.2",
