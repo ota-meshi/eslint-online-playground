@@ -1,4 +1,4 @@
-// eslint-disable-next-line @typescript-eslint/ban-types -- ignore
+// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- ignore
 export function debounce<F extends Function>(fn: F, interval = 100): F {
   let timer: NodeJS.Timeout | undefined;
 
