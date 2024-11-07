@@ -194,7 +194,7 @@ function margeImport(
         usedIds.add(name);
       }
     } else {
-      const node = findNamedImport(spec.imported.name);
+      const node = findNamedImport(getName(spec.imported));
       if (node) {
         localNames[spec.local.name] = node.spec.local.name;
       } else {
@@ -207,7 +207,7 @@ function margeImport(
               type: "ImportSpecifier",
               imported: {
                 type: "Identifier",
-                name: spec.imported.name,
+                name: getName(spec.imported),
               },
               local: {
                 type: "Identifier",
@@ -260,7 +260,8 @@ function margeImport(
     for (const node of iterateImport()) {
       const spec = node.specifiers.find(
         (spec): spec is ESTree.ImportSpecifier =>
-          spec.type === "ImportSpecifier" && spec.imported.name === imported,
+          spec.type === "ImportSpecifier" &&
+          getName(spec.imported) === imported,
       );
       if (spec) {
         return { decl: node, spec };
@@ -309,7 +310,7 @@ function margeRequire(
     } else if (spec.type === "ImportDefaultSpecifier") {
       importedName = "default";
     } else {
-      importedName = spec.imported.name;
+      importedName = getName(spec.imported);
     }
     const preferName: string = spec.local.name;
     if (requireNode.type === "Identifier") {
@@ -455,4 +456,8 @@ function resolveName(name: string, usedIds: Set<string>) {
     resolved = `_${resolved}`;
   }
   return resolved;
+}
+
+function getName(node: ESTree.Identifier | ESTree.Literal): string {
+  return node.type === "Identifier" ? node.name : String(node.value);
 }
