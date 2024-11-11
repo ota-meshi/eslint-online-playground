@@ -1,15 +1,21 @@
 <script lang="ts">
-const pluginName = "eslint-plugin-jsonc";
-export const name = `${pluginName} with @eslint/json`;
+const jsonc = "eslint-plugin-jsonc";
+const json = "@eslint/json";
+export const name = `${jsonc} with ${json}`;
 </script>
-<script setup lang="ts"></script>
+<script setup lang="ts">
+const pluginName = jsonc;
+</script>
 <template>
   <div>
-    Example that uses
-    <a href="https://github.com/eslint/json" target="_blank">@eslint/json</a>
-    with
-    <a href="https://ota-meshi.github.io/eslint-plugin-jsonc/" target="_blank"
-      >eslint-plugin-jsonc</a
-    >.
+    Example of using
+    <a
+      href="https://ota-meshi.github.io/eslint-plugin-jsonc/"
+      target="_blank"
+      >{{ pluginName }}</a
+    >
+    and
+    <a href="https://github.com/eslint/json" target="_blank">{{ json }}</a>
+    together.
   </div>
 </template>
