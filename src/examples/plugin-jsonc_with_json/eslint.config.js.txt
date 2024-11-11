@@ -1,0 +1,38 @@
+import json from "@eslint/json";
+import jsonc from 'eslint-plugin-jsonc';
+
+export default [
+  {
+    plugins: {
+      json,
+      jsonc
+    },
+  },
+  {
+    files: ["**/*.json"],
+    language: "json/json",
+    rules: {
+      ...json.configs.recommended.rules,
+      "jsonc/comma-dangle": "error",
+      "jsonc/quote-props": "error",
+    },
+  },
+  {
+    files: ["**/*.jsonc", ".vscode/*.json"],
+    language: "json/jsonc",
+    rules: {
+      ...json.configs.recommended.rules,
+      "jsonc/comma-dangle": "error",
+      "jsonc/quote-props": "error",
+    },
+  },
+  {
+    files: ["**/*.json5"],
+    language: "json/json5",
+    rules: {
+      ...json.configs.recommended.rules,
+      "jsonc/comma-dangle": "error",
+      "jsonc/quote-props": "error",
+    },
+  },
+];

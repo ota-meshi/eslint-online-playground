@@ -1,8 +1,8 @@
 export default {
   type: "module",
   devDependencies: {
+    "@eslint/json": "latest",
     eslint: "latest",
-    "eslint-plugin-package-json": "latest",
-    "jsonc-eslint-parser": "latest",
+    "eslint-plugin-jsonc": "latest",
   },
 };
