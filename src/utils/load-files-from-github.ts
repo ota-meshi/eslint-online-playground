@@ -81,11 +81,10 @@ async function loadFilesFromGitHubWithUnGh(
       response.files.map(async (file) => {
         if (!file.path.startsWith(prefix)) return;
         if (ignore(file)) return;
-        const fileResponse: UnGhFileResponse = await fetchWithMessage(
-          `https://ungh.cc/repos/${owner}/${repo}/files/${treeSha}/${file.path}`,
-        ).then((res) => res.json());
 
-        result[file.path] = fileResponse.file.contents;
+        result[file.path] = await fetchForGitHub(
+          `https://raw.githubusercontent.com/${owner}/${repo}/${treeSha}/${file.path}`,
+        ).then((res) => res.text());
       }),
     );
     return result;
