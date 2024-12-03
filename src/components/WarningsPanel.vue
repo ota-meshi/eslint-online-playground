@@ -61,13 +61,15 @@ function formatPosition(message: Linter.LintMessage) {
           <template v-if="msg.url">
             <a :href="msg.url" target="_blank">({{ msg.ruleId }})</a>
           </template>
-          <template v-else>({{ msg.ruleId }})</template>
-          <span
-            class="ep-warning__line-numbers"
-            @click="() => emit('clickMessage', msg)"
-          >
-            [{{ formatPosition(msg) }}]</span
-          >
+          <template v-else-if="msg.ruleId">({{ msg.ruleId }})</template>
+          <template v-if="msg.line != null">
+            <span
+              class="ep-warning__line-numbers"
+              @click="() => emit('clickMessage', msg)"
+            >
+              [{{ formatPosition(msg) }}]</span
+            >
+          </template>
         </li>
       </template>
       <template v-else>
