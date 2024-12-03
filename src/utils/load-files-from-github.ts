@@ -8,6 +8,11 @@ type TreeFile = { type: "blob"; url: string; path: string };
 type TreeDir = { type: "tree"; url: string; path: string };
 type TreeResponse = { tree: (TreeFile | TreeDir)[]; truncated: boolean };
 type RateLimitResponse = { rate: { limit: number; remaining: number } };
+
+type UnGhRepoResponse = { repo: { defaultBranch: string } };
+type UnGhFile = { path: string };
+type UnGhFilesResponse = { files: UnGhFile[] };
+type UnGhFileResponse = { file: { contents: string } };
 export function parseGitHubURL(
   url: string,
 ): { owner: string; repo: string; path: string; ref?: string } | null {
@@ -43,9 +48,52 @@ export async function loadFilesFromGitHub(
   ref?: string,
 ): Promise<Record<string, string>> {
   return loadingWith(async () => {
-    const result = await loadFilesFromGitHubTreesAPI(owner, repo, path, ref);
-    return result ?? loadFilesFromGitHubContentsAPI(owner, repo, path, ref);
+    return (
+      (await loadFilesFromGitHubWithUnGh(owner, repo, path, ref)) ??
+      (await loadFilesFromGitHubTreesAPI(owner, repo, path, ref)) ??
+      loadFilesFromGitHubContentsAPI(owner, repo, path, ref)
+    );
   });
+}
+
+async function loadFilesFromGitHubWithUnGh(
+  owner: string,
+  repo: string,
+  path: string,
+  ref?: string,
+): Promise<Record<string, string> | null> {
+  try {
+    const treeSha =
+      ref ||
+      (await (async () => {
+        const res: UnGhRepoResponse = await fetchWithMessage(
+          `https://ungh.cc/repos/${owner}/${repo}`,
+        ).then((res) => res.json());
+        return res.repo.defaultBranch;
+      })());
+    if (!treeSha) return null;
+    const response: UnGhFilesResponse = await fetchWithMessage(
+      `https://ungh.cc/repos/${owner}/${repo}/files/${treeSha}`,
+    ).then((res) => res.json());
+    const result: Record<string, string> = {};
+    const prefix = path ? `${path}/` : "";
+    await Promise.all(
+      response.files.map(async (file) => {
+        if (!file.path.startsWith(prefix)) return;
+        if (ignore(file)) return;
+        const fileResponse: UnGhFileResponse = await fetchWithMessage(
+          `https://ungh.cc/repos/${owner}/${repo}/files/${treeSha}/${file.path}`,
+        ).then((res) => res.json());
+
+        result[file.path] = fileResponse.file.contents;
+      }),
+    );
+    return result;
+  } catch (e) {
+    // eslint-disable-next-line no-console -- debug
+    console.error(e);
+    return null;
+  }
 }
 
 async function loadFilesFromGitHubTreesAPI(
@@ -121,7 +169,7 @@ async function loadFilesFromGitHubContentsURL(
   return result;
 }
 
-function ignore(file: ContentFile | TreeFile): boolean {
+function ignore(file: ContentFile | TreeFile | UnGhFile): boolean {
   return (
     // Ignore .gitignore, .github, .vscode, .devcontainer
     // and binary files
@@ -192,6 +240,20 @@ let queue: Promise<any> = Promise.resolve();
 
 let githubToken = "";
 
+async function fetchWithMessage(url: string | URL): Promise<Response> {
+  queue = queue.then(() => messageWith(`Request to\n${url}`, nextFetch));
+  return queue;
+
+  function nextFetch() {
+    return fetch(url).then(async (res) => {
+      if (res.status !== 200) {
+        throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
+      }
+      return res;
+    });
+  }
+}
+
 async function fetchForGitHub(url: string | URL): Promise<Response> {
   // debug
   // if (!githubToken) {
@@ -200,10 +262,7 @@ async function fetchForGitHub(url: string | URL): Promise<Response> {
   //     new Error(`Failed to fetch ${url}: ${2}`),
   //   );
   // }
-  queue = queue.then(
-    () => messageWith(`Request to\n${url}`, nextFetch),
-    () => messageWith(`Request to\n${url}`, nextFetch),
-  );
+  queue = queue.then(() => messageWith(`Request to\n${url}`, nextFetch));
   return queue;
 
   function nextFetch() {
