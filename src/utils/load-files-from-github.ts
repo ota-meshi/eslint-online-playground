@@ -12,7 +12,6 @@ type RateLimitResponse = { rate: { limit: number; remaining: number } };
 type UnGhRepoResponse = { repo: { defaultBranch: string } };
 type UnGhFile = { path: string };
 type UnGhFilesResponse = { files: UnGhFile[] };
-type UnGhFileResponse = { file: { contents: string } };
 export function parseGitHubURL(
   url: string,
 ): { owner: string; repo: string; path: string; ref?: string } | null {
