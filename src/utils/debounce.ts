@@ -1,11 +1,13 @@
-// eslint-disable-next-line @typescript-eslint/no-unsafe-function-type -- ignore
-export function debounce<F extends Function>(fn: F, interval = 100): F {
+export function debounce<ARGS extends any[], F extends (...args: ARGS) => void>(
+  fn: F,
+  interval = 100,
+): (...args: ARGS) => void {
   let timer: NodeJS.Timeout | undefined;
 
-  return ((...args: any[]) => {
+  return (...args) => {
     clearTimeout(timer);
     timer = setTimeout(() => {
-      void fn(...(args as any));
+      fn(...args);
     }, interval);
-  }) as unknown as F;
+  };
 }

@@ -435,7 +435,7 @@ watch(
         configFileName: configFileName.value,
       });
     }
-  }, 300),
+  }, 1000),
 );
 
 async function updatePackageJson(packageJson: string) {
