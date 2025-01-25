@@ -15,7 +15,7 @@ import { installPlugin } from "./plugins";
 import type { Plugin } from "./plugins";
 import { maybeTSConfig } from "./utils/tsconfig";
 import { prettyStringify } from "./utils/json-utils";
-import * as hash from "./utils/hash";
+import * as href from "./utils/href";
 import { isLockFile } from "./utils/lock-file";
 import { isRepoEnvFile } from "./utils/evn-file";
 
@@ -101,14 +101,17 @@ async function handleSelectPlugins(plugins: Plugin[]) {
   sources.value = newSources;
 }
 
-let lastHashData = hash.getHashData();
+let lastQueryAndHashData = href.getQueryAndHashData();
 
 watch(
   sources,
   debounce(() => {
     const hashData = compress(sources.value);
-    lastHashData = hashData;
-    window.location.hash = hashData;
+    lastQueryAndHashData = { hash: hashData };
+    const url = new URL(window.location.href);
+    url.search = "";
+    url.hash = hashData;
+    history.replaceState(null, "", url.toString());
     if (window.parent) {
       window.parent.postMessage(hashData, "*");
     }
@@ -118,9 +121,11 @@ watch(
 
 if (typeof window !== "undefined") {
   window.addEventListener("hashchange", () => {
-    const hashData = hash.getHashData();
-    if (hashData && hashData !== lastHashData) {
-      void hash.toSources(hashData).then((sources) => {
+    const queryAndHashData = href.getQueryAndHashData();
+    if (
+      JSON.stringify(queryAndHashData) !== JSON.stringify(lastQueryAndHashData)
+    ) {
+      void href.toSources(queryAndHashData).then((sources) => {
         if (sources) {
           void setSources(sources);
         }
