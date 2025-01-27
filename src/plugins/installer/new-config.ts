@@ -18,9 +18,9 @@ export async function installPluginForFlatConfig(
   configText: string,
   plugins: Plugin[],
 ): Promise<ConfigInstallPluginResult> {
-  const codeRead = await import("code-red");
+  const codeRed = await import("code-red");
   try {
-    const ast: ESTree.Program = codeRead.parse(configText, {
+    const ast: ESTree.Program = codeRed.parse(configText, {
       ecmaVersion: "latest",
       ranges: true,
       locations: true,
@@ -86,10 +86,10 @@ export async function installPluginForFlatConfig(
     const helper: BuildESLintConfigHelper = {
       type: sourceType,
       x(code) {
-        return codeRead.parseExpressionAt(code, 0, {});
+        return codeRed.parseExpressionAt(code, 0, {});
       },
       i(code) {
-        const decl = codeRead.parse(code, {
+        const decl = codeRed.parse(code, {
           ecmaVersion: "latest",
           sourceType: "module",
         }).body[0];
@@ -100,7 +100,7 @@ export async function installPluginForFlatConfig(
         throw new Error("Failed to parse import declaration.");
       },
       require(def) {
-        return codeRead.parse(
+        return codeRed.parse(
           `import * as ${def.local} from ${JSON.stringify(def.source)}`,
           {
             ecmaVersion: "latest",
@@ -133,7 +133,7 @@ export async function installPluginForFlatConfig(
       targetNode.elements.push(...eslintConfig.expression(localNames, helper));
     }
 
-    return { configText: codeRead.print(ast).code };
+    return { configText: codeRed.print(ast).code };
   } catch (e) {
     // eslint-disable-next-line no-console -- ignore
     console.error(e);
