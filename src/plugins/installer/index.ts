@@ -21,6 +21,7 @@ export type ConfigInstallPluginResult =
     }
   | { error: true; configText?: string };
 
+// eslint-disable-next-line complexity -- ignore
 export async function installPlugin(
   packageJson: string,
   configText: string,
@@ -84,6 +85,14 @@ export async function installPlugin(
         ...(await installPluginForFlatConfig(configText, plugins)),
         packageJson: packageJsonResult,
       };
+    }
+    if (
+      configFileName === "eslint.config.ts" ||
+      configFileName === "eslint.config.cts" ||
+      configFileName === "eslint.config.mts"
+    ) {
+      alertAndLog("TypeScript config is not supported.");
+      return { error: true };
     }
   } catch {
     return {

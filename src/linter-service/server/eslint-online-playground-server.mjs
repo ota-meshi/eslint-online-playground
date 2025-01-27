@@ -10,6 +10,7 @@ import {
   extractJson,
   isReservedFileName,
   CONFIG_FILE_NAMES,
+  LEGACY_CONFIG_FILE_NAMES,
 } from "./eslint-online-playground-server-utils.mjs";
 import fs from "fs";
 import path from "path";
@@ -147,10 +148,6 @@ async function lint(input) {
   }
 
   function useLegacyConfig() {
-    return (
-      input.configFileName !== "eslint.config.js" &&
-      input.configFileName !== "eslint.config.cjs" &&
-      input.configFileName !== "eslint.config.mjs"
-    );
+    return LEGACY_CONFIG_FILE_NAMES.includes(input.configFileName);
   }
 }
