@@ -1,16 +1,25 @@
 const DIRECTIVE_OPEN = "{{{ep-json-start}}}";
 const DIRECTIVE_CLOSE = "{{{ep-json-end}}}";
 
-export const CONFIG_FILE_NAMES = [
+export const FLAT_CONFIG_FILE_NAMES = /** @type {const} */ ([
+  "eslint.config.js",
+  "eslint.config.cjs",
+  "eslint.config.mjs",
+  "eslint.config.ts",
+  "eslint.config.cts",
+  "eslint.config.mts",
+]);
+export const LEGACY_CONFIG_FILE_NAMES = /** @type {const} */ ([
   ".eslintrc",
   ".eslintrc.cjs",
   ".eslintrc.js",
   ".eslintrc.json",
   ".eslintrc.yaml",
   ".eslintrc.yml",
-  "eslint.config.js",
-  "eslint.config.cjs",
-  "eslint.config.mjs",
+]);
+export const CONFIG_FILE_NAMES = [
+  ...FLAT_CONFIG_FILE_NAMES,
+  ...LEGACY_CONFIG_FILE_NAMES,
 ];
 const RESERVED_FILE_NAMES = [
   "eslint-online-playground-server.mjs",
