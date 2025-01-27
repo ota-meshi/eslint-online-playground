@@ -79,9 +79,9 @@ async function loadFilesFromGitHubWithUnGh(
     await Promise.all(
       response.files.map(async (file) => {
         if (!file.path.startsWith(prefix)) return;
-        if (ignore(file)) return;
+        if (ignore(file.path)) return;
 
-        result[file.path] = await fetchForGitHub(
+        result[file.path.slice(prefix.length)] = await fetchForGitHub(
           `https://raw.githubusercontent.com/${owner}/${repo}/${treeSha}/${file.path}`,
         ).then((res) => res.text());
       }),
@@ -120,8 +120,8 @@ async function loadFilesFromGitHubTreesAPI(
     response.tree.map(async (file) => {
       if (file.type === "blob") {
         if (!file.path.startsWith(prefix)) return;
-        if (ignore(file)) return;
-        result[file.path] = await fetchForGitHub(
+        if (ignore(file.path)) return;
+        result[file.path.slice(prefix.length)] = await fetchForGitHub(
           `https://raw.githubusercontent.com/${owner}/${repo}/${treeSha}/${file.path}`,
         ).then((res) => res.text());
       }
@@ -155,7 +155,7 @@ async function loadFilesFromGitHubContentsURL(
   await Promise.all(
     (Array.isArray(response) ? response : [response]).map(async (file) => {
       if (file.type === "file") {
-        if (ignore(file)) return;
+        if (ignore(file.path)) return;
         result[file.path] = await fetchForGitHub(file.download_url).then(
           (res) => res.text(),
         );
@@ -167,16 +167,16 @@ async function loadFilesFromGitHubContentsURL(
   return result;
 }
 
-function ignore(file: ContentFile | TreeFile | UnGhFile): boolean {
+function ignore(filePath: string): boolean {
   return (
     // Ignore .gitignore, .github, .vscode, .devcontainer
     // and binary files
-    file.path === ".gitignore" ||
-    file.path.endsWith("/.gitignore") ||
-    file.path.startsWith(".github/") ||
-    file.path.startsWith(".vscode/") ||
-    file.path.startsWith(".devcontainer/") ||
-    maybeBinaryFile(file.path)
+    filePath === ".gitignore" ||
+    filePath.endsWith("/.gitignore") ||
+    filePath.startsWith(".github/") ||
+    filePath.startsWith(".vscode/") ||
+    filePath.startsWith(".devcontainer/") ||
+    maybeBinaryFile(filePath)
   );
 }
 
