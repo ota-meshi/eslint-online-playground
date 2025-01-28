@@ -6,6 +6,7 @@
     "src/**/*.d.ts",
     "src/**/*.tsx",
     "src/**/*.vue",
+    "test/**/*.ts",
     "vite.config.ts"
   ]
 }

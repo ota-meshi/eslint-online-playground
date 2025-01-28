@@ -1,3 +1,5 @@
+// eslint-disable-next-line spaced-comment -- triple slash directive
+/// <reference types="vitest" />
 import { defineConfig } from "vite";
 import vue from "@vitejs/plugin-vue";
 import { fileURLToPath } from "url";
@@ -19,5 +21,8 @@ export default defineConfig(() => ({
       yaml: path.resolve(dirname, "./node_modules/yaml/browser/index.js"),
       assert: path.join(dirname, "./shim-assert.mjs"),
     },
+  },
+  test: {
+    include: ["test/**/*.ts"],
   },
 }));

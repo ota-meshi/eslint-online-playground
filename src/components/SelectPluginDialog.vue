@@ -11,7 +11,7 @@ const selectPlugins = ref<string[]>([]);
 const packageJson = ref({});
 const availablePlugins = computed(() => {
   return Object.values(plugins.value).filter(
-    (p) => !p.hasInstalled(packageJson.value),
+    (p) => !p.hasInstalled || !p.hasInstalled(packageJson.value),
   );
 });
 
