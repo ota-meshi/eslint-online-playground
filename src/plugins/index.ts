@@ -36,7 +36,7 @@ export type Plugin = {
   devDependencies: Record<string, string>;
   eslintLegacyConfig?: ESLintLegacyConfig;
   eslintConfig?: ESLintConfig<string>;
-  hasInstalled: (packageJson: any) => boolean;
+  hasInstalled?: (packageJson: any) => boolean;
 };
 
 export * from "./installer";

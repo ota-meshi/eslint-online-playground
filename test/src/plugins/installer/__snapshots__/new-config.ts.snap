@@ -1,0 +1,95 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`installPluginForFlatConfig with es-x > cjs 1`] = `
+"const js = require("@eslint/js");
+const jsdoc = require('eslint-plugin-jsdoc');
+const es = require("eslint-plugin-es-x");
+
+module.exports = [
+	js.configs.recommended,
+	{ rules: { quotes: ["error", "double"] } },
+	es.configs['flat/restrict-to-es2019']
+];"
+`;
+
+exports[`installPluginForFlatConfig with es-x > esm 1`] = `
+"import js from "@eslint/js";
+import jsdoc from 'eslint-plugin-jsdoc';
+import es from 'eslint-plugin-es-x';
+
+export default [
+	js.configs.recommended,
+	{ rules: { quotes: ["error", "double"] } },
+	es.configs['flat/restrict-to-es2019']
+];"
+`;
+
+exports[`installPluginForFlatConfig with jsdoc > cjs 1`] = `
+"const js = require("@eslint/js");
+const jsdoc = require('eslint-plugin-jsdoc');
+
+module.exports = [
+	js.configs.recommended,
+	{ rules: { quotes: ["error", "double"] } },
+	jsdoc.configs['flat/recommended']
+];"
+`;
+
+exports[`installPluginForFlatConfig with jsdoc > esm 1`] = `
+"import js from "@eslint/js";
+import jsdoc from 'eslint-plugin-jsdoc';
+
+export default [
+	js.configs.recommended,
+	{ rules: { quotes: ["error", "double"] } },
+	jsdoc.configs['flat/recommended']
+];"
+`;
+
+exports[`installPluginForFlatConfig with stylistic > cjs 1`] = `
+"const js = require("@eslint/js");
+const jsdoc = require('eslint-plugin-jsdoc');
+const stylistic = require("@stylistic/eslint-plugin");
+
+module.exports = [
+	js.configs.recommended,
+	{ rules: { quotes: ["error", "double"] } },
+	stylistic.configs['recommended-flat']
+];"
+`;
+
+exports[`installPluginForFlatConfig with stylistic > esm 1`] = `
+"import js from "@eslint/js";
+import jsdoc from 'eslint-plugin-jsdoc';
+import stylistic from '@stylistic/eslint-plugin';
+
+export default [
+	js.configs.recommended,
+	{ rules: { quotes: ["error", "double"] } },
+	stylistic.configs['recommended-flat']
+];"
+`;
+
+exports[`installPluginForFlatConfig with typescript-eslint > cjs 1`] = `
+"const js = require("@eslint/js");
+const jsdoc = require('eslint-plugin-jsdoc');
+const tseslint = require("typescript-eslint");
+
+module.exports = [
+	js.configs.recommended,
+	{ rules: { quotes: ["error", "double"] } },
+	...tseslint.config(...tseslint.configs.recommended)
+];"
+`;
+
+exports[`installPluginForFlatConfig with typescript-eslint > esm 1`] = `
+"import js from "@eslint/js";
+import jsdoc from 'eslint-plugin-jsdoc';
+import tseslint from 'typescript-eslint';
+
+export default [
+	js.configs.recommended,
+	{ rules: { quotes: ["error", "double"] } },
+	...tseslint.config(...tseslint.configs.recommended)
+];"
+`;
