@@ -7,9 +7,9 @@ export async function installPluginForCJS(
   configText: string,
   plugins: Plugin[],
 ): Promise<ConfigInstallPluginResult> {
-  const codeRead = await import("code-red");
+  const codeRed = await import("code-red");
   try {
-    const ast: ESTree.Program = codeRead.parse(configText, {
+    const ast: ESTree.Program = codeRed.parse(configText, {
       ecmaVersion: "latest",
       ranges: true,
       locations: true,
@@ -77,7 +77,7 @@ export async function installPluginForCJS(
       }
     }
 
-    return { configText: codeRead.print(ast).code };
+    return { configText: codeRed.print(ast).code };
   } catch (e) {
     // eslint-disable-next-line no-console -- ignore
     console.error(e);

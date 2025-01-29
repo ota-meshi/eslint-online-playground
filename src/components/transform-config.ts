@@ -49,8 +49,8 @@ export async function transformConfigFormat(
 }
 
 async function transformCjsToJson(configText: string) {
-  const codeRead = await import("code-red");
-  const ast: ESTree.Program = codeRead.parse(configText, {
+  const codeRed = await import("code-red");
+  const ast: ESTree.Program = codeRed.parse(configText, {
     ecmaVersion: "latest",
     ranges: true,
     locations: true,
@@ -74,9 +74,11 @@ async function transformCjsToJson(configText: string) {
 }
 
 async function transformCjsToYaml(configText: string) {
-  const codeRead = await import("code-red");
-  const yaml = await import("yaml");
-  const ast: ESTree.Program = codeRead.parse(configText, {
+  const [codeRed, yaml] = await Promise.all([
+    import("code-red"),
+    import("yaml"),
+  ]);
+  const ast: ESTree.Program = codeRed.parse(configText, {
     ecmaVersion: "latest",
     ranges: true,
     locations: true,
@@ -106,20 +108,22 @@ async function transformYamlToJson(configText: string) {
 }
 
 async function transformYamlToCjs(configText: string) {
-  const yaml = await import("yaml");
-  const codeRead = await import("code-red");
+  const [yaml, codeRed] = await Promise.all([
+    import("yaml"),
+    import("code-red"),
+  ]);
 
   const ast = yaml.parseDocument(configText);
 
   return `module.exports = ${
-    codeRead.print(yamlToJsExpression(yaml, ast.contents)).code
+    codeRed.print(yamlToJsExpression(yaml, ast.contents)).code
   }`;
 }
 
 async function transformJsonToCjs(configText: string) {
   const parsed = JSON.parse(configText);
-  const codeRead = await import("code-red");
-  return `module.exports = ${codeRead.print(toESExpression(parsed)).code}`;
+  const codeRed = await import("code-red");
+  return `module.exports = ${codeRed.print(toESExpression(parsed)).code}`;
 }
 
 async function jsExpressionToYaml(
