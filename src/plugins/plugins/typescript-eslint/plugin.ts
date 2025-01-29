@@ -35,9 +35,9 @@ export const eslintConfig: ESLintConfig<"tseslint"> = {
       });
     }
   },
-  *expression(names, helper) {
+  async *expression(names, helper) {
     yield helper.spread(
-      helper.x(
+      await helper.x(
         `${names.tseslint}.config(...${names.tseslint}.configs.recommended)`,
       ),
     );

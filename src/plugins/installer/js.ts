@@ -7,15 +7,9 @@ export async function installPluginForCJS(
   configText: string,
   plugins: Plugin[],
 ): Promise<ConfigInstallPluginResult> {
-  const codeRed = await import("code-red");
+  const es = await import("../../es/index");
   try {
-    const ast: ESTree.Program = codeRed.parse(configText, {
-      ecmaVersion: "latest",
-      ranges: true,
-      locations: true,
-      sourceType: "module",
-      allowReturnOutsideFunction: true,
-    }) as never;
+    const ast: ESTree.Program = await es.parse(configText);
 
     let commonJsExports = ast.body.find(isModuleExports);
     if (!commonJsExports) {
@@ -77,7 +71,7 @@ export async function installPluginForCJS(
       }
     }
 
-    return { configText: codeRed.print(ast).code };
+    return { configText: await es.print(ast) };
   } catch (e) {
     // eslint-disable-next-line no-console -- ignore
     console.error(e);

@@ -13,20 +13,14 @@ import {
   isRequireDeclaration,
   iterateRequireDeclarator,
 } from "../../utils/estree-utils";
+import * as es from "../../es/index";
 
 export async function installPluginForFlatConfig(
   configText: string,
   plugins: Plugin[],
 ): Promise<ConfigInstallPluginResult> {
-  const codeRed = await import("code-red");
   try {
-    const ast: ESTree.Program = codeRed.parse(configText, {
-      ecmaVersion: "latest",
-      ranges: true,
-      locations: true,
-      sourceType: "module",
-      allowReturnOutsideFunction: true,
-    }) as never;
+    const ast: ESTree.Program = await es.parse(configText);
 
     let targetNode: ESTree.ArrayExpression;
     let sourceType: "module" | "script" = "module";
@@ -86,27 +80,29 @@ export async function installPluginForFlatConfig(
     const helper: BuildESLintConfigHelper = {
       type: sourceType,
       x(code) {
-        return codeRed.parseExpressionAt(code, 0, {});
+        return es.parseExpression(code);
       },
-      i(code) {
-        const decl = codeRed.parse(code, {
-          ecmaVersion: "latest",
-          sourceType: "module",
-        }).body[0];
+      async i(code) {
+        const decl = (await es.parse(code)).body[0];
 
         if (decl?.type === "ImportDeclaration") {
           return decl;
         }
-        throw new Error("Failed to parse import declaration.");
+        throw new Error(
+          `Failed to parse import declaration: ${JSON.stringify(code)}`,
+        );
       },
-      require(def) {
-        return codeRed.parse(
-          `import * as ${def.local} from ${JSON.stringify(def.source)}`,
-          {
-            ecmaVersion: "latest",
-            sourceType: "module",
-          },
+      async require(def) {
+        const decl = (
+          await es.parse(
+            `import * as ${def.local} from ${JSON.stringify(def.source)}`,
+          )
         ).body[0];
+
+        if (decl?.type === "ImportDeclaration") {
+          return decl;
+        }
+        throw new Error(`Failed to parse: ${JSON.stringify(def)}`);
       },
       spread(expression) {
         return {
@@ -123,17 +119,19 @@ export async function installPluginForFlatConfig(
       }
       const eslintConfig = plugin.eslintConfig;
       const localNames: Record<string, string> = Object.create(null);
-      for (const decl of eslintConfig.imports(helper)) {
+      for await (const decl of eslintConfig.imports(helper)) {
         if (sourceType === "module") {
           margeImport(ast.body, decl, localNames, usedIds);
         } else {
           margeRequire(ast.body, decl, localNames, usedIds);
         }
       }
-      targetNode.elements.push(...eslintConfig.expression(localNames, helper));
+      for await (const element of eslintConfig.expression(localNames, helper)) {
+        targetNode.elements.push(element);
+      }
     }
 
-    return { configText: codeRed.print(ast).code };
+    return { configText: await es.print(ast) };
   } catch (e) {
     // eslint-disable-next-line no-console -- ignore
     console.error(e);
