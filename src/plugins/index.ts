@@ -10,23 +10,28 @@ export type ESLintLegacyConfig = {
     parser?: string;
   }[];
 };
+type MaybePromise<T> = T | Promise<T>;
+type MaybeAsyncIterable<T> = Iterable<MaybePromise<T>> | AsyncIterable<T>;
 export type BuildESLintConfigHelper = {
-  x(code: string): ESTree.Expression;
-  spread(expression: ESTree.Expression): ESTree.SpreadElement;
-  i(code: string): ESTree.ImportDeclaration;
-  require(def: { local: string; source: string }): ESTree.ImportDeclaration;
+  x(code: string): MaybePromise<ESTree.Expression>;
+  spread(expression: ESTree.Expression): MaybePromise<ESTree.SpreadElement>;
+  i(code: string): MaybePromise<ESTree.ImportDeclaration>;
+  require(def: {
+    local: string;
+    source: string;
+  }): MaybePromise<ESTree.ImportDeclaration>;
   type: "module" | "script";
 };
 export type ESLintConfig<N extends string> = {
   /** Return an ImportDeclaration that imports the plugin. */
   imports: (
     helper: BuildESLintConfigHelper,
-  ) => Iterable<ESTree.ImportDeclaration>;
+  ) => MaybeAsyncIterable<ESTree.ImportDeclaration>;
   /** Return an Expression or SpreadElement that represents the element to configure. */
   expression: (
     names: Record<N, string>,
     helper: BuildESLintConfigHelper,
-  ) => Iterable<ESTree.Expression | ESTree.SpreadElement>;
+  ) => MaybeAsyncIterable<ESTree.Expression | ESTree.SpreadElement>;
 };
 
 export type Plugin = {

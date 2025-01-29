@@ -6,6 +6,7 @@ import { installPluginForCJS } from "./js";
 import { installPluginForJson } from "./json";
 import { prettyStringify } from "../../utils/json-utils";
 import { installPluginForFlatConfig } from "./new-config";
+import { FLAT_CONFIG_FILE_NAMES } from "../../linter-service/server/eslint-online-playground-server-utils.mjs";
 
 export type InstallPluginResult =
   | {
@@ -21,7 +22,6 @@ export type ConfigInstallPluginResult =
     }
   | { error: true; configText?: string };
 
-// eslint-disable-next-line complexity -- ignore
 export async function installPlugin(
   packageJson: string,
   configText: string,
@@ -76,23 +76,11 @@ export async function installPlugin(
         packageJson: packageJsonResult,
       };
     }
-    if (
-      configFileName === "eslint.config.js" ||
-      configFileName === "eslint.config.cjs" ||
-      configFileName === "eslint.config.mjs"
-    ) {
+    if (FLAT_CONFIG_FILE_NAMES.includes(configFileName as never)) {
       return {
         ...(await installPluginForFlatConfig(configText, plugins)),
         packageJson: packageJsonResult,
       };
-    }
-    if (
-      configFileName === "eslint.config.ts" ||
-      configFileName === "eslint.config.cts" ||
-      configFileName === "eslint.config.mts"
-    ) {
-      alertAndLog("TypeScript config is not supported.");
-      return { error: true };
     }
   } catch {
     return {

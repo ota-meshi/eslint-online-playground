@@ -49,14 +49,8 @@ export async function transformConfigFormat(
 }
 
 async function transformCjsToJson(configText: string) {
-  const codeRed = await import("code-red");
-  const ast: ESTree.Program = codeRed.parse(configText, {
-    ecmaVersion: "latest",
-    ranges: true,
-    locations: true,
-    sourceType: "module",
-    allowReturnOutsideFunction: true,
-  }) as never;
+  const es = await import("../es/index");
+  const ast: ESTree.Program = await es.parse(configText);
 
   const scopeManager = await analyzeScope(ast);
 
@@ -74,17 +68,8 @@ async function transformCjsToJson(configText: string) {
 }
 
 async function transformCjsToYaml(configText: string) {
-  const [codeRed, yaml] = await Promise.all([
-    import("code-red"),
-    import("yaml"),
-  ]);
-  const ast: ESTree.Program = codeRed.parse(configText, {
-    ecmaVersion: "latest",
-    ranges: true,
-    locations: true,
-    sourceType: "module",
-    allowReturnOutsideFunction: true,
-  }) as never;
+  const [es, yaml] = await Promise.all([import("../es/index"), import("yaml")]);
+  const ast: ESTree.Program = await es.parse(configText);
 
   const exportNode = ast.body.find(isModuleExports);
   if (exportNode) {
@@ -108,22 +93,19 @@ async function transformYamlToJson(configText: string) {
 }
 
 async function transformYamlToCjs(configText: string) {
-  const [yaml, codeRed] = await Promise.all([
-    import("yaml"),
-    import("code-red"),
-  ]);
+  const [yaml, es] = await Promise.all([import("yaml"), import("../es/index")]);
 
   const ast = yaml.parseDocument(configText);
 
-  return `module.exports = ${
-    codeRed.print(yamlToJsExpression(yaml, ast.contents)).code
-  }`;
+  return `module.exports = ${await es.print(
+    yamlToJsExpression(yaml, ast.contents),
+  )}`;
 }
 
 async function transformJsonToCjs(configText: string) {
   const parsed = JSON.parse(configText);
-  const codeRed = await import("code-red");
-  return `module.exports = ${codeRed.print(toESExpression(parsed)).code}`;
+  const es = await import("../es/index");
+  return `module.exports = ${await es.print(toESExpression(parsed))}`;
 }
 
 async function jsExpressionToYaml(

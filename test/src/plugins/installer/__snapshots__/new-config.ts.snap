@@ -3,7 +3,7 @@
 exports[`installPluginForFlatConfig with es-x > cjs 1`] = `
 "const js = require("@eslint/js");
 const jsdoc = require('eslint-plugin-jsdoc');
-const es = require("eslint-plugin-es-x");
+const es = require('eslint-plugin-es-x');
 
 module.exports = [
 	js.configs.recommended,
@@ -49,7 +49,7 @@ export default [
 exports[`installPluginForFlatConfig with stylistic > cjs 1`] = `
 "const js = require("@eslint/js");
 const jsdoc = require('eslint-plugin-jsdoc');
-const stylistic = require("@stylistic/eslint-plugin");
+const stylistic = require('@stylistic/eslint-plugin');
 
 module.exports = [
 	js.configs.recommended,
@@ -73,7 +73,7 @@ export default [
 exports[`installPluginForFlatConfig with typescript-eslint > cjs 1`] = `
 "const js = require("@eslint/js");
 const jsdoc = require('eslint-plugin-jsdoc');
-const tseslint = require("typescript-eslint");
+const tseslint = require('typescript-eslint');
 
 module.exports = [
 	js.configs.recommended,
