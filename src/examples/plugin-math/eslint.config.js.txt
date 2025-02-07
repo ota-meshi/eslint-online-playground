@@ -1,0 +1,6 @@
+import js from "@eslint/js";
+import eslintPluginMath from 'eslint-plugin-math';
+export default [
+  js.configs.recommended,
+  eslintPluginMath.configs.recommended,
+];
