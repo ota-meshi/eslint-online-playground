@@ -18,6 +18,7 @@ import TabsPanel from "./TabsPanel.vue";
 import TabPanel from "./TabPanel.vue";
 import WarningsPanel from "./WarningsPanel.vue";
 import TreeTabs from "./TreeTabs.vue";
+import ContextMenu from "./ContextMenu.vue";
 import type {
   LinterService,
   LinterServiceResultSuccess,
@@ -55,6 +56,7 @@ let seq = 0;
 const consoleOutput = ref<InstanceType<typeof ConsoleOutput> | null>(null);
 const outputTabs = ref<InstanceType<typeof TabsPanel> | null>(null);
 const inputTabs = ref<InstanceType<typeof TreeTabs> | null>(null);
+const contextMenu = ref<InstanceType<typeof ContextMenu> | null>(null);
 const lintServerRef = shallowRef<LinterService>();
 const monacoRef = shallowRef<Monaco>();
 void loadMonaco().then((monaco) => (monacoRef.value = monaco));
@@ -145,6 +147,7 @@ type SourceData = {
     _range: Range,
     context: languages.CodeActionContext,
   ) => ReturnType<CodeActionProvider>;
+  codeActionList?: languages.CodeActionList;
 };
 
 watch(
@@ -641,6 +644,45 @@ function handleClickMessage(message: Linter.LintMessage) {
   inputTabs.value?.setChecked(source.fileName);
 }
 
+async function handleContextmenuMessage({
+  message,
+  event,
+}: {
+  message: Linter.LintMessage;
+  event: MouseEvent;
+}) {
+  const source = activeSource.value;
+  const editor = source?.editor;
+  if (!source || !editor || source.linterServiceResult?.returnCode !== 0) {
+    return;
+  }
+
+  event.preventDefault();
+
+  const quickFixes = await editor.getQuickFixesFromMarker(
+    messageToMarker(
+      message,
+      source.linterServiceResult.ruleMetadata,
+      monacoRef.value!,
+    ),
+  );
+
+  if (source.codeActionList) {
+    source.codeActionList.dispose();
+  }
+  source.codeActionList = quickFixes;
+  contextMenu.value?.open({ x: event.clientX, y: event.clientY });
+}
+
+function handleClickAction(action: languages.CodeAction) {
+  const source = activeSource.value;
+  if (!source || !source.editor) {
+    return;
+  }
+
+  source.editor.runCodeAction(action);
+}
+
 async function handleAddFile() {
   let newFileName = "src/example.js";
   let i = 1;
@@ -759,6 +801,12 @@ function selectOutput(nm: "console" | "warnings") {
         <WarningsPanel
           :result="activeSource?.linterServiceResult"
           @click-message="handleClickMessage"
+          @contextmenu-message="handleContextmenuMessage"
+        />
+        <ContextMenu
+          ref="contextMenu"
+          :code-action-list="activeSource?.codeActionList"
+          @click-action="handleClickAction"
         />
       </TabPanel>
       <TabPanel title="Console" name="console" :order="2">

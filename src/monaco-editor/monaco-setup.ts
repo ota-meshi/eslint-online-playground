@@ -1,10 +1,10 @@
 import type {
   editor,
-  languages,
   CancellationToken,
   Range,
   IDisposable,
 } from "monaco-editor";
+import { languages } from "monaco-editor";
 import { loadMonaco } from "./monaco-loader.js";
 
 export type CodeActionProvider = (
@@ -25,8 +25,12 @@ export type MonacoEditor = {
   setMarkers: (markers: editor.IMarkerData[]) => void;
   /** Gets the editor. */
   getEditor: () => editor.IStandaloneCodeEditor;
-  /** Register a code action provider. */
-  registerCodeActionProvider: (codeActionProvider: CodeActionProvider) => void;
+  /** Sets a code action provider. */
+  setCodeActionProvider: (codeActionProvider: CodeActionProvider) => void;
+  /** Gets a quick fix from the marker */
+  getQuickFixesFromMarker: (
+    marker: editor.IMarkerData,
+  ) => Promise<languages.CodeActionList>;
   /** Set the theme. */
   setTheme: (theme: "dark" | "light") => void;
   /** Dispose the editor. */
@@ -50,8 +54,12 @@ export type MonacoDiffEditor = {
   getLeftEditor: () => editor.IStandaloneCodeEditor;
   /** Gets the modified editor. */
   getRightEditor: () => editor.IStandaloneCodeEditor;
-  /** Register a code action provider. */
-  registerCodeActionProvider: (codeActionProvider: CodeActionProvider) => void;
+  /** Sets a code action provider. */
+  setCodeActionProvider: (codeActionProvider: CodeActionProvider) => void;
+  /** Gets a quick fix from the marker */
+  getQuickFixesFromMarker: (
+    marker: editor.IMarkerData,
+  ) => Promise<languages.CodeActionList>;
   /** Set the theme. */
   setTheme: (theme: "dark" | "light") => void;
   /** Dispose the all editors. */
@@ -173,8 +181,10 @@ export async function setupMonacoEditor({
       },
       getLeftEditor: () => leftEditor,
       getRightEditor: () => rightEditor,
-      registerCodeActionProvider: (provideCodeActions) =>
-        codeActionProvider.register(provideCodeActions),
+      setCodeActionProvider: (provideCodeActions) =>
+        codeActionProvider.set(provideCodeActions),
+      getQuickFixesFromMarker: (marker) =>
+        codeActionProvider.getQuickFixesFromMarker(marker),
       setTheme: (theme: "dark" | "light") => {
         leftEditor.updateOptions({
           theme: theme === "dark" ? "vs-dark" : "vs",
@@ -222,8 +232,10 @@ export async function setupMonacoEditor({
       void updateMarkers(standaloneEditor, markers);
     },
     getEditor: () => standaloneEditor,
-    registerCodeActionProvider: (provideCodeActions) =>
-      codeActionProvider.register(provideCodeActions),
+    setCodeActionProvider: (provideCodeActions) =>
+      codeActionProvider.set(provideCodeActions),
+    getQuickFixesFromMarker: (marker) =>
+      codeActionProvider.getQuickFixesFromMarker(marker),
     setTheme: (theme: "dark" | "light") => {
       standaloneEditor.updateOptions({
         theme: theme === "dark" ? "vs-dark" : "vs",
@@ -265,7 +277,10 @@ export async function setupMonacoEditor({
   function buildCodeActionProviderContainer(
     editor: editor.IStandaloneCodeEditor,
   ): {
-    register: (codeActionProvider: CodeActionProvider) => void;
+    set: (codeActionProvider: CodeActionProvider) => void;
+    getQuickFixesFromMarker: (
+      marker: editor.IMarkerData,
+    ) => Promise<languages.CodeActionList>;
     dispose: () => void;
   } {
     let codeActionProviderDisposable: IDisposable = {
@@ -273,6 +288,10 @@ export async function setupMonacoEditor({
         // void
       },
     };
+
+    let getQuickFixesFromMarker:
+      | ((marker: editor.IMarkerData) => ReturnType<CodeActionProvider>)
+      | null = null;
 
     function updateCodeActionProvider(codeActionProvider: CodeActionProvider) {
       codeActionProviderDisposable.dispose();
@@ -290,12 +309,51 @@ export async function setupMonacoEditor({
             return codeActionProvider(model, ...args);
           },
         });
+
+      getQuickFixesFromMarker = async (marker) => {
+        const model = editor.getModel()!;
+
+        const range = new monaco.Range(
+          marker.startLineNumber,
+          marker.startColumn,
+          marker.endLineNumber,
+          marker.endColumn,
+        );
+
+        const context: languages.CodeActionContext = {
+          markers: [marker],
+          trigger: languages.CodeActionTriggerType.Invoke,
+          only: "quickfix",
+        };
+
+        const token: CancellationToken = {
+          isCancellationRequested: false,
+          onCancellationRequested: () => {
+            return {
+              dispose() {
+                // noop
+              },
+            };
+          },
+        };
+
+        const result = await codeActionProvider(model, range, context, token);
+
+        return result;
+      };
     }
 
     return {
-      register: (codeActionProvider) => {
+      set: (codeActionProvider) => {
         updateCodeActionProvider(codeActionProvider);
       },
+      getQuickFixesFromMarker: async (marker) =>
+        (await getQuickFixesFromMarker?.(marker)) || {
+          actions: [],
+          dispose() {
+            // noop
+          },
+        },
       dispose() {
         codeActionProviderDisposable.dispose();
       },
