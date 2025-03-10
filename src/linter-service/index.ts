@@ -111,7 +111,7 @@ export async function setupLintServer({
     if (processing) {
       next = run;
       // eslint-disable-next-line no-unmodified-loop-condition -- OK
-      while (processing) {
+      while (processing != null) {
         await processing;
       }
 

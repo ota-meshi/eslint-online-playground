@@ -13,13 +13,13 @@ export type ESLintLegacyConfig = {
 type MaybePromise<T> = T | Promise<T>;
 type MaybeAsyncIterable<T> = Iterable<MaybePromise<T>> | AsyncIterable<T>;
 export type BuildESLintConfigHelper = {
-  x(code: string): MaybePromise<ESTree.Expression>;
-  spread(expression: ESTree.Expression): MaybePromise<ESTree.SpreadElement>;
-  i(code: string): MaybePromise<ESTree.ImportDeclaration>;
-  require(def: {
+  x: (code: string) => MaybePromise<ESTree.Expression>;
+  spread: (expression: ESTree.Expression) => MaybePromise<ESTree.SpreadElement>;
+  i: (code: string) => MaybePromise<ESTree.ImportDeclaration>;
+  require: (def: {
     local: string;
     source: string;
-  }): MaybePromise<ESTree.ImportDeclaration>;
+  }) => MaybePromise<ESTree.ImportDeclaration>;
   type: "module" | "script";
 };
 export type ESLintConfig<N extends string> = {
