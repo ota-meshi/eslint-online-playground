@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { editor } from "monaco-editor";
+import type { editor, languages } from "monaco-editor";
 import { computed, ref } from "vue";
 import { loadMonaco } from "../monaco-editor";
 import type { Monaco } from "../monaco-editor";
@@ -65,6 +65,21 @@ function revealLineInCenter(lineNumber: number) {
 defineExpose({
   setSelection,
   revealLineInCenter,
+  async getQuickFixesFromMarker(
+    marker: editor.IMarkerData,
+  ): Promise<languages.CodeActionList> {
+    return (
+      (await monacoEditor.value?.getQuickFixesFromMarker(marker)) ?? {
+        actions: [],
+        dispose: () => {
+          // noop
+        },
+      }
+    );
+  },
+  runCodeAction(codeAction: languages.CodeAction) {
+    return monacoEditor.value?.runCodeAction(codeAction);
+  },
 });
 </script>
 

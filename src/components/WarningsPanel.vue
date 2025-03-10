@@ -7,8 +7,13 @@ import type { LinterServiceResult } from "../linter-service";
 const props = defineProps<{
   result?: LinterServiceResult | null;
 }>();
-const emit =
-  defineEmits<(type: "clickMessage", message: Linter.LintMessage) => void>();
+const emit = defineEmits<{
+  (type: "clickMessage", message: Linter.LintMessage): void;
+  (
+    type: "contextmenuMessage",
+    payload: { message: Linter.LintMessage; event: MouseEvent },
+  ): void;
+}>();
 const sortedMessage = computed(() => {
   if (!props.result || props.result.returnCode !== 0) {
     return [];
@@ -57,15 +62,40 @@ function formatPosition(message: Linter.LintMessage) {
           >
             {{ msg.severity === 1 ? "⚠️" : "✕" }}
           </span>
-          <span> {{ msg.message.trim() }} </span>
+          <span
+            class="ep-warning__message"
+            @click="() => emit('clickMessage', msg)"
+            @contextmenu="
+              (event: MouseEvent) =>
+                emit('contextmenuMessage', { message: msg, event })
+            "
+          >
+            {{ msg.message.trim() }}
+          </span>
           <template v-if="msg.url">
-            <a :href="msg.url" target="_blank">({{ msg.ruleId }})</a>
+            <a :href="msg.url" target="_blank" class="ep-warning__rule-id"
+              >({{ msg.ruleId }})</a
+            >
           </template>
-          <template v-else-if="msg.ruleId">({{ msg.ruleId }})</template>
+          <template v-else-if="msg.ruleId">
+            <span
+              class="ep-warning__rule-id"
+              @click="() => emit('clickMessage', msg)"
+              @contextmenu="
+                (event: MouseEvent) =>
+                  emit('contextmenuMessage', { message: msg, event })
+              "
+              >({{ msg.ruleId }})</span
+            >
+          </template>
           <template v-if="msg.line != null">
             <span
               class="ep-warning__line-numbers"
               @click="() => emit('clickMessage', msg)"
+              @contextmenu="
+                (event: MouseEvent) =>
+                  emit('contextmenuMessage', { message: msg, event })
+              "
             >
               [{{ formatPosition(msg) }}]</span
             >
@@ -112,6 +142,14 @@ function formatPosition(message: Linter.LintMessage) {
 
 .ep-warning__severity-warning {
   background-color: var(--ep-severity-warning-background-color);
+}
+
+.ep-warning__message {
+  cursor: pointer;
+}
+
+.ep-warning__rule-id:not(a) {
+  cursor: pointer;
 }
 
 .ep-warning__line-numbers {

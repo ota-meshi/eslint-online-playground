@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { editor } from "monaco-editor";
+import type { editor, languages } from "monaco-editor";
 import { ref, watch } from "vue";
 import type {
   CodeActionProvider,
@@ -56,7 +56,7 @@ watch([root, () => props.diff], async ([element, useDiffEditor]) => {
     editorRef.value.setRightMarkers(props.rightMarkers || []);
   }
   if (props.codeActionProvider) {
-    editorRef.value.registerCodeActionProvider(props.codeActionProvider);
+    editorRef.value.setCodeActionProvider(props.codeActionProvider);
   }
 });
 
@@ -118,7 +118,7 @@ watch(
   () => props.codeActionProvider,
   (codeActionProvider) => {
     if (codeActionProvider)
-      editorRef.value?.registerCodeActionProvider(codeActionProvider);
+      editorRef.value?.setCodeActionProvider(codeActionProvider);
   },
 );
 
@@ -143,9 +143,56 @@ function revealLineInCenter(lineNumber: number) {
   }
 }
 
+function runCodeAction(codeAction: languages.CodeAction) {
+  if (!codeAction.edit) {
+    return;
+  }
+
+  let editorInstance;
+  if (editorRef.value?.type === "standalone") {
+    editorInstance = editorRef.value?.getEditor();
+  } else {
+    editorInstance = editorRef.value?.getLeftEditor();
+  }
+  if (!editorInstance) {
+    return;
+  }
+  const model = editorInstance?.getModel();
+  if (!model) {
+    return;
+  }
+  const uri = model.uri.toString();
+  const modelVersion = model.getVersionId();
+
+  const operations: editor.ISingleEditOperation[] = [];
+  for (const edit of codeAction.edit.edits) {
+    if (!("resource" in edit)) {
+      return;
+    }
+    if (edit.resource.toString() !== uri || modelVersion !== edit.versionId) {
+      return;
+    }
+    operations.push(edit.textEdit);
+  }
+  editorInstance.executeEdits("apply-code-action", operations);
+}
+
 defineExpose({
   setSelection,
   revealLineInCenter,
+  async getQuickFixesFromMarker(
+    marker: editor.IMarkerData,
+  ): Promise<languages.CodeActionList> {
+    return (
+      (await editorRef.value?.getQuickFixesFromMarker(marker)) ?? {
+        actions: [],
+        dispose: () => {
+          // noop
+        },
+      }
+    );
+  },
+  runCodeAction,
 });
 </script>
 
