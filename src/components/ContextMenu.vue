@@ -59,8 +59,9 @@ window.addEventListener("click", () => {
 <style scoped>
 .ep-contextmenu {
   margin: 0;
-  border: 1px solid var(--ep-border-color);
   background-color: var(--ep-menu-background-color);
+  color: var(--ep-color);
+  border: 1px solid var(--ep-border-color);
   border-radius: 2px;
 }
 

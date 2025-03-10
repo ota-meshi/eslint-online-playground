@@ -1,9 +1,5 @@
-import type {
-  editor,
-  CancellationToken,
-  Range,
-  IDisposable,
-} from "monaco-editor";
+import type { CancellationToken, Range, IDisposable } from "monaco-editor";
+import { editor } from "monaco-editor";
 import { languages } from "monaco-editor";
 import { loadMonaco } from "./monaco-loader.js";
 
@@ -251,18 +247,25 @@ export async function setupMonacoEditor({
   return result;
 
   /** Update value */
-  function updateValue(editor: editor.IStandaloneCodeEditor, value: string) {
-    const old = editor.getValue();
+  function updateValue(
+    editorInstance: editor.IStandaloneCodeEditor,
+    value: string,
+  ) {
+    const old = editorInstance.getValue();
 
     if (old !== value) {
-      const model = editor.getModel()!;
-      editor.executeEdits("update-value", [
-        {
-          range: model.getFullModelRange(),
-          text: value,
-          forceMoveMarkers: true,
-        },
-      ]);
+      if (editorInstance.getOption(editor.EditorOption.readOnly)) {
+        editorInstance.setValue(value);
+      } else {
+        const model = editorInstance.getModel()!;
+        editorInstance.executeEdits("update-value", [
+          {
+            range: model.getFullModelRange(),
+            text: value,
+            forceMoveMarkers: true,
+          },
+        ]);
+      }
     }
   }
 
