@@ -154,26 +154,27 @@ function runCodeAction(codeAction: languages.CodeAction) {
   } else {
     editorInstance = editorRef.value?.getLeftEditor();
   }
+  if (!editorInstance) {
+    return;
+  }
   const model = editorInstance?.getModel();
   if (!model) {
     return;
   }
+  const uri = model.uri.toString();
+  const modelVersion = model.getVersionId();
 
   const operations: editor.ISingleEditOperation[] = [];
-
   for (const edit of codeAction.edit.edits) {
     if (!("resource" in edit)) {
       return;
     }
-    if (
-      edit.resource.toString() !== model.uri.toString() ||
-      model.getVersionId() !== edit.versionId
-    ) {
+    if (edit.resource.toString() !== uri || modelVersion !== edit.versionId) {
       return;
     }
     operations.push(edit.textEdit);
   }
-  model.applyEdits(operations, true);
+  editorInstance.executeEdits("apply-code-action", operations);
 }
 
 defineExpose({

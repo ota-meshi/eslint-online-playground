@@ -255,7 +255,14 @@ export async function setupMonacoEditor({
     const old = editor.getValue();
 
     if (old !== value) {
-      editor.setValue(value);
+      const model = editor.getModel()!;
+      editor.executeEdits("update-value", [
+        {
+          range: model.getFullModelRange(),
+          text: value,
+          forceMoveMarkers: true,
+        },
+      ]);
     }
   }
 
