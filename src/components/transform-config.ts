@@ -43,6 +43,7 @@ export async function transformConfigFormat(
       return await transformYamlToCjs(configText);
     }
   } catch (e) {
+    // eslint-disable-next-line no-console -- Log
     console.log("Transform Error", e);
   }
   return configText;

@@ -143,6 +143,7 @@ async function startServerInternal(
           }
         }
         if (lastLength === callbacks.length) {
+          // eslint-disable-next-line no-console -- Log
           console.log("Unused output", str);
         }
       },

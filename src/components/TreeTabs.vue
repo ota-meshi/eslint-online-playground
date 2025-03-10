@@ -51,7 +51,7 @@ const treeTabs = computed(() => {
   for (const tab of tabs.value) {
     const pathNames = tab.value.title.split(/[/\\]/u);
     let targetTree = tree;
-    let leaf = pathNames.pop()!;
+    const leaf = pathNames.pop()!;
     for (const target of pathNames) {
       const targetNode = targetTree.children.find(
         (child) => child.name === target,

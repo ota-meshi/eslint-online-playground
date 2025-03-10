@@ -40,7 +40,7 @@ export function parseGitHubURL(
   return null;
 }
 
-export async function loadFilesFromGitHub(
+export function loadFilesFromGitHub(
   owner: string,
   repo: string,
   path: string,
@@ -130,7 +130,7 @@ async function loadFilesFromGitHubTreesAPI(
   return result;
 }
 
-async function loadFilesFromGitHubContentsAPI(
+function loadFilesFromGitHubContentsAPI(
   owner: string,
   repo: string,
   path: string,
@@ -238,12 +238,12 @@ let queue: Promise<any> = Promise.resolve();
 
 let githubToken = "";
 
-async function fetchWithMessage(url: string | URL): Promise<Response> {
+function fetchWithMessage(url: string | URL): Promise<Response> {
   queue = queue.then(() => messageWith(`Request to\n${url}`, nextFetch));
   return queue;
 
   function nextFetch() {
-    return fetch(url).then(async (res) => {
+    return fetch(url).then((res) => {
       if (res.status !== 200) {
         throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
       }
@@ -252,7 +252,7 @@ async function fetchWithMessage(url: string | URL): Promise<Response> {
   }
 }
 
-async function fetchForGitHub(url: string | URL): Promise<Response> {
+function fetchForGitHub(url: string | URL): Promise<Response> {
   // debug
   // if (!githubToken) {
   //   await retryFetchForGitHubWithRequestToken(
