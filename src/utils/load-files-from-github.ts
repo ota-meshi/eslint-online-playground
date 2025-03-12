@@ -169,10 +169,8 @@ async function loadFilesFromGitHubContentsURL(
 
 function ignore(filePath: string): boolean {
   return (
-    // Ignore .gitignore, .github, .vscode, .devcontainer
+    // Ignore .github, .vscode, .devcontainer
     // and binary files
-    filePath === ".gitignore" ||
-    filePath.endsWith("/.gitignore") ||
     filePath.startsWith(".github/") ||
     filePath.startsWith(".vscode/") ||
     filePath.startsWith(".devcontainer/") ||
