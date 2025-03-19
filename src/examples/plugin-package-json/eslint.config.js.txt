@@ -1,5 +1,5 @@
-import packageJson from "eslint-plugin-package-json/configs/recommended";
+import packageJson from "eslint-plugin-package-json";
 
 export default [
-  packageJson
+  packageJson.configs.recommended
 ];

@@ -1,0 +1,17 @@
+{
+	"name": "@my-package/foo",
+	"version": "0.1.0",
+	"engines": {
+		"node": ">=4.0.0"
+	},
+	"scripts": {
+		"lint": "eslint .",
+		"test": "jest",
+		"start": "node server.js"
+	},
+	"dependencies": {
+		"lodash": "^4.17.11",
+    "npm-package-arg": "^10.0.0",
+    "package-json": "^8.1.0"
+	}
+}

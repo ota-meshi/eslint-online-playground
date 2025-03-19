@@ -1,0 +1,5 @@
+import * as nodeDependenciesPlugin from "eslint-plugin-node-dependencies"
+
+export default [
+  ...nodeDependenciesPlugin.configs["flat/recommended"],
+];
