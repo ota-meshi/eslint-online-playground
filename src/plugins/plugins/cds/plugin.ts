@@ -1,4 +1,4 @@
-import type { ESLintConfig, ESLintLegacyConfig } from "../..";
+import type { ESLintConfig, ESLintLegacyConfig, PluginMeta } from "../..";
 
 export const name = "@sap/eslint-plugin-cds";
 export const description =
@@ -20,3 +20,4 @@ export const eslintConfig: ESLintConfig<"cds"> = {
     yield helper.x(`${names.cds}.configs.recommended`);
   },
 };
+export const meta: PluginMeta = { lang: ["cds", "csn", "csv"] };

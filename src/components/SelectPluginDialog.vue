@@ -66,6 +66,19 @@ function handleClickDialog() {
                 {{ plugin.description }}
               </div>
             </template>
+            <template v-if="plugin.meta">
+              <span
+                v-if="plugin.meta.lang"
+                class="ep-select-plugin__item-langs"
+              >
+                <template
+                  v-for="lang in [plugin.meta.lang].flat(Infinity)"
+                  :key="lang"
+                >
+                  <span class="ep-select-plugin__item-lang">{{ lang }}</span>
+                </template>
+              </span>
+            </template>
           </label>
           <a
             v-if="plugin.repo"
@@ -123,6 +136,26 @@ function handleClickDialog() {
 
 .ep-select-plugin__item-title {
   font-weight: bold;
+}
+
+.ep-select-plugin__item-langs {
+  display: flex;
+  gap: 4px;
+}
+
+.ep-select-plugin__item-lang {
+  border-radius: 1em;
+  padding-inline: 0.5em;
+
+  border-width: 1px;
+  border-style: solid;
+  border-color: transparent;
+  color: var(--color-primary-900);
+  background-color: rgb(from var(--color-primary-500) r g b / 0.14);
+}
+
+.dark .ep-select-plugin__item-lang {
+  color: var(--color-primary-300);
 }
 
 .github {

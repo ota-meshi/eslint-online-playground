@@ -1,4 +1,4 @@
-import type { ESLintConfig, ESLintLegacyConfig } from "../..";
+import type { ESLintConfig, ESLintLegacyConfig, PluginMeta } from "../..";
 
 export const name = "typescript-eslint";
 export const description =
@@ -51,3 +51,4 @@ export function hasInstalled(packageJson: any): boolean {
       packageJson.dependencies?.[pluginName] != null,
   );
 }
+export const meta: PluginMeta = { lang: "typescript" };

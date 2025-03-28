@@ -34,6 +34,10 @@ export type ESLintConfig<N extends string> = {
   ) => MaybeAsyncIterable<ESTree.Expression | ESTree.SpreadElement>;
 };
 
+export type PluginMeta = {
+  lang?: string[] | string;
+};
+
 export type Plugin = {
   name: string;
   description?: string;
@@ -42,6 +46,7 @@ export type Plugin = {
   eslintLegacyConfig?: ESLintLegacyConfig;
   eslintConfig?: ESLintConfig<string>;
   hasInstalled?: (packageJson: any) => boolean;
+  meta?: PluginMeta;
 };
 
 export * from "./installer";
