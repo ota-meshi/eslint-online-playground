@@ -12,14 +12,16 @@ export type Example = {
   getFiles(): Promise<Record<string, string>>;
 };
 
-let allExamples: Record<string, Example> | null = null;
+let allExamples: Promise<Record<string, Example>> | null = null;
 
 export async function loadExamples(): Promise<Record<string, Example>> {
   if (allExamples) {
     return allExamples;
   }
-  allExamples = {};
+  return (allExamples = loadExamplesWithoutCache());
+}
 
+async function loadExamplesWithoutCache(): Promise<Record<string, Example>> {
   type ExampleTS = {
     default?: any;
     name?: string;
@@ -27,13 +29,12 @@ export async function loadExamples(): Promise<Record<string, Example>> {
     githubResources?: string;
   };
 
-  const list = [
+  const resourceList = [
     ...Object.entries(import.meta.glob("./**/*.ts")).map(
-      ([fileName, content]) => {
-        const val = content() as Promise<ExampleTS>;
+      ([fileName, loadContent]) => {
         return {
           keys: convertToExampleKeys(fileName),
-          content: val,
+          loadContent: () => loadContent() as Promise<ExampleTS>,
         };
       },
     ),
@@ -43,7 +44,7 @@ export async function loadExamples(): Promise<Record<string, Example>> {
       }),
     ).map(([fileName, loadContent]) => ({
       keys: convertToExampleKeys(fileName),
-      content: loadContent().then((m) => m.default),
+      loadContent: () => loadContent().then((m) => m.default),
     })),
   ];
 
@@ -52,13 +53,13 @@ export async function loadExamples(): Promise<Record<string, Example>> {
     {
       name: string;
       meta?: ExampleTS;
-      resources: Record<string, Promise<string>>;
+      resources: Record<string, () => Promise<string>>;
     }
   > = {};
-  for (const { keys, content } of list) {
+  for (const { keys, loadContent } of resourceList) {
     const ex = (examplesMap[keys.name] ??= { name: keys.name, resources: {} });
     if (keys.fileName === "meta") {
-      const metaContent = await content;
+      const metaContent = await loadContent();
       if (typeof metaContent === "object") {
         const meta = metaContent;
         ex.name = meta.name || ex.name;
@@ -66,46 +67,55 @@ export async function loadExamples(): Promise<Record<string, Example>> {
         continue;
       }
     }
-    ex.resources[keys.fileName] = content.then((content) =>
-      typeof content === "string"
-        ? content
-        : prettyStringify(content.default ?? content),
-    );
+    ex.resources[keys.fileName] = () =>
+      loadContent().then((content) =>
+        typeof content === "string"
+          ? content
+          : prettyStringify(content.default ?? content),
+      );
   }
 
+  const examples: Record<string, Example> = {};
   for (const ex of Object.values(examplesMap).sort(({ name: a }, { name: b }) =>
     customCompare(a, b),
   )) {
-    let loaded = false;
-    allExamples[ex.name] = {
+    let files: Promise<[string, string][]> | null = null;
+
+    async function loadFiles() {
+      if (ex.meta?.githubResources) {
+        const github = parseGitHubURL(ex.meta.githubResources);
+        if (github)
+          for (const [name, resource] of Object.entries(
+            await loadFilesFromGitHub(
+              github.owner,
+              github.repo,
+              github.path,
+              github.ref,
+            ),
+          )) {
+            ex.resources[name] = () => Promise.resolve(resource);
+          }
+      }
+      return Promise.all(
+        Object.entries(ex.resources).map(
+          async ([name, loadContent]) =>
+            [name, await loadContent()] as [string, string],
+        ),
+      );
+    }
+
+    examples[ex.name] = {
       name: ex.name,
       description: ex.meta?.description,
       async getFiles() {
-        if (ex.meta?.githubResources && !loaded) {
-          loaded = true;
-          const github = parseGitHubURL(ex.meta.githubResources);
-          if (github)
-            Object.assign(
-              ex.resources,
-              await loadFilesFromGitHub(
-                github.owner,
-                github.repo,
-                github.path,
-                github.ref,
-              ),
-            );
+        if (!files) {
+          files = loadFiles();
         }
-        const files = await Promise.all(
-          Object.entries(ex.resources).map(async ([name, content]) => [
-            name,
-            await content,
-          ]),
-        );
-        return Object.fromEntries(files);
+        return Object.fromEntries(await files);
       },
     };
   }
-  return allExamples;
+  return examples;
 }
 
 function convertToExampleKeys(file: string) {
