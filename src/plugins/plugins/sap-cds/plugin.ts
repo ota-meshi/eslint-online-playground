@@ -20,4 +20,4 @@ export const eslintConfig: ESLintConfig<"cds"> = {
     yield helper.x(`${names.cds}.configs.recommended`);
   },
 };
-export const meta: PluginMeta = { lang: ["cds", "csn", "csv"] };
+export const meta: PluginMeta = { lang: ["cds"] };

@@ -1,9 +1,23 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import type { Plugin } from "../plugins";
 import { loadPlugins } from "../plugins";
 import GitHubIcon from "./GitHubIcon.vue";
 import { loadingWith } from "../utils/loading";
+
+const languageOrder = [
+  "javascript",
+  "typescript",
+  "jsx",
+  "json",
+  "vue",
+  "svelte",
+  "astro",
+  "yaml",
+  "toml",
+  "ejs",
+  "template",
+];
 
 const plugins = ref<Record<string, Plugin>>({});
 const dialogRef = ref<HTMLDialogElement>();
@@ -14,12 +28,56 @@ const availablePlugins = computed(() => {
     (p) => !p.hasInstalled || !p.hasInstalled(packageJson.value),
   );
 });
+const availableLanguages = computed(() => {
+  return new Set(
+    availablePlugins.value
+      .map((p) => p.meta?.lang as string[])
+      .flat()
+      .filter((l) => l)
+      .sort(compareLang),
+  );
+});
+const selectLanguage = ref<string>("$all$");
+const filteredPlugins = computed(() =>
+  selectLanguage.value === "$all$"
+    ? availablePlugins.value
+    : availablePlugins.value.filter((plugin) =>
+        (plugin.meta?.lang as string[])?.includes(selectLanguage.value),
+      ),
+);
+
+watch(
+  () => availablePlugins.value,
+  (availablePlugins) => {
+    if (
+      availablePlugins.every(
+        (plugin) =>
+          !(plugin.meta?.lang as string[])?.includes(selectLanguage.value),
+      )
+    ) {
+      selectLanguage.value = "$all$";
+    }
+  },
+  { immediate: true },
+);
 
 const emit = defineEmits<(type: "select", plugins: Plugin[]) => void>();
 
 defineExpose({
   open,
 });
+
+function compareLang(a: string, b: string) {
+  if (a === b) return 0;
+  const indexA = languageOrder.indexOf(a);
+  const indexB = languageOrder.indexOf(b);
+  if (indexA !== -1 && indexB !== -1) {
+    return indexA - indexB;
+  }
+  if (indexA !== -1) return -1;
+  if (indexB !== -1) return 1;
+  return a > b ? 1 : -1;
+}
 
 async function open(packageJsonText: string) {
   await loadingWith(async () => {
@@ -47,10 +105,59 @@ function handleClickDialog() {
 
 <template>
   <dialog ref="dialogRef" class="ep-select-plugin" @click="handleClickDialog">
+    <div class="ep-select-plugin__head" @click.stop>
+      <div class="ep-select-plugin__filter">
+        <div>
+          <span class="carbon--filter"></span>
+        </div>
+        <div class="ep-select-plugin__lang-filter-items">
+          <label
+            class="ep-select-plugin__lang-filter-item"
+            :class="{
+              'ep-select-plugin__lang-filter-item--selected':
+                selectLanguage === '$all$',
+            }"
+          >
+            <input
+              v-model="selectLanguage"
+              type="radio"
+              name="lang"
+              value="$all$"
+            />
+            All
+            <span class="ep-select-plugin__lang-filter-item-count">{{
+              availablePlugins.length
+            }}</span>
+          </label>
+          <template v-for="lang in availableLanguages" :key="lang">
+            <label
+              class="ep-select-plugin__lang-filter-item"
+              :class="{
+                'ep-select-plugin__lang-filter-item--selected':
+                  selectLanguage === lang,
+              }"
+            >
+              <input
+                v-model="selectLanguage"
+                type="radio"
+                name="lang"
+                :value="lang"
+              />
+              {{ lang }}
+              <span class="ep-select-plugin__lang-filter-item-count">{{
+                availablePlugins.filter((plugin) =>
+                  (plugin.meta?.lang as string[])?.includes(lang),
+                ).length
+              }}</span>
+            </label>
+          </template>
+        </div>
+      </div>
+    </div>
     <div class="ep-select-plugin__list" @click.stop>
       <template v-if="availablePlugins.length">
         <div
-          v-for="plugin in availablePlugins"
+          v-for="plugin in filteredPlugins"
           :key="plugin.name"
           class="ep-select-plugin__item"
         >
@@ -71,10 +178,7 @@ function handleClickDialog() {
                 v-if="plugin.meta.lang"
                 class="ep-select-plugin__item-langs"
               >
-                <template
-                  v-for="lang in [plugin.meta.lang].flat(Infinity)"
-                  :key="lang"
-                >
+                <template v-for="lang in plugin.meta.lang" :key="lang">
                   <span class="ep-select-plugin__item-lang">{{ lang }}</span>
                 </template>
               </span>
@@ -99,7 +203,7 @@ function handleClickDialog() {
         </p>
       </template>
     </div>
-    <div class="ep-select-plugin__foot">
+    <div class="ep-select-plugin__foot" @click.stop>
       <button class="ep-button" @click="handleOk">INSTALL</button>
     </div>
   </dialog>
@@ -119,10 +223,60 @@ function handleClickDialog() {
   position: relative;
   gap: 8px;
   padding-block: 1rem;
+  margin: 1rem auto auto auto;
+  min-width: 1100px;
+  min-width: min(calc(100vw - 2em - 6px), 1100px);
 }
 
 .ep-select-plugin[open] {
   display: flex;
+}
+
+.ep-select-plugin__head {
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--ep-border-color);
+  padding: 0 1rem 0.5rem 1rem;
+}
+
+.ep-select-plugin__filter {
+  display: flex;
+  gap: 8px;
+  padding-inline: 1rem;
+}
+
+.ep-select-plugin__lang-filter-items {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.ep-select-plugin__lang-filter-item {
+  border-radius: 1em;
+  padding-inline: 0.5em;
+  border-width: 1px;
+  border-style: solid;
+  border-color: rgb(from var(--color-primary-500) r g b / 0.14);
+  color: var(--color-primary-900);
+  cursor: pointer;
+  user-select: none;
+}
+
+.ep-select-plugin__lang-filter-item--selected {
+  background-color: rgb(from var(--color-primary-500) r g b / 0.14);
+  border-color: transparent;
+}
+
+.dark .ep-select-plugin__lang-filter-item {
+  color: var(--color-primary-300);
+}
+
+.ep-select-plugin__lang-filter-item input {
+  display: none;
+}
+
+.ep-select-plugin__lang-filter-item-count {
+  font-size: 0.75em;
+  line-height: 1em;
 }
 
 .ep-select-plugin__list {
@@ -158,9 +312,8 @@ function handleClickDialog() {
 }
 
 .ep-select-plugin__item-lang {
-  border-radius: 1em;
+  border-radius: 5em;
   padding-inline: 0.5em;
-
   border-width: 1px;
   border-style: solid;
   border-color: transparent;
@@ -180,5 +333,19 @@ function handleClickDialog() {
   flex-shrink: 0;
   border-top: 1px solid var(--ep-border-color);
   padding: 0.5rem 1rem 0 1rem;
+}
+
+.carbon--filter {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23000' d='M18 28h-4a2 2 0 0 1-2-2v-7.59L4.59 11A2 2 0 0 1 4 9.59V6a2 2 0 0 1 2-2h20a2 2 0 0 1 2 2v3.59a2 2 0 0 1-.59 1.41L20 18.41V26a2 2 0 0 1-2 2M6 6v3.59l8 8V26h4v-8.41l8-8V6Z'/%3E%3C/svg%3E");
+  background-color: currentColor;
+  -webkit-mask-image: var(--svg);
+  mask-image: var(--svg);
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
 }
 </style>
