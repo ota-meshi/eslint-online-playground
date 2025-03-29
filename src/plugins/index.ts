@@ -77,6 +77,15 @@ export async function loadPlugins(): Promise<Record<string, Plugin>> {
               );
             };
           }
+          if (!plugin.meta) {
+            plugin.meta = {};
+          }
+          if (!plugin.meta.lang) {
+            plugin.meta.lang = ["javascript"];
+          }
+          if (typeof plugin.meta.lang === "string") {
+            plugin.meta.lang = [plugin.meta.lang];
+          }
           return plugin;
         },
       ),

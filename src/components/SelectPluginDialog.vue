@@ -98,8 +98,9 @@ function handleClickDialog() {
           <code>package.json</code> and install them.
         </p>
       </template>
-
-      <button class="ep-button" @click="handleOk">OK</button>
+    </div>
+    <div class="ep-select-plugin__foot">
+      <button class="ep-button" @click="handleOk">INSTALL</button>
     </div>
   </dialog>
 </template>
@@ -111,12 +112,25 @@ function handleClickDialog() {
   border: 1px solid var(--ep-border-color);
   border-radius: 2px;
   font-size: 0.75rem;
+  padding: 0;
+  box-sizing: border-box;
+  overflow: hidden;
+  flex-direction: column;
+  position: relative;
+  gap: 8px;
+  padding-block: 1rem;
+}
+
+.ep-select-plugin[open] {
+  display: flex;
 }
 
 .ep-select-plugin__list {
   gap: 8px;
   display: flex;
   flex-direction: column;
+  overflow: auto;
+  padding-inline: 1rem;
 }
 
 .ep-select-plugin__item {
@@ -160,5 +174,11 @@ function handleClickDialog() {
 
 .github {
   display: flex;
+}
+
+.ep-select-plugin__foot {
+  flex-shrink: 0;
+  border-top: 1px solid var(--ep-border-color);
+  padding: 0.5rem 1rem 0 1rem;
 }
 </style>

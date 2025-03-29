@@ -103,6 +103,7 @@ async function handleClickRepo() {
   border: 1px solid var(--ep-border-color);
   border-radius: 2px;
   font-size: 0.75rem;
+  box-sizing: border-box;
 }
 
 .ep-select-example :deep(a) {
