@@ -1,7 +1,7 @@
 import type { ESLintConfig, PluginMeta } from "../..";
 
 export const name = "eslint-plugin-svelte";
-export const description = "ESLint plugin for Svelte using AST";
+export const description = "ESLint plugin for Svelte using AST.";
 export const repo = "https://github.com/sveltejs/eslint-plugin-svelte";
 export const devDependencies = { [name]: "latest", svelte: "latest" };
 export const eslintConfig: ESLintConfig<"svelte"> = {
