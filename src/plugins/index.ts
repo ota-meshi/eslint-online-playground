@@ -35,13 +35,14 @@ export type ESLintConfig<N extends string> = {
 };
 
 export type PluginMeta = {
-  lang?: string[] | string;
+  description: string;
+  lang?: string[];
+  repo?: string;
+  package?: string;
 };
 
 export type Plugin = {
   name: string;
-  description?: string;
-  repo?: string;
   devDependencies: Record<string, string>;
   eslintLegacyConfig?: ESLintLegacyConfig;
   eslintConfig?: ESLintConfig<string>;
@@ -71,20 +72,24 @@ export async function loadPlugins(): Promise<Record<string, Plugin>> {
             plugin.hasInstalled = function hasInstalled(
               packageJson: any,
             ): boolean {
+              const packageName = plugin.meta?.package || plugin.name;
               return (
-                packageJson.devDependencies?.[plugin.name] != null ||
-                packageJson.dependencies?.[plugin.name] != null
+                packageJson.devDependencies?.[packageName] != null ||
+                packageJson.dependencies?.[packageName] != null
               );
             };
           }
           if (!plugin.meta) {
-            plugin.meta = {};
+            throw new Error(`${plugin.name} does not have meta`);
+          }
+          if (!plugin.meta.description) {
+            throw new Error(`${plugin.name} does not have meta.description`);
           }
           if (!plugin.meta.lang) {
             plugin.meta.lang = ["javascript"];
           }
-          if (typeof plugin.meta.lang === "string") {
-            plugin.meta.lang = [plugin.meta.lang];
+          if (!plugin.meta.package) {
+            plugin.meta.package = plugin.name;
           }
           return plugin;
         },

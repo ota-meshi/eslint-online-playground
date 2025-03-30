@@ -1,8 +1,11 @@
 import type { ESLintConfig, ESLintLegacyConfig, PluginMeta } from "../..";
 
 export const name = "@intlify/eslint-plugin-vue-i18n";
-export const description = "🌐 ESLint plugin for Vue I18n.";
-export const repo = "https://github.com/intlify/eslint-plugin-vue-i18n";
+export const meta: PluginMeta = {
+  description: "🌐 ESLint plugin for Vue I18n.",
+  repo: "https://github.com/intlify/eslint-plugin-vue-i18n",
+  lang: ["vue"],
+};
 export const devDependencies = { [name]: "latest" };
 export const eslintLegacyConfig: ESLintLegacyConfig = {
   extends: ["plugin:@intlify/vue-i18n/recommended-legacy"],
@@ -24,7 +27,4 @@ export const eslintConfig: ESLintConfig<typeof importName> = {
       await helper.x(`${names[importName]}.configs.recommended`),
     );
   },
-};
-export const meta: PluginMeta = {
-  lang: ["vue"],
 };

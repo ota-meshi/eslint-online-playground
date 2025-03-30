@@ -1,9 +1,10 @@
-import type { ESLintConfig } from "../..";
+import type { ESLintConfig, PluginMeta } from "../..";
 
 export const name = "eslint-plugin-module-interop";
-export const description =
-  "ESLint plugin with rules for module interoperability.";
-export const repo = "https://github.com/ota-meshi/eslint-plugin-module-interop";
+export const meta: PluginMeta = {
+  description: "ESLint plugin with rules for module interoperability.",
+  repo: "https://github.com/ota-meshi/eslint-plugin-module-interop",
+};
 export const devDependencies = { [name]: "latest" };
 export const eslintConfig: ESLintConfig<"moduleInteropPlugin"> = {
   *imports(helper) {

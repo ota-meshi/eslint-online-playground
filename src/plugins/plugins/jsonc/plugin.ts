@@ -1,8 +1,11 @@
 import type { ESLintConfig, ESLintLegacyConfig, PluginMeta } from "../..";
 
 export const name = "eslint-plugin-jsonc";
-export const description = "ESLint plugin for JSON(C|5)? files.";
-export const repo = "https://github.com/ota-meshi/eslint-plugin-jsonc";
+export const meta: PluginMeta = {
+  description: "ESLint plugin for JSON(C|5)? files.",
+  repo: "https://github.com/ota-meshi/eslint-plugin-jsonc",
+  lang: ["json"],
+};
 export const devDependencies = { [name]: "latest" };
 export const eslintLegacyConfig: ESLintLegacyConfig = {
   overrides: [
@@ -49,7 +52,4 @@ export const eslintConfig: ESLintConfig<typeof importName> = {
       ),
     );
   },
-};
-export const meta: PluginMeta = {
-  lang: ["json"],
 };

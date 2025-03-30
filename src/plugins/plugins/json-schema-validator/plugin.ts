@@ -1,10 +1,11 @@
 import type { ESLintConfig, ESLintLegacyConfig, PluginMeta } from "../..";
 
 export const name = "eslint-plugin-json-schema-validator";
-export const description =
-  "ESLint plugin that validates data using JSON Schema Validator.";
-export const repo =
-  "https://github.com/ota-meshi/eslint-plugin-json-schema-validator";
+export const meta: PluginMeta = {
+  description: "ESLint plugin that validates data using JSON Schema Validator.",
+  repo: "https://github.com/ota-meshi/eslint-plugin-json-schema-validator",
+  lang: ["json", "yaml", "toml"],
+};
 export const devDependencies = { [name]: "latest" };
 export const eslintLegacyConfig: ESLintLegacyConfig = {
   extends: ["plugin:json-schema-validator/recommended"],
@@ -26,7 +27,4 @@ export const eslintConfig: ESLintConfig<typeof importName> = {
       await helper.x(`${names[importName]}.configs["flat/recommended"]`),
     );
   },
-};
-export const meta: PluginMeta = {
-  lang: ["json", "yaml", "toml"],
 };

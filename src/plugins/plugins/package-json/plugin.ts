@@ -1,10 +1,12 @@
 import type { ESLintConfig, ESLintLegacyConfig, PluginMeta } from "../..";
 
 export const name = "eslint-plugin-package-json";
-export const description =
-  "Rules for consistent, readable, and valid package.json files. 🗂️";
-export const repo =
-  "https://github.com/JoshuaKGoldberg/eslint-plugin-package-json";
+export const meta: PluginMeta = {
+  description:
+    "Rules for consistent, readable, and valid package.json files. 🗂️",
+  repo: "https://github.com/JoshuaKGoldberg/eslint-plugin-package-json",
+  lang: ["json"],
+};
 export const devDependencies = { [name]: "latest" };
 export const eslintLegacyConfig: ESLintLegacyConfig = {
   overrides: [
@@ -30,7 +32,4 @@ export const eslintConfig: ESLintConfig<typeof importName> = {
   *expression(names, helper) {
     yield helper.x(`${names[importName]}.configs.recommended`);
   },
-};
-export const meta: PluginMeta = {
-  lang: ["json"],
 };

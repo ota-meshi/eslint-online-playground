@@ -3,6 +3,7 @@ import { ref, computed, watch } from "vue";
 import type { Plugin } from "../plugins";
 import { loadPlugins } from "../plugins";
 import GitHubIcon from "./GitHubIcon.vue";
+import NpmIcon from "./NpmIcon.vue";
 import { loadingWith } from "../utils/loading";
 
 const languageOrder = [
@@ -31,7 +32,7 @@ const availablePlugins = computed(() => {
 const availableLanguages = computed(() => {
   return new Set(
     availablePlugins.value
-      .map((p) => p.meta?.lang as string[])
+      .map((p) => p.meta!.lang!)
       .flat()
       .filter((l) => l)
       .sort(compareLang),
@@ -42,7 +43,7 @@ const filteredPlugins = computed(() =>
   selectLanguage.value === "$all$"
     ? availablePlugins.value
     : availablePlugins.value.filter((plugin) =>
-        (plugin.meta?.lang as string[])?.includes(selectLanguage.value),
+        plugin.meta?.lang?.includes(selectLanguage.value),
       ),
 );
 
@@ -146,7 +147,7 @@ function handleClickDialog() {
               {{ lang }}
               <span class="ep-select-plugin__lang-filter-item-count">{{
                 availablePlugins.filter((plugin) =>
-                  (plugin.meta?.lang as string[])?.includes(lang),
+                  plugin.meta?.lang?.includes(lang),
                 ).length
               }}</span>
             </label>
@@ -168,9 +169,9 @@ function handleClickDialog() {
               :value="plugin.name"
             />
             <div class="ep-select-plugin__item-title">{{ plugin.name }}</div>
-            <template v-if="plugin.description">
+            <template v-if="plugin.meta?.description">
               <div>
-                {{ plugin.description }}
+                {{ plugin.meta.description }}
               </div>
             </template>
             <template v-if="plugin.meta">
@@ -185,13 +186,21 @@ function handleClickDialog() {
             </template>
           </label>
           <a
-            v-if="plugin.repo"
-            class="github"
+            v-if="plugin.meta?.repo"
+            class="ep-select-plugin__link-icon"
             target="_blank"
-            :href="plugin.repo"
+            :href="plugin.meta.repo"
             @click.stop
           >
             <GitHubIcon alt="GitHub" />
+          </a>
+          <a
+            class="ep-select-plugin__link-icon"
+            target="_blank"
+            :href="`https://www.npmjs.com/package/${plugin.meta?.package || plugin.name}`"
+            @click.stop
+          >
+            <NpmIcon alt="npm" />
           </a>
         </div>
       </template>
@@ -226,6 +235,11 @@ function handleClickDialog() {
   margin: 1rem auto auto auto;
   min-width: 1100px;
   min-width: min(calc(100vw - 2em - 6px), 1100px);
+}
+
+.ep-select-plugin :deep(a) {
+  color: var(--ep-link-color);
+  text-decoration: none;
 }
 
 .ep-select-plugin[open] {
@@ -325,7 +339,7 @@ function handleClickDialog() {
   color: var(--color-primary-300);
 }
 
-.github {
+.ep-select-plugin__link-icon {
   display: flex;
 }
 

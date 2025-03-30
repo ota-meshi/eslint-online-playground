@@ -31,6 +31,6 @@ const iconSize = computed(() => `${props.size ?? 24}px`);
   height: v-bind(iconSize);
 }
 path {
-  fill: var(--ep-link-color);
+  fill: currentColor;
 }
 </style>

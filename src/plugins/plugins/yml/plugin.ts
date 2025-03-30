@@ -1,9 +1,11 @@
 import type { ESLintConfig, ESLintLegacyConfig, PluginMeta } from "../..";
 
 export const name = "eslint-plugin-yml";
-export const description =
-  "This ESLint plugin provides linting rules for YAML.";
-export const repo = "https://github.com/ota-meshi/eslint-plugin-yml";
+export const meta: PluginMeta = {
+  description: "This ESLint plugin provides linting rules for YAML.",
+  repo: "https://github.com/ota-meshi/eslint-plugin-yml",
+  lang: ["yaml"],
+};
 export const devDependencies = { [name]: "latest" };
 export const eslintLegacyConfig: ESLintLegacyConfig = {
   extends: ["plugin:yml/standard"],
@@ -25,7 +27,4 @@ export const eslintConfig: ESLintConfig<typeof importName> = {
       await helper.x(`${names[importName]}.configs['flat/standard']`),
     );
   },
-};
-export const meta: PluginMeta = {
-  lang: ["yaml"],
 };

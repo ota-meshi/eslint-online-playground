@@ -1,10 +1,12 @@
 import type { ESLintConfig, ESLintLegacyConfig, PluginMeta } from "../..";
 
 export const name = "eslint-plugin-lodash-template";
-export const description =
-  "ESLint plugin for John Resig-style micro template, Lodash's template, Underscore's template and EJS.";
-export const repo =
-  "https://github.com/ota-meshi/eslint-plugin-lodash-template";
+export const meta: PluginMeta = {
+  description:
+    "ESLint plugin for John Resig-style micro template, Lodash's template, Underscore's template and EJS.",
+  repo: "https://github.com/ota-meshi/eslint-plugin-lodash-template",
+  lang: ["ejs", "template"],
+};
 export const devDependencies = { [name]: "latest" };
 export const eslintLegacyConfig: ESLintLegacyConfig = {
   extends: ["plugin:lodash-template/recommended-with-html"],
@@ -27,7 +29,4 @@ export const eslintConfig: ESLintConfig<typeof importName> = {
       ...${names[importName]}.configs['flat/recommended-with-html']
     }`);
   },
-};
-export const meta: PluginMeta = {
-  lang: ["ejs", "template"],
 };
