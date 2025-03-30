@@ -197,6 +197,10 @@ if (typeof window !== "undefined") {
   padding: 4px;
 }
 
+.header-menu a {
+  color: var(--ep-link-color);
+}
+
 .github {
   display: flex;
 }
