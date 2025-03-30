@@ -1,9 +1,12 @@
+import { defineConfig } from "eslint/config";
 import js from "@eslint/js";
-export default [
-  js.configs.recommended,
-  {
-    rules: {
-      quotes: ["error", "double"],
+export default defineConfig(
+  [
+    js.configs.recommended,
+    {
+      rules: {
+        quotes: ["error", "double"],
+      },
     },
-  },
-];
+  ]
+);

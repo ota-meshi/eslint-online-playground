@@ -27,35 +27,51 @@ export async function installPluginForFlatConfig(
     const exportDefault = ast.body.find(isExportDefault);
     if (exportDefault) {
       sourceType = "module";
-      if (exportDefault.declaration.type === "ArrayExpression") {
-        targetNode = exportDefault.declaration;
+      const expr = isDefineConfigCall(exportDefault.declaration)
+        ? exportDefault.declaration.arguments[0]
+        : exportDefault.declaration;
+      if (expr.type === "ArrayExpression") {
+        targetNode = expr;
       } else {
-        targetNode = exportDefault.declaration = {
+        targetNode = {
           type: "ArrayExpression",
           elements: [
             {
               type: "SpreadElement",
-              argument: exportDefault.declaration as any,
+              argument: expr as any,
             },
           ],
         };
+        if (isDefineConfigCall(exportDefault.declaration)) {
+          exportDefault.declaration.arguments[0] = targetNode;
+        } else {
+          exportDefault.declaration = targetNode;
+        }
       }
     } else {
       const commonJsExports = ast.body.find(isModuleExports);
       if (commonJsExports) {
         sourceType = "script";
-        if (commonJsExports.expression.right.type === "ArrayExpression") {
-          targetNode = commonJsExports.expression.right;
+        const expr = isDefineConfigCall(commonJsExports.expression.right)
+          ? commonJsExports.expression.right.arguments[0]
+          : commonJsExports.expression.right;
+        if (expr.type === "ArrayExpression") {
+          targetNode = expr;
         } else {
-          targetNode = commonJsExports.expression.right = {
+          targetNode = {
             type: "ArrayExpression",
             elements: [
               {
                 type: "SpreadElement",
-                argument: commonJsExports.expression.right,
+                argument: expr as any,
               },
             ],
           };
+          if (isDefineConfigCall(commonJsExports.expression.right)) {
+            commonJsExports.expression.right.arguments[0] = targetNode;
+          } else {
+            commonJsExports.expression.right = targetNode;
+          }
         }
       } else {
         alertAndLog(
@@ -138,6 +154,31 @@ export async function installPluginForFlatConfig(
     alertAndLog("Failed to parse config. Failed to add new configuration.");
     return { error: true };
   }
+}
+
+function skipDefineConfig(
+  expr:
+    | ESTree.Expression
+    | ESTree.MaybeNamedFunctionDeclaration
+    | ESTree.MaybeNamedClassDeclaration,
+) {
+  if (isDefineConfigCall(expr)) {
+    return expr.arguments[0];
+  }
+  return expr;
+}
+
+function isDefineConfigCall(
+  expr:
+    | ESTree.Expression
+    | ESTree.MaybeNamedFunctionDeclaration
+    | ESTree.MaybeNamedClassDeclaration,
+): expr is ESTree.CallExpression {
+  return (
+    expr.type === "CallExpression" &&
+    expr.callee.type === "Identifier" &&
+    expr.callee.name === "defineConfig"
+  );
 }
 
 function margeImport(
