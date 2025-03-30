@@ -156,18 +156,6 @@ export async function installPluginForFlatConfig(
   }
 }
 
-function skipDefineConfig(
-  expr:
-    | ESTree.Expression
-    | ESTree.MaybeNamedFunctionDeclaration
-    | ESTree.MaybeNamedClassDeclaration,
-) {
-  if (isDefineConfigCall(expr)) {
-    return expr.arguments[0];
-  }
-  return expr;
-}
-
 function isDefineConfigCall(
   expr:
     | ESTree.Expression
