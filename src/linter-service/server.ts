@@ -118,8 +118,18 @@ async function startServerInternal(
     new WritableStream({
       write(str) {
         if (!callbacks.length) {
-          // eslint-disable-next-line no-console -- Demo runtime
-          if (!boot) console.log(str);
+          if (!boot) {
+            // eslint-disable-next-line no-console -- Demo runtime
+            console.log(str);
+            return;
+          }
+
+          const output = extractJson(str);
+          if (output && output.type !== "data") {
+            // eslint-disable-next-line no-console -- Demo runtime
+            console[output.type](output.payload);
+            return;
+          }
 
           return;
         }
@@ -132,13 +142,18 @@ async function startServerInternal(
 
           return;
         }
+        if (output.type !== "data") {
+          // eslint-disable-next-line no-console -- Demo runtime
+          console[output.type](output.payload);
+          return;
+        }
 
         const lastLength = callbacks.length;
         const buffer = [...callbacks];
         callbacks.length = 0;
         let callback;
         while ((callback = buffer.shift())) {
-          if (!callback(output)) {
+          if (!callback(output.payload)) {
             callbacks.push(callback);
           }
         }

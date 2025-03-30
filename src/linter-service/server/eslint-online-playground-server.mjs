@@ -33,20 +33,24 @@ function main() {
   process.stdin.setRawMode(true);
   process.stdin.resume();
 
+  process.on("warning", (warning) => {
+    process.stdout.write(createJsonPayload(String(warning), { type: "warn" }));
+  });
+
   process.stdin.on("data", (data) => {
     const input = extractJson(data.toString());
 
-    if (!input) return;
+    if (!input || input.type !== "data") return;
 
     // Health check.
-    if (input === "ok?") {
+    if (input.payload === "ok?") {
       process.stdout.write(createJsonPayload("ok"));
 
       return;
     }
 
     // Request linting.
-    lint(input);
+    lint(input.payload);
   });
 
   // Notify the start of boot.
@@ -106,10 +110,12 @@ async function lint(input) {
 
     // Write the linting result to the stdout.
     process.stdout.write(
-      createJsonPayload(output, (key, value) => {
-        if (key.startsWith("_")) return undefined;
+      createJsonPayload(output, {
+        replacer: (key, value) => {
+          if (key.startsWith("_")) return undefined;
 
-        return value;
+          return value;
+        },
       }),
     );
   } catch (e) {

@@ -1,6 +1,10 @@
 const DIRECTIVE_OPEN = "{{{ep-json-start}}}";
 const DIRECTIVE_CLOSE = "{{{ep-json-end}}}";
 
+/**
+ * @typedef {'data' | 'warn'} PayloadType
+ */
+
 export const FLAT_CONFIG_FILE_NAMES = /** @type {const} */ ([
   "eslint.config.js",
   "eslint.config.cjs",
@@ -32,6 +36,7 @@ const RESERVED_FILE_NAMES = [
 /**
  * If the value is JSON enclosed in directives, extract the value and parse the JSON to get the value.
  * @param {string} str
+ * @returns {{type: PayloadType, payload: any} | null}
  */
 export function extractJson(str) {
   if (!str.startsWith(DIRECTIVE_OPEN) || !str.endsWith(DIRECTIVE_CLOSE)) {
@@ -44,10 +49,16 @@ export function extractJson(str) {
 /**
  * Make the payload a string enclosed in directives.
  * @param {any} payload
- * @param {(key: string, value: any) => any} [replacer]
+ * @param {object} [options]
+ * @param {(key: string, value: any) => any} [options.replacer]
+ * @param {PayloadType} [options.type]
  */
-export function createJsonPayload(payload, replacer) {
-  return DIRECTIVE_OPEN + JSON.stringify(payload, replacer) + DIRECTIVE_CLOSE;
+export function createJsonPayload(payload, { replacer, type } = {}) {
+  return (
+    DIRECTIVE_OPEN +
+    JSON.stringify({ type: type ?? "data", payload }, replacer) +
+    DIRECTIVE_CLOSE
+  );
 }
 
 /**

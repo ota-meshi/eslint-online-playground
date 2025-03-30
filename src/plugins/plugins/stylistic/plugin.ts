@@ -1,4 +1,4 @@
-import type { ESLintConfig, ESLintLegacyConfig, PluginMeta } from "../..";
+import type { ESLintConfig, PluginMeta } from "../..";
 
 export const name = "ESLint Stylistic";
 export const meta: PluginMeta = {
@@ -14,16 +14,17 @@ export const devDependencies = {
   "@stylistic/eslint-plugin-jsx": "latest",
   "@stylistic/eslint-plugin-plus": "latest",
 };
-export const eslintLegacyConfig: ESLintLegacyConfig = {
-  plugins: [
-    "@stylistic",
-    "@stylistic/js",
-    "@stylistic/ts",
-    "@stylistic/jsx",
-    "@stylistic/plus",
-  ],
-  extends: ["plugin:@stylistic/recommended-extends"],
-};
+// Removed in v4.
+// export const eslintLegacyConfig: ESLintLegacyConfig = {
+//   plugins: [
+//     "@stylistic",
+//     "@stylistic/js",
+//     "@stylistic/ts",
+//     "@stylistic/jsx",
+//     "@stylistic/plus",
+//   ],
+//   extends: ["plugin:@stylistic/recommended-extends"],
+// };
 export const eslintConfig: ESLintConfig<"stylistic"> = {
   *imports(helper) {
     if (helper.type === "module") {
@@ -36,7 +37,7 @@ export const eslintConfig: ESLintConfig<"stylistic"> = {
     }
   },
   *expression(names, helper) {
-    yield helper.x(`${names.stylistic}.configs['recommended-flat']`);
+    yield helper.x(`${names.stylistic}.configs.recommended`);
   },
 };
 export function hasInstalled(packageJson: any): boolean {
