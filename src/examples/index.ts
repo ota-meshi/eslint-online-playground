@@ -56,24 +56,30 @@ async function loadExamplesWithoutCache(): Promise<Record<string, Example>> {
       resources: Record<string, () => Promise<string>>;
     }
   > = {};
-  for (const { keys, loadContent } of resourceList) {
-    const ex = (examplesMap[keys.name] ??= { name: keys.name, resources: {} });
-    if (keys.fileName === "meta") {
-      const metaContent = await loadContent();
-      if (typeof metaContent === "object") {
-        const meta = metaContent;
-        ex.name = meta.name || ex.name;
-        ex.meta = meta;
-        continue;
+
+  await Promise.all(
+    resourceList.map(async ({ keys, loadContent }) => {
+      const ex = (examplesMap[keys.name] ??= {
+        name: keys.name,
+        resources: {},
+      });
+      if (keys.fileName === "meta") {
+        const metaContent = await loadContent();
+        if (typeof metaContent === "object") {
+          const meta = metaContent;
+          ex.name = meta.name || ex.name;
+          ex.meta = meta;
+          return;
+        }
       }
-    }
-    ex.resources[keys.fileName] = () =>
-      loadContent().then((content) =>
-        typeof content === "string"
-          ? content
-          : prettyStringify(content.default ?? content),
-      );
-  }
+      ex.resources[keys.fileName] = () =>
+        loadContent().then((content) =>
+          typeof content === "string"
+            ? content
+            : prettyStringify(content.default ?? content),
+        );
+    }),
+  );
 
   const examples: Record<string, Example> = {};
   for (const ex of Object.values(examplesMap).sort(({ name: a }, { name: b }) =>
