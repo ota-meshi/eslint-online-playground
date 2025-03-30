@@ -38,14 +38,40 @@ const availableLanguages = computed(() => {
       .sort(compareLang),
   );
 });
+const filterText = ref<string>("");
 const selectLanguage = ref<string>("$all$");
-const filteredPlugins = computed(() =>
-  selectLanguage.value === "$all$"
-    ? availablePlugins.value
-    : availablePlugins.value.filter((plugin) =>
-        plugin.meta?.lang?.includes(selectLanguage.value),
-      ),
-);
+const filterWords = computed(() => {
+  return filterText.value
+    .split(/\s+/)
+    .map((word) => word.trim().toLowerCase())
+    .filter((word) => word);
+});
+const textFilteredPlugins = computed(() => {
+  if (!filterWords.value.length) return availablePlugins.value;
+
+  const words = filterWords.value.map((word) => word.toLowerCase());
+
+  function filter(plugin: Plugin) {
+    return words.every(
+      (text) =>
+        plugin.name.toLowerCase().includes(text) ||
+        plugin.meta?.description?.toLowerCase().includes(text) ||
+        plugin.meta?.package?.toLowerCase().includes(text) ||
+        plugin.meta?.lang?.some((lang) => lang.toLowerCase().includes(text)),
+    );
+  }
+
+  return availablePlugins.value.filter(filter);
+});
+const filteredPlugins = computed(() => {
+  if (selectLanguage.value === "$all$") return textFilteredPlugins.value;
+
+  function filter(plugin: Plugin) {
+    return plugin.meta!.lang!.includes(selectLanguage.value);
+  }
+
+  return textFilteredPlugins.value.filter(filter);
+});
 
 watch(
   () => availablePlugins.value,
@@ -108,101 +134,114 @@ function handleClickDialog() {
   <dialog ref="dialogRef" class="ep-select-plugin" @click="handleClickDialog">
     <div class="ep-select-plugin__head" @click.stop>
       <div class="ep-select-plugin__filter">
-        <div>
+        <div class="ep-select-plugin__filter-left">
           <span class="carbon--filter"></span>
         </div>
-        <div class="ep-select-plugin__lang-filter-items">
-          <label
-            class="ep-select-plugin__lang-filter-item"
-            :class="{
-              'ep-select-plugin__lang-filter-item--selected':
-                selectLanguage === '$all$',
-            }"
-          >
+        <div class="ep-select-plugin__filter-content">
+          <div class="ep-select-plugin__filter-text">
             <input
-              v-model="selectLanguage"
-              type="radio"
-              name="lang"
-              value="$all$"
+              v-model="filterText"
+              type="text"
+              class="ep-select-plugin__filter-input"
             />
-            All
-            <span class="ep-select-plugin__lang-filter-item-count">{{
-              availablePlugins.length
-            }}</span>
-          </label>
-          <template v-for="lang in availableLanguages" :key="lang">
+          </div>
+          <div class="ep-select-plugin__lang-filter-items">
             <label
               class="ep-select-plugin__lang-filter-item"
               :class="{
                 'ep-select-plugin__lang-filter-item--selected':
-                  selectLanguage === lang,
+                  selectLanguage === '$all$',
               }"
             >
               <input
                 v-model="selectLanguage"
                 type="radio"
                 name="lang"
-                :value="lang"
+                value="$all$"
               />
-              {{ lang }}
+              All
               <span class="ep-select-plugin__lang-filter-item-count">{{
-                availablePlugins.filter((plugin) =>
-                  plugin.meta?.lang?.includes(lang),
-                ).length
+                textFilteredPlugins.length
               }}</span>
             </label>
-          </template>
+            <template v-for="lang in availableLanguages" :key="lang">
+              <label
+                class="ep-select-plugin__lang-filter-item"
+                :class="{
+                  'ep-select-plugin__lang-filter-item--selected':
+                    selectLanguage === lang,
+                }"
+              >
+                <input
+                  v-model="selectLanguage"
+                  type="radio"
+                  name="lang"
+                  :value="lang"
+                />
+                {{ lang }}
+                <span class="ep-select-plugin__lang-filter-item-count">{{
+                  textFilteredPlugins.filter((plugin) =>
+                    plugin.meta?.lang?.includes(lang),
+                  ).length
+                }}</span>
+              </label>
+            </template>
+          </div>
         </div>
       </div>
     </div>
     <div class="ep-select-plugin__list" @click.stop>
-      <template v-if="availablePlugins.length">
-        <div
+      <template v-if="filteredPlugins.length">
+        <label
           v-for="plugin in filteredPlugins"
           :key="plugin.name"
           class="ep-select-plugin__item"
         >
-          <label class="ep-select-plugin__item-meta">
-            <input
-              v-model="selectPlugins"
-              type="checkbox"
-              :value="plugin.name"
-            />
+          <input v-model="selectPlugins" type="checkbox" :value="plugin.name" />
+          <div class="ep-select-plugin__item-section">
             <div class="ep-select-plugin__item-title">{{ plugin.name }}</div>
             <template v-if="plugin.meta?.description">
               <div>
                 {{ plugin.meta.description }}
               </div>
             </template>
+          </div>
+          <div class="ep-select-plugin__item-section">
             <template v-if="plugin.meta">
               <span
                 v-if="plugin.meta.lang"
                 class="ep-select-plugin__item-langs"
               >
                 <template v-for="lang in plugin.meta.lang" :key="lang">
-                  <span class="ep-select-plugin__item-lang">{{ lang }}</span>
+                  <span
+                    class="ep-select-plugin__item-lang"
+                    @click.stop.prevent="() => (selectLanguage = lang)"
+                    >{{ lang }}</span
+                  >
                 </template>
               </span>
             </template>
-          </label>
-          <a
-            v-if="plugin.meta?.repo"
-            class="ep-select-plugin__link-icon"
-            target="_blank"
-            :href="plugin.meta.repo"
-            @click.stop
-          >
-            <GitHubIcon alt="GitHub" />
-          </a>
-          <a
-            class="ep-select-plugin__link-icon"
-            target="_blank"
-            :href="`https://www.npmjs.com/package/${plugin.meta?.package || plugin.name}`"
-            @click.stop
-          >
-            <NpmIcon alt="npm" />
-          </a>
-        </div>
+            <div class="ep-select-plugin__item-section">
+              <a
+                v-if="plugin.meta?.repo"
+                class="ep-select-plugin__link-icon"
+                target="_blank"
+                :href="plugin.meta.repo"
+                @click.stop
+              >
+                <GitHubIcon alt="GitHub" />
+              </a>
+              <a
+                class="ep-select-plugin__link-icon"
+                target="_blank"
+                :href="`https://www.npmjs.com/package/${plugin.meta?.package || plugin.name}`"
+                @click.stop
+              >
+                <NpmIcon alt="npm" />
+              </a>
+            </div>
+          </div>
+        </label>
       </template>
       <template v-else>
         <p>
@@ -255,7 +294,23 @@ function handleClickDialog() {
 .ep-select-plugin__filter {
   display: flex;
   gap: 8px;
-  padding-inline: 1rem;
+  /* padding-inline: 1rem; */
+}
+
+.ep-select-plugin__filter-left {
+  display: flex;
+  align-items: center;
+}
+
+.ep-select-plugin__filter-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex-grow: 1;
+}
+
+.ep-select-plugin__filter-text input {
+  width: 100%;
 }
 
 .ep-select-plugin__lang-filter-items {
@@ -306,18 +361,21 @@ function handleClickDialog() {
   gap: 16px;
   align-items: center;
 }
+
 .ep-select-plugin__item:has(+ .ep-select-plugin__item) {
   border-bottom: 1px solid var(--ep-border-color);
 }
 
-.ep-select-plugin__item-meta {
+.ep-select-plugin__item-section {
   display: flex;
-  gap: 16px;
+  column-gap: 16px;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .ep-select-plugin__item-title {
   font-weight: bold;
+  white-space: nowrap;
 }
 
 .ep-select-plugin__item-langs {
@@ -333,6 +391,7 @@ function handleClickDialog() {
   border-color: transparent;
   color: var(--color-primary-900);
   background-color: rgb(from var(--color-primary-500) r g b / 0.14);
+  cursor: pointer;
 }
 
 .dark .ep-select-plugin__item-lang {
