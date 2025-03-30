@@ -1,8 +1,11 @@
 import type { ESLintConfig, PluginMeta } from "../..";
 
 export const name = "@eslint/json";
-export const description = "JSON language plugin for ESLint.";
-export const repo = "https://github.com/eslint/json";
+export const meta: PluginMeta = {
+  description: "JSON language plugin for ESLint.",
+  repo: "https://github.com/eslint/json",
+  lang: ["json"],
+};
 export const devDependencies = { [name]: "latest" };
 export const eslintConfig: ESLintConfig<"json"> = {
   *imports(helper) {
@@ -27,4 +30,3 @@ export const eslintConfig: ESLintConfig<"json"> = {
     );
   },
 };
-export const meta: PluginMeta = { lang: ["json"] };

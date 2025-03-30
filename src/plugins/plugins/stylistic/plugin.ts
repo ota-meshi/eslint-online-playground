@@ -1,8 +1,12 @@
 import type { ESLintConfig, ESLintLegacyConfig, PluginMeta } from "../..";
 
 export const name = "ESLint Stylistic";
-export const description = "Stylistic Formatting for ESLint.";
-export const repo = "https://eslint.style/";
+export const meta: PluginMeta = {
+  description: "Stylistic Formatting for ESLint.",
+  repo: "https://eslint.style/",
+  lang: ["javascript", "typescript", "jsx"],
+  package: "@stylistic/eslint-plugin",
+};
 export const devDependencies = {
   "@stylistic/eslint-plugin": "latest",
   "@stylistic/eslint-plugin-js": "latest",
@@ -42,4 +46,3 @@ export function hasInstalled(packageJson: any): boolean {
     packageJson.dependencies?.[pluginName] != null
   );
 }
-export const meta: PluginMeta = { lang: ["javascript", "typescript", "jsx"] };

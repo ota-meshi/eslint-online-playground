@@ -1,8 +1,11 @@
 import type { ESLintConfig, ESLintLegacyConfig, PluginMeta } from "../..";
 
 export const name = "eslint-plugin-vue";
-export const description = "Official ESLint plugin for Vue.js.";
-export const repo = "https://github.com/vuejs/eslint-plugin-vue";
+export const meta: PluginMeta = {
+  description: "Official ESLint plugin for Vue.js.",
+  repo: "https://github.com/vuejs/eslint-plugin-vue",
+  lang: ["vue"],
+};
 export const devDependencies = { [name]: "latest" };
 export const eslintLegacyConfig: ESLintLegacyConfig = {
   extends: ["plugin:vue/vue3-recommended"],
@@ -22,4 +25,3 @@ export const eslintConfig: ESLintConfig<"vue"> = {
     );
   },
 };
-export const meta: PluginMeta = { lang: "vue" };

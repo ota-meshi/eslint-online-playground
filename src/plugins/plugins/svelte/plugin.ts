@@ -1,8 +1,11 @@
 import type { ESLintConfig, PluginMeta } from "../..";
 
 export const name = "eslint-plugin-svelte";
-export const description = "ESLint plugin for Svelte using AST.";
-export const repo = "https://github.com/sveltejs/eslint-plugin-svelte";
+export const meta: PluginMeta = {
+  description: "ESLint plugin for Svelte using AST.",
+  repo: "https://github.com/sveltejs/eslint-plugin-svelte",
+  lang: ["svelte"],
+};
 export const devDependencies = { [name]: "latest", svelte: "latest" };
 export const eslintConfig: ESLintConfig<"svelte"> = {
   *imports({ type, i, require }) {
@@ -17,4 +20,3 @@ export const eslintConfig: ESLintConfig<"svelte"> = {
     yield helper.spread(await helper.x(`${names.svelte}.configs.recommended`));
   },
 };
-export const meta: PluginMeta = { lang: "svelte" };

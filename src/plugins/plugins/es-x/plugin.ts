@@ -1,8 +1,10 @@
-import type { ESLintConfig, ESLintLegacyConfig } from "../..";
+import type { ESLintConfig, ESLintLegacyConfig, PluginMeta } from "../..";
 
 export const name = "eslint-plugin-es-x";
-export const description = "ESLint plugin about ECMAScript syntactic features.";
-export const repo = "https://github.com/eslint-community/eslint-plugin-es-x";
+export const meta: PluginMeta = {
+  description: "ESLint plugin about ECMAScript syntactic features.",
+  repo: "https://github.com/eslint-community/eslint-plugin-es-x",
+};
 export const devDependencies = { [name]: "latest" };
 export const eslintLegacyConfig: ESLintLegacyConfig = {
   extends: ["plugin:es-x/restrict-to-es2019"],

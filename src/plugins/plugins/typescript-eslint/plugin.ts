@@ -1,9 +1,12 @@
 import type { ESLintConfig, ESLintLegacyConfig, PluginMeta } from "../..";
 
 export const name = "typescript-eslint";
-export const description =
-  "The tooling that enables ESLint and Prettier to support TypeScript.";
-export const repo = "https://github.com/typescript-eslint/typescript-eslint";
+export const meta: PluginMeta = {
+  description:
+    "The tooling that enables ESLint and Prettier to support TypeScript.",
+  repo: "https://github.com/typescript-eslint/typescript-eslint",
+  lang: ["typescript"],
+};
 export const devDependencies = {
   "@typescript-eslint/parser": "latest",
   "@typescript-eslint/eslint-plugin": "latest",
@@ -51,4 +54,3 @@ export function hasInstalled(packageJson: any): boolean {
       packageJson.dependencies?.[pluginName] != null,
   );
 }
-export const meta: PluginMeta = { lang: "typescript" };

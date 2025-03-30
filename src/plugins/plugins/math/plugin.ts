@@ -1,8 +1,10 @@
-import type { ESLintConfig, ESLintLegacyConfig } from "../..";
+import type { ESLintConfig, ESLintLegacyConfig, PluginMeta } from "../..";
 
 export const name = "eslint-plugin-math";
-export const description = "ESLint plugin related to Math object and Number.";
-export const repo = "https://github.com/ota-meshi/eslint-plugin-math";
+export const meta: PluginMeta = {
+  description: "ESLint plugin related to Math object and Number.",
+  repo: "https://github.com/ota-meshi/eslint-plugin-math",
+};
 export const devDependencies = { [name]: "latest" };
 export const eslintLegacyConfig: ESLintLegacyConfig = {
   extends: ["plugin:math/recommended-legacy"],
