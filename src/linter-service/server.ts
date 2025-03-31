@@ -117,6 +117,20 @@ async function startServerInternal(
   void serverProcess.output.pipeTo(
     new WritableStream({
       write(str) {
+        const output = extractJson(str);
+
+        if (!output) {
+          // eslint-disable-next-line no-console -- Demo runtime
+          console.log(str);
+          return;
+        }
+
+        if (output.type !== "data") {
+          // eslint-disable-next-line no-console -- Demo runtime
+          console[output.type](output.payload);
+          return;
+        }
+
         if (!callbacks.length) {
           if (!boot) {
             // eslint-disable-next-line no-console -- Demo runtime
@@ -124,27 +138,6 @@ async function startServerInternal(
             return;
           }
 
-          const output = extractJson(str);
-          if (output && output.type !== "data") {
-            // eslint-disable-next-line no-console -- Demo runtime
-            console[output.type](output.payload);
-            return;
-          }
-
-          return;
-        }
-
-        const output = extractJson(str);
-
-        if (!output) {
-          // eslint-disable-next-line no-console -- Demo runtime
-          console.log(str);
-
-          return;
-        }
-        if (output.type !== "data") {
-          // eslint-disable-next-line no-console -- Demo runtime
-          console[output.type](output.payload);
           return;
         }
 
@@ -171,9 +164,7 @@ async function startServerInternal(
     data: any,
     test: (data: any) => boolean,
   ): Promise<string> {
-    await writer.write(createJsonPayload(data));
-
-    return new Promise((resolve) => {
+    const result = new Promise<string>((resolve) => {
       function callback(output: string) {
         if (test(output)) {
           resolve(output);
@@ -184,6 +175,10 @@ async function startServerInternal(
 
       callbacks.push(callback);
     });
+
+    await writer.write(createJsonPayload(data));
+
+    return result;
   }
 
   const serverInternal = {
