@@ -3,6 +3,9 @@ import { editor } from "monaco-editor";
 import { languages } from "monaco-editor";
 import { loadMonaco } from "./monaco-loader.js";
 
+export const DARK_THEME_NAME = "github-dark";
+export const LIGHT_THEME_NAME = "github-light";
+
 export type CodeActionProvider = (
   model: editor.ITextModel,
   range: Range,
@@ -116,7 +119,7 @@ export async function setupMonacoEditor({
 
   const options: editor.IStandaloneEditorConstructionOptions = {
     value: init.value,
-    theme: init.theme === "dark" ? "vs-dark" : "vs",
+    theme: init.theme === "dark" ? DARK_THEME_NAME : LIGHT_THEME_NAME,
     language,
     automaticLayout: true,
     tabSize: 2,
@@ -183,10 +186,10 @@ export async function setupMonacoEditor({
         codeActionProvider.getQuickFixesFromMarker(marker),
       setTheme: (theme: "dark" | "light") => {
         leftEditor.updateOptions({
-          theme: theme === "dark" ? "vs-dark" : "vs",
+          theme: theme === "dark" ? DARK_THEME_NAME : LIGHT_THEME_NAME,
         });
         rightEditor.updateOptions({
-          theme: theme === "dark" ? "vs-dark" : "vs",
+          theme: theme === "dark" ? DARK_THEME_NAME : LIGHT_THEME_NAME,
         });
       },
       disposeEditor: () => {
@@ -234,7 +237,7 @@ export async function setupMonacoEditor({
       codeActionProvider.getQuickFixesFromMarker(marker),
     setTheme: (theme: "dark" | "light") => {
       standaloneEditor.updateOptions({
-        theme: theme === "dark" ? "vs-dark" : "vs",
+        theme: theme === "dark" ? DARK_THEME_NAME : LIGHT_THEME_NAME,
       });
     },
     disposeEditor: () => {
