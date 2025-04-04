@@ -1,0 +1,3 @@
+
+/*eslint-disable no-undef, no-unused-vars */
+var foo = bar()
