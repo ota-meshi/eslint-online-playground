@@ -1,23 +1,27 @@
 import type { Monaco } from "../monaco-editor";
 
-export type Language =
-  | "javascript"
-  | "typescript"
-  | "json"
-  | "html"
-  | "markdown"
-  | "svelte"
-  | "astro"
-  | "yaml"
-  | "toml"
-  | "css"
-  | "scss"
-  | "stylus"
-  | "cds";
+export const ALL_LANGUAGES = [
+  "javascript",
+  "typescript",
+  "json",
+  "html",
+  "vue",
+  "markdown",
+  "svelte",
+  "astro",
+  "yaml",
+  "toml",
+  "css",
+  "scss",
+  "stylus",
+  "cds",
+] as const;
+
+export type Language = (typeof ALL_LANGUAGES)[number];
 const tsExtensions = [".ts", ".tsx", ".mts", ".cts"];
 const jsonExtensions = [".json", ".json5", ".jsonc"];
 const yamlExtensions = [".yml", ".yaml"];
-const htmlExtensions = [".html", ".vue"];
+const htmlExtensions = [".html"];
 const markdownExtensions = [".md", ".markdown"];
 const stylusExtensions = [".stylus", ".styl"];
 
@@ -28,6 +32,7 @@ export function getLang(monaco: Monaco | null, fileName: string): Language {
   if (htmlExtensions.some((ext) => fileName.endsWith(ext))) return "html";
   if (markdownExtensions.some((ext) => fileName.endsWith(ext)))
     return "markdown";
+  if (fileName.endsWith(".vue")) return "vue";
   if (fileName.endsWith(".svelte")) return "svelte";
   if (fileName.endsWith(".astro")) return "astro";
   if (fileName.endsWith(".toml")) return "toml";
@@ -35,6 +40,7 @@ export function getLang(monaco: Monaco | null, fileName: string): Language {
   if (fileName.endsWith(".css")) return "css";
   if (fileName.endsWith(".scss")) return "scss";
   if (stylusExtensions.some((ext) => fileName.endsWith(ext))) return "stylus";
+
   if (fileName.endsWith(".cds")) return "cds";
   if (monaco) {
     const lang = monaco.languages

@@ -1,10 +1,10 @@
-import type { IRawGrammar } from "monaco-textmate";
+import type { LanguageRegistration } from "shiki";
 
 // https://github.com/cap-js/docs/blob/9f7b450dd0428f296ce7dc08671c66251ef12935/.vitepress/languages/cds.tmLanguage.json
-export const grammar: IRawGrammar = {
+export const grammar: LanguageRegistration = {
   comment: "SAP CAP CDS Syntax 2.0 (open-source)",
   fileTypes: ["cds"],
-  name: "CDS Definition Language (CDL)",
+  name: "cds",
   patterns: [
     {
       comment: "entityDef, aspectDef, and others containing elements",

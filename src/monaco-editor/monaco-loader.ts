@@ -1,7 +1,10 @@
 import type * as monaco from "monaco-editor";
 export type Monaco = typeof monaco;
 import { version as monacoVersion } from "monaco-editor/package.json";
-import { registerTextmateLanguage } from "./textmate";
+import { createHighlighter } from "shiki";
+import { shikiToMonaco } from "@shikijs/monaco";
+import { DARK_THEME_NAME, LIGHT_THEME_NAME } from "./monaco-setup";
+import { ALL_LANGUAGES } from "../components/lang";
 
 let monacoPromise: Promise<Monaco> | null = null;
 
@@ -14,7 +17,7 @@ export function loadMonaco(): Promise<Monaco> {
         "vs/editor/editor.main",
       );
 
-      setupEnhancedLanguages(monaco);
+      await setupEnhancedLanguages(monaco);
 
       return monaco;
     })())
@@ -172,49 +175,79 @@ async function appendScript(src: string): Promise<HTMLScriptElement> {
   });
 }
 
-function setupEnhancedLanguages(monaco: Monaco) {
+async function setupEnhancedLanguages(monaco: Monaco) {
+  for (const id of ALL_LANGUAGES) {
+    monaco.languages.register({ id });
+  }
+  await createHighlighter({
+    themes: [DARK_THEME_NAME, LIGHT_THEME_NAME],
+    langs: [
+      ...ALL_LANGUAGES.filter((lang) => lang !== "cds"),
+      import("./syntaxes/ejs.tmlanguage").then((m) => m.grammar),
+      import("./syntaxes/cds.tmLanguage").then((m) => m.grammar),
+    ],
+  }).then((highlighter) => {
+    // Register the themes from Shiki, and provide syntax highlighting for Monaco.
+    shikiToMonaco(highlighter, monaco);
+  });
+
+  registerLanguageConfiguration(monaco, "vue", async () => {
+    const module = await import("./syntaxes/vue-language-configuration");
+    return module.getConfig(monaco);
+  });
+
   const dynamicImport: <M>(file: string) => Promise<M> = new Function(
     "file",
     "return import(file)",
   ) as any;
 
-  void dynamicImport<
-    // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
-    typeof import("@ota-meshi/site-kit-monarch-syntaxes/astro")
-  >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/astro").then(
-    (module) => module.setupAstroLanguage(monaco),
-  );
-
-  void dynamicImport<
-    // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
-    typeof import("@ota-meshi/site-kit-monarch-syntaxes/stylus")
-  >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/stylus").then(
-    (module) => module.setupStylusLanguage(monaco),
-  );
-
-  void dynamicImport<
-    // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
-    typeof import("@ota-meshi/site-kit-monarch-syntaxes/svelte")
-  >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/svelte").then(
-    (module) => module.setupSvelteLanguage(monaco),
-  );
-  void dynamicImport<
-    // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
-    typeof import("@ota-meshi/site-kit-monarch-syntaxes/toml")
-  >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/toml").then(
-    (module) => module.setupTomlLanguage(monaco),
-  );
-
-  registerTextmateLanguage(monaco, {
-    language: { id: "cds", scopeName: "source.cds" },
-    loadGrammarDefinition: async () => {
-      const module = await import("./syntaxes/cds.tmLanguage");
-
-      return module.grammar;
-    },
-    loadConfig: async () => {
-      const module = await import("./syntaxes/cds.configuration");
-      return module.getConfig(monaco);
-    },
+  registerLanguageConfiguration(monaco, "astro", async () => {
+    const module = await dynamicImport<
+      // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
+      typeof import("@ota-meshi/site-kit-monarch-syntaxes/astro")
+    >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/astro");
+    return module.loadAstroLanguageConfig();
   });
+  registerLanguageConfiguration(monaco, "stylus", async () => {
+    const module = await dynamicImport<
+      // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
+      typeof import("@ota-meshi/site-kit-monarch-syntaxes/stylus")
+    >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/stylus");
+    return module.loadStylusLanguageConfig();
+  });
+  registerLanguageConfiguration(monaco, "svelte", async () => {
+    const module = await dynamicImport<
+      // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
+      typeof import("@ota-meshi/site-kit-monarch-syntaxes/svelte")
+    >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/svelte");
+    return module.loadSvelteLanguageConfig();
+  });
+  registerLanguageConfiguration(monaco, "toml", async () => {
+    const module = await dynamicImport<
+      // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
+      typeof import("@ota-meshi/site-kit-monarch-syntaxes/toml")
+    >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/toml");
+    return module.loadTomlLanguageConfig();
+  });
+}
+
+function registerLanguageConfiguration(
+  monaco: Monaco,
+  languageId: string,
+  loadConfig: () => Promise<monaco.languages.LanguageConfiguration>,
+): void {
+  const models = monaco.editor
+    .getModels()
+    .filter((model) => model.getLanguageId() === languageId);
+  if (!models.length) {
+    monaco.languages.onLanguageEncountered(languageId, () => {
+      void Promise.resolve(loadConfig()).then((conf) => {
+        monaco.languages.setLanguageConfiguration(languageId, conf);
+      });
+    });
+  } else {
+    void Promise.resolve(loadConfig()).then((config) => {
+      monaco.languages.setLanguageConfiguration(languageId, config);
+    });
+  }
 }
