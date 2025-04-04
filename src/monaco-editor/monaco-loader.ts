@@ -1,6 +1,7 @@
 import type * as monaco from "monaco-editor";
 export type Monaco = typeof monaco;
 import { version as monacoVersion } from "monaco-editor/package.json";
+import { registerTextmateLanguage } from "./textmate";
 
 let monacoPromise: Promise<Monaco> | null = null;
 
@@ -203,4 +204,17 @@ function setupEnhancedLanguages(monaco: Monaco) {
   >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/toml").then(
     (module) => module.setupTomlLanguage(monaco),
   );
+
+  registerTextmateLanguage(monaco, {
+    language: { id: "cds", scopeName: "source.cds" },
+    loadGrammarDefinition: async () => {
+      const module = await import("./syntaxes/cds.tmLanguage");
+
+      return module.grammar;
+    },
+    loadConfig: async () => {
+      const module = await import("./syntaxes/cds.configuration");
+      return module.getConfig(monaco);
+    },
+  });
 }

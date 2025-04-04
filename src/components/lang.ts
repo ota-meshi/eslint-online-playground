@@ -12,7 +12,8 @@ export type Language =
   | "toml"
   | "css"
   | "scss"
-  | "stylus";
+  | "stylus"
+  | "cds";
 const tsExtensions = [".ts", ".tsx", ".mts", ".cts"];
 const jsonExtensions = [".json", ".json5", ".jsonc"];
 const yamlExtensions = [".yml", ".yaml"];
@@ -34,6 +35,7 @@ export function getLang(monaco: Monaco | null, fileName: string): Language {
   if (fileName.endsWith(".css")) return "css";
   if (fileName.endsWith(".scss")) return "scss";
   if (stylusExtensions.some((ext) => fileName.endsWith(ext))) return "stylus";
+  if (fileName.endsWith(".cds")) return "cds";
   if (monaco) {
     const lang = monaco.languages
       .getLanguages()
