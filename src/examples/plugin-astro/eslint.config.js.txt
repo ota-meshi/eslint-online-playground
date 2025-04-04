@@ -6,4 +6,12 @@ export default tseslint.config(
   ...tseslint.configs.recommended,
   ...eslintPluginAstro.configs.recommended,
   ...eslintPluginAstro.configs["jsx-a11y-strict"],
+  {
+    files: ["**/*.astro"],
+    rules: {
+      "astro/prefer-class-list-directive": "error",
+      "astro/prefer-object-class-list": "error",
+      "astro/prefer-split-class-list": "error"
+    },
+  }
 );
