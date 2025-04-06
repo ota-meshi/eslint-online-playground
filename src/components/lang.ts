@@ -13,6 +13,7 @@ export const ALL_LANGUAGES = [
   "toml",
   "css",
   "scss",
+  "less",
   "stylus",
   "cds",
 ] as const;
@@ -25,6 +26,7 @@ const htmlExtensions = [".html"];
 const markdownExtensions = [".md", ".markdown"];
 const stylusExtensions = [".stylus", ".styl"];
 
+// eslint-disable-next-line complexity -- ignore
 export function getLang(monaco: Monaco | null, fileName: string): Language {
   if (tsExtensions.some((ext) => fileName.endsWith(ext))) return "typescript";
   if (jsonExtensions.some((ext) => fileName.endsWith(ext))) return "json";
@@ -39,6 +41,7 @@ export function getLang(monaco: Monaco | null, fileName: string): Language {
 
   if (fileName.endsWith(".css")) return "css";
   if (fileName.endsWith(".scss")) return "scss";
+  if (fileName.endsWith(".less")) return "less";
   if (stylusExtensions.some((ext) => fileName.endsWith(ext))) return "stylus";
 
   if (fileName.endsWith(".cds")) return "cds";
