@@ -1,10 +1,12 @@
 import type * as monaco from "monaco-editor";
 export type Monaco = typeof monaco;
 import { version as monacoVersion } from "monaco-editor/package.json";
-import { createHighlighter } from "shiki";
+import type { HighlighterCore, LanguageRegistration } from "shiki";
+import { createHighlighterCore } from "shiki/bundle/web";
 import { shikiToMonaco } from "@shikijs/monaco";
-import { DARK_THEME_NAME, LIGHT_THEME_NAME } from "./monaco-setup";
+import type { Language } from "../components/lang";
 import { ALL_LANGUAGES } from "../components/lang";
+import { createOnigurumaEngine } from "shiki/engine/oniguruma";
 
 let monacoPromise: Promise<Monaco> | null = null;
 
@@ -176,57 +178,63 @@ async function appendScript(src: string): Promise<HTMLScriptElement> {
 }
 
 async function setupEnhancedLanguages(monaco: Monaco) {
-  for (const id of ALL_LANGUAGES) {
-    monaco.languages.register({ id });
-  }
-  await createHighlighter({
-    themes: [DARK_THEME_NAME, LIGHT_THEME_NAME],
-    langs: [
-      ...ALL_LANGUAGES.filter((lang) => lang !== "cds"),
-      import("./syntaxes/ejs.tmlanguage").then((m) => m.grammar),
-      import("./syntaxes/cds.tmLanguage").then((m) => m.grammar),
+  const monacoLanguageIds = new Set(
+    monaco.languages.getLanguages().map((l) => l.id),
+  );
+  const highlighter = await createHighlighterCore({
+    themes: [
+      import(`@shikijs/themes/github-dark`),
+      import(`@shikijs/themes/github-light`),
     ],
-  }).then((highlighter) => {
-    // Register the themes from Shiki, and provide syntax highlighting for Monaco.
-    shikiToMonaco(highlighter, monaco);
+    langs: [import("./syntaxes/ejs.tmlanguage").then((m) => m.grammar)],
+    // `shiki/wasm` contains the wasm binary inlined as base64 string.
+    engine: createOnigurumaEngine(import("shiki/wasm")),
   });
+  // Register the themes from Shiki, and provide syntax highlighting for Monaco.
+  shikiToMonaco(highlighter, monaco);
+  for (const id of ALL_LANGUAGES) {
+    if (!monacoLanguageIds.has(id)) {
+      monaco.languages.register({ id });
+    }
+    registerShikiHighlighter(monaco, highlighter, id);
+  }
 
   registerLanguageConfiguration(monaco, "vue", async () => {
     const module = await import("./syntaxes/vue-language-configuration");
     return module.getConfig(monaco);
   });
 
-  const dynamicImport: <M>(file: string) => Promise<M> = new Function(
-    "file",
-    "return import(file)",
-  ) as any;
-
   registerLanguageConfiguration(monaco, "astro", async () => {
-    const module = await dynamicImport<
+    const module = (await import(
+      // @ts-expect-error -- ignore
+      /* @vite-ignore */ "https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/astro"
       // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
-      typeof import("@ota-meshi/site-kit-monarch-syntaxes/astro")
-    >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/astro");
+    )) as typeof import("@ota-meshi/site-kit-monarch-syntaxes/astro");
+
     return module.loadAstroLanguageConfig();
   });
   registerLanguageConfiguration(monaco, "stylus", async () => {
-    const module = await dynamicImport<
+    const module = (await import(
+      // @ts-expect-error -- ignore
+      /* @vite-ignore */ "https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/stylus"
       // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
-      typeof import("@ota-meshi/site-kit-monarch-syntaxes/stylus")
-    >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/stylus");
+    )) as typeof import("@ota-meshi/site-kit-monarch-syntaxes/stylus");
     return module.loadStylusLanguageConfig();
   });
   registerLanguageConfiguration(monaco, "svelte", async () => {
-    const module = await dynamicImport<
+    const module = (await import(
+      // @ts-expect-error -- ignore
+      /* @vite-ignore */ "https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/svelte"
       // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
-      typeof import("@ota-meshi/site-kit-monarch-syntaxes/svelte")
-    >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/svelte");
+    )) as typeof import("@ota-meshi/site-kit-monarch-syntaxes/svelte");
     return module.loadSvelteLanguageConfig();
   });
   registerLanguageConfiguration(monaco, "toml", async () => {
-    const module = await dynamicImport<
+    const module = (await import(
+      // @ts-expect-error -- ignore
+      /* @vite-ignore */ "https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/toml"
       // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
-      typeof import("@ota-meshi/site-kit-monarch-syntaxes/toml")
-    >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/toml");
+    )) as typeof import("@ota-meshi/site-kit-monarch-syntaxes/toml");
     return module.loadTomlLanguageConfig();
   });
 }
@@ -250,4 +258,74 @@ function registerLanguageConfiguration(
       monaco.languages.setLanguageConfiguration(languageId, config);
     });
   }
+}
+
+const TEXTMATE_LANGUAGES: Record<
+  Language,
+  () => Promise<LanguageRegistration | LanguageRegistration[]>
+> = {
+  javascript: () => import("@shikijs/langs/javascript").then((m) => m.default),
+  typescript: () => import("@shikijs/langs/typescript").then((m) => m.default),
+  json: () => import("@shikijs/langs/json").then((m) => m.default),
+  html: () => import("@shikijs/langs/html").then((m) => m.default),
+  vue: () => import("@shikijs/langs/vue").then((m) => m.default),
+  markdown: () => import("@shikijs/langs/markdown").then((m) => m.default),
+  yaml: () => import("@shikijs/langs/yaml").then((m) => m.default),
+  astro: () => import("@shikijs/langs/astro").then((m) => m.default),
+  svelte: () => import("@shikijs/langs/svelte").then((m) => m.default),
+  css: () => import("@shikijs/langs/css").then((m) => m.default),
+  scss: () => import("@shikijs/langs/scss").then((m) => m.default),
+  stylus: () => import("@shikijs/langs/stylus").then((m) => m.default),
+  less: () => import("@shikijs/langs/less").then((m) => m.default),
+  toml: () => import("@shikijs/langs/toml").then((m) => m.default),
+  cds: () => import("./syntaxes/cds.tmLanguage").then((m) => m.grammar),
+};
+
+const needRegisterShikiHighlighterLanguageIds = new Set<Language>();
+let registerShikiHighlighterLanguageTimeoutId: NodeJS.Timeout | null = null;
+
+function registerShikiHighlighter(
+  monaco: Monaco,
+  highlighter: HighlighterCore,
+  languageId: Language,
+): void {
+  const models = monaco.editor
+    .getModels()
+    .filter((model) => model.getLanguageId() === languageId);
+
+  if (!models.length) {
+    monaco.languages.onLanguageEncountered(languageId, () => {
+      registerShikiHighlighterLanguage(monaco, highlighter, languageId);
+    });
+  } else {
+    registerShikiHighlighterLanguage(monaco, highlighter, languageId);
+  }
+}
+
+function registerShikiHighlighterLanguage(
+  monaco: Monaco,
+  highlighter: HighlighterCore,
+  languageId: Language,
+) {
+  needRegisterShikiHighlighterLanguageIds.add(languageId);
+  if (registerShikiHighlighterLanguageTimeoutId != null)
+    clearTimeout(registerShikiHighlighterLanguageTimeoutId);
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises -- OK
+  registerShikiHighlighterLanguageTimeoutId = setTimeout(async () => {
+    const languageRegistrations = [
+      ...needRegisterShikiHighlighterLanguageIds,
+    ].map((languageId) => TEXTMATE_LANGUAGES[languageId]());
+    needRegisterShikiHighlighterLanguageIds.clear();
+    await highlighter.loadLanguage(
+      ...(await Promise.all(languageRegistrations)).flat(),
+    );
+    const editorThemes = monaco.editor.getEditors().map((editor) => {
+      return [editor, (editor.getRawOptions() as any).theme] as const;
+    });
+    // Register the themes from Shiki, and provide syntax highlighting for Monaco.
+    shikiToMonaco(highlighter, monaco);
+    for (const [editor, theme] of editorThemes) {
+      editor.updateOptions({ theme } as any);
+    }
+  }, 200);
 }
