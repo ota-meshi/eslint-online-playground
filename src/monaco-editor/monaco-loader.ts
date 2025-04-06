@@ -204,37 +204,37 @@ async function setupEnhancedLanguages(monaco: Monaco) {
     return module.getConfig(monaco);
   });
 
-  const dynamicImport: <M>(file: string) => Promise<M> = new Function(
-    "file",
-    "return import(file)",
-  ) as any;
-
   registerLanguageConfiguration(monaco, "astro", async () => {
-    const module = await dynamicImport<
+    const module = (await import(
+      // @ts-expect-error -- ignore
+      /* @vite-ignore */ "https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/astro"
       // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
-      typeof import("@ota-meshi/site-kit-monarch-syntaxes/astro")
-    >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/astro");
+    )) as typeof import("@ota-meshi/site-kit-monarch-syntaxes/astro");
+
     return module.loadAstroLanguageConfig();
   });
   registerLanguageConfiguration(monaco, "stylus", async () => {
-    const module = await dynamicImport<
+    const module = (await import(
+      // @ts-expect-error -- ignore
+      /* @vite-ignore */ "https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/stylus"
       // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
-      typeof import("@ota-meshi/site-kit-monarch-syntaxes/stylus")
-    >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/stylus");
+    )) as typeof import("@ota-meshi/site-kit-monarch-syntaxes/stylus");
     return module.loadStylusLanguageConfig();
   });
   registerLanguageConfiguration(monaco, "svelte", async () => {
-    const module = await dynamicImport<
+    const module = (await import(
+      // @ts-expect-error -- ignore
+      /* @vite-ignore */ "https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/svelte"
       // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
-      typeof import("@ota-meshi/site-kit-monarch-syntaxes/svelte")
-    >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/svelte");
+    )) as typeof import("@ota-meshi/site-kit-monarch-syntaxes/svelte");
     return module.loadSvelteLanguageConfig();
   });
   registerLanguageConfiguration(monaco, "toml", async () => {
-    const module = await dynamicImport<
+    const module = (await import(
+      // @ts-expect-error -- ignore
+      /* @vite-ignore */ "https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/toml"
       // eslint-disable-next-line @typescript-eslint/consistent-type-imports -- ignore
-      typeof import("@ota-meshi/site-kit-monarch-syntaxes/toml")
-    >("https://cdn.skypack.dev/@ota-meshi/site-kit-monarch-syntaxes/toml");
+    )) as typeof import("@ota-meshi/site-kit-monarch-syntaxes/toml");
     return module.loadTomlLanguageConfig();
   });
 }
