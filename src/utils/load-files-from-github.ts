@@ -274,7 +274,7 @@ function fetchForGitHub(url: string | URL): Promise<Response> {
       if (res.status !== 200) {
         if (`${res.status}`.startsWith("4")) {
           const rlRes: RateLimitResponse = await fetch(
-            `https://api.github.com/rate_limit`,
+            "https://api.github.com/rate_limit",
           ).then((res) => {
             if (res.status !== 200) {
               throw new Error(`Failed to fetch ${url}: ${res.statusText}`);

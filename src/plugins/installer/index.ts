@@ -32,7 +32,7 @@ export async function installPlugin(
   try {
     packageJsonObject = JSON.parse(packageJson);
   } catch {
-    alertAndLog(`Cannot parse package.json`);
+    alertAndLog("Cannot parse package.json");
     return {
       error: true,
     };
@@ -42,7 +42,7 @@ export async function installPlugin(
     typeof packageJsonObject !== "object" ||
     Array.isArray(packageJsonObject)
   ) {
-    alertAndLog(`Cannot parse package.json`);
+    alertAndLog("Cannot parse package.json");
     return {
       error: true,
     };

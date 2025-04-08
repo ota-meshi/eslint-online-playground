@@ -13,7 +13,7 @@ export const eslintLegacyConfig: ESLintLegacyConfig = {
 export const eslintConfig: ESLintConfig<"regexp"> = {
   *imports(helper) {
     if (helper.type === "module") {
-      yield helper.i(`import regexp from 'eslint-plugin-regexp'`);
+      yield helper.i("import regexp from 'eslint-plugin-regexp'");
     } else {
       yield helper.require({
         local: "regexp",

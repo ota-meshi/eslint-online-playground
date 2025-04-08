@@ -13,7 +13,7 @@ export const eslintConfig: ESLintConfig<"comments"> = {
   *imports(helper) {
     if (helper.type === "module") {
       yield helper.i(
-        `import comments from "@eslint-community/eslint-plugin-eslint-comments/configs"`,
+        'import comments from "@eslint-community/eslint-plugin-eslint-comments/configs"',
       );
     } else {
       yield helper.require({

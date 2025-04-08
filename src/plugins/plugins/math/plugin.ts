@@ -12,7 +12,7 @@ export const eslintLegacyConfig: ESLintLegacyConfig = {
 export const eslintConfig: ESLintConfig<"eslintPluginMath"> = {
   *imports(helper) {
     if (helper.type === "module") {
-      yield helper.i(`import eslintPluginMath from 'eslint-plugin-math'`);
+      yield helper.i("import eslintPluginMath from 'eslint-plugin-math'");
     } else {
       yield helper.require({
         local: "eslintPluginMath",

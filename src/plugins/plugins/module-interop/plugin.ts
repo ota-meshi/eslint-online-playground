@@ -10,7 +10,7 @@ export const eslintConfig: ESLintConfig<"moduleInteropPlugin"> = {
   *imports(helper) {
     if (helper.type === "module") {
       yield helper.i(
-        `import moduleInteropPlugin from "eslint-plugin-module-interop"`,
+        'import moduleInteropPlugin from "eslint-plugin-module-interop"',
       );
     } else {
       yield helper.require({

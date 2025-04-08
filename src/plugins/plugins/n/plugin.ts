@@ -12,7 +12,7 @@ export const eslintLegacyConfig: ESLintLegacyConfig = {
 export const eslintConfig: ESLintConfig<"nodePlugin"> = {
   *imports(helper) {
     if (helper.type === "module") {
-      yield helper.i(`import nodePlugin from "eslint-plugin-n"`);
+      yield helper.i('import nodePlugin from "eslint-plugin-n"');
     } else {
       yield helper.require({
         local: "nodePlugin",
