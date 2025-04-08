@@ -4,7 +4,7 @@ import js from "@eslint/js";
 
 export default [
   {
-    ignores: ["node_modules", "dist"],
+    ignores: ["node_modules/", "dist/", "coverage/"],
   },
   js.configs.recommended,
   ...myPlugin.config({
@@ -32,6 +32,42 @@ export default [
       "no-shadow": "off",
       "no-unused-vars": "off",
       "@typescript-eslint/no-shadow": "off",
+      quotes: [
+        "error",
+        "double",
+        {
+          avoidEscape: true,
+        },
+      ],
+    },
+  },
+  {
+    files: ["**/*.{ts,vue}"],
+    rules: {
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "monaco-editor",
+              message: "Please use loaded monaco-editor instead.",
+              allowTypeImports: true,
+            },
+          ],
+          patterns: [
+            {
+              regex: "^@shikijs/",
+              message: "Please use CDN instead.",
+              allowTypeImports: true,
+            },
+            {
+              regex: "^shiki/",
+              message: "Please use CDN instead.",
+              allowTypeImports: true,
+            },
+          ],
+        },
+      ],
     },
   },
   {

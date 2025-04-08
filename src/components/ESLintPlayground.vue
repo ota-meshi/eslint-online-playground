@@ -689,7 +689,7 @@ async function handleAddFile() {
   while (props.sources[newFileName]) {
     newFileName = `src/example${i++}.js`;
   }
-  const content = `console.log("Hello!");`;
+  const content = 'console.log("Hello!");';
   emit("update:sources", {
     ...props.sources,
     [newFileName]: content,

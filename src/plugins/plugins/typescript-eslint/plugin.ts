@@ -30,7 +30,7 @@ export const eslintLegacyConfig: ESLintLegacyConfig = {
 export const eslintConfig: ESLintConfig<"tseslint"> = {
   *imports(helper) {
     if (helper.type === "module") {
-      yield helper.i(`import tseslint from 'typescript-eslint'`);
+      yield helper.i("import tseslint from 'typescript-eslint'");
     } else {
       yield helper.require({
         local: "tseslint",

@@ -63,7 +63,7 @@
     "eslint-plugin-yml": "^1.14.0",
     "monaco-editor": "^0.52.2",
     "typescript": "^5.5.2",
-    "typescript-eslint": "^8.26.0",
+    "typescript-eslint": "^8.29.1",
     "vite": "^6.0.0",
     "vitest": "^3.0.4",
     "vue-eslint-parser": "^10.0.0",

@@ -1,6 +1,6 @@
 import type { CancellationToken, Range, IDisposable } from "monaco-editor";
-import { editor } from "monaco-editor";
-import { languages } from "monaco-editor";
+import type { editor } from "monaco-editor";
+import type { languages } from "monaco-editor";
 import { loadMonaco } from "./monaco-loader.js";
 
 export const DARK_THEME_NAME = "github-dark";
@@ -257,7 +257,7 @@ export async function setupMonacoEditor({
     const old = editorInstance.getValue();
 
     if (old !== value) {
-      if (editorInstance.getOption(editor.EditorOption.readOnly)) {
+      if (editorInstance.getOption(monaco.editor.EditorOption.readOnly)) {
         editorInstance.setValue(value);
       } else {
         const model = editorInstance.getModel()!;
@@ -335,7 +335,7 @@ export async function setupMonacoEditor({
 
         const context: languages.CodeActionContext = {
           markers: [marker],
-          trigger: languages.CodeActionTriggerType.Invoke,
+          trigger: monaco.languages.CodeActionTriggerType.Invoke,
           only: "quickfix",
         };
 

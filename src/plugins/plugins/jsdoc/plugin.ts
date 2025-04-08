@@ -12,7 +12,7 @@ export const eslintLegacyConfig: ESLintLegacyConfig = {
 export const eslintConfig: ESLintConfig<"jsdoc"> = {
   *imports(helper) {
     if (helper.type === "module") {
-      yield helper.i(`import jsdoc from 'eslint-plugin-jsdoc'`);
+      yield helper.i("import jsdoc from 'eslint-plugin-jsdoc'");
     } else {
       yield helper.require({
         local: "jsdoc",
