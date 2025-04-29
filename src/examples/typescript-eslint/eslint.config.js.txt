@@ -5,10 +5,7 @@ export default tseslint.config(
   {
     files: ["**/*.{ts,mts,cts,tsx}", "*.{ts,mts,cts,tsx}"],
     extends: [
-      tseslint.configs["eslint-recommended"],
-      ...tseslint.configs.recommended,
-      tseslint.configs["recommended-requiring-type-checking"],
-      ...tseslint.configs.strict,
+      ...tseslint.configs.strictTypeChecked,
       {
         languageOptions: {
           parserOptions: {
