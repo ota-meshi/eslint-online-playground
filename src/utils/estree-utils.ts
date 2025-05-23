@@ -1,7 +1,8 @@
 import type * as ESTree from "estree";
-import type * as eslintUtils from "eslint-utils";
-import type { ScopeManager } from "eslint-scope";
+import type * as eslintUtils from "@eslint-community/eslint-utils";
+import type { ScopeManager as ScopeManagerConstructor } from "eslint-scope";
 type ESLintUtils = typeof eslintUtils;
+type ScopeManager = InstanceType<typeof ScopeManagerConstructor>;
 
 export function isModuleExports(
   node: ESTree.Node,
@@ -110,7 +111,6 @@ export async function toValueFromESExpression(
   scopeManager: ScopeManager,
 ): Promise<unknown> {
   const eslintUtils: ESLintUtils = await import(
-    // @ts-expect-error -- ignore
     "@eslint-community/eslint-utils"
   );
   const result = eslintUtils.getStaticValue(object, scopeManager.globalScope);

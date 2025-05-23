@@ -8,7 +8,7 @@ import {
   analyzeScope,
 } from "../utils/estree-utils";
 import { toYAMLContent } from "../utils/yaml-utils";
-import type * as eslintUtils from "eslint-utils";
+import type * as eslintUtils from "@eslint-community/eslint-utils";
 import { prettyStringify } from "../utils/json-utils";
 type ESLintUtils = typeof eslintUtils;
 
@@ -121,7 +121,6 @@ async function jsExpressionToYaml(
 > {
   const scopeManager = await analyzeScope(program);
   const eslintUtils: ESLintUtils = await import(
-    // @ts-expect-error -- ignore
     "@eslint-community/eslint-utils"
   );
 
