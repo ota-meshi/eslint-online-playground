@@ -237,16 +237,16 @@ let queue: Promise<any> = Promise.resolve();
 let githubToken = "";
 
 function fetchWithMessage(url: string | URL): Promise<Response> {
-  queue = queue.then(() => messageWith(`Request to\n${url}`, nextFetch));
-  return queue;
+  const result = queue.then(() => messageWith(`Request to\n${url}`, nextFetch));
+  queue = result.catch(() => null);
+  return result;
 
-  function nextFetch() {
-    return fetch(url).then((res) => {
-      if (res.status !== 200) {
-        throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
-      }
-      return res;
-    });
+  async function nextFetch() {
+    const res = await fetch(url);
+    if (res.status !== 200) {
+      throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
+    }
+    return res;
   }
 }
 
@@ -258,42 +258,38 @@ function fetchForGitHub(url: string | URL): Promise<Response> {
   //     new Error(`Failed to fetch ${url}: ${2}`),
   //   );
   // }
-  queue = queue.then(() => messageWith(`Request to\n${url}`, nextFetch));
-  return queue;
+  const result = queue.then(() => messageWith(`Request to\n${url}`, nextFetch));
+  queue = result.catch(() => null);
+  return result;
 
-  function nextFetch() {
-    return (
-      githubToken
-        ? fetch(url, {
-            headers: {
-              Authorization: `Bearer ${githubToken}`,
-            },
-          })
-        : fetch(url)
-    ).then(async (res) => {
-      if (res.status !== 200) {
-        if (`${res.status}`.startsWith("4")) {
-          const rlRes: RateLimitResponse = await fetch(
-            "https://api.github.com/rate_limit",
-          ).then((res) => {
-            if (res.status !== 200) {
-              throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
-            }
-            return res.json();
-          });
-          if (rlRes.rate.remaining > 0) {
-            throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
-          }
-          return retryFetchForGitHubWithRequestToken(
-            rlRes,
-            new Error(`Failed to fetch ${url}: ${res.statusText}`),
-          );
+  async function nextFetch() {
+    const res = await (githubToken
+      ? fetch(url, {
+          headers: {
+            Authorization: `Bearer ${githubToken}`,
+          },
+        })
+      : fetch(url));
+
+    if (res.status !== 200) {
+      if (`${res.status}`.startsWith("4")) {
+        const rlRes = await fetch("https://api.github.com/rate_limit");
+        if (rlRes.status !== 200) {
+          throw new Error(`Failed to fetch ${url}: ${rlRes.statusText}`);
         }
-
-        throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
+        const rlJson: RateLimitResponse = await rlRes.json();
+        if (rlJson.rate.remaining > 0) {
+          throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
+        }
+        return retryFetchForGitHubWithRequestToken(
+          rlJson,
+          new Error(`Failed to fetch ${url}: ${res.statusText}`),
+        );
       }
-      return res;
-    });
+
+      throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
+    }
+    return res;
   }
 
   function retryFetchForGitHubWithRequestToken(
