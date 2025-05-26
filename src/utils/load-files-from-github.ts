@@ -48,6 +48,7 @@ export function loadFilesFromGitHub(
 ): Promise<Record<string, string>> {
   return loadingWith(async () => {
     return (
+      (await loadFilesFromGitHubTreesAPIWithoutToken(owner, repo, path, ref)) ??
       (await loadFilesFromGitHubWithUnGh(owner, repo, path, ref)) ??
       (await loadFilesFromGitHubTreesAPI(owner, repo, path, ref)) ??
       loadFilesFromGitHubContentsAPI(owner, repo, path, ref)
@@ -83,6 +84,7 @@ async function loadFilesFromGitHubWithUnGh(
 
         result[file.path.slice(prefix.length)] = await fetchForGitHub(
           `https://raw.githubusercontent.com/${owner}/${repo}/${treeSha}/${file.path}`,
+          { requestToken: true },
         ).then((res) => res.text());
       }),
     );
@@ -94,22 +96,47 @@ async function loadFilesFromGitHubWithUnGh(
   }
 }
 
-async function loadFilesFromGitHubTreesAPI(
+function loadFilesFromGitHubTreesAPIWithoutToken(
   owner: string,
   repo: string,
   path: string,
-  ref?: string,
+  ref: string | undefined,
+): Promise<Record<string, string> | null> {
+  return loadFilesFromGitHubTreesAPIWithOption(owner, repo, path, ref, {
+    requestToken: false,
+  });
+}
+
+function loadFilesFromGitHubTreesAPI(
+  owner: string,
+  repo: string,
+  path: string,
+  ref: string | undefined,
+): Promise<Record<string, string> | null> {
+  return loadFilesFromGitHubTreesAPIWithOption(owner, repo, path, ref, {
+    requestToken: true,
+  });
+}
+
+async function loadFilesFromGitHubTreesAPIWithOption(
+  owner: string,
+  repo: string,
+  path: string,
+  ref: string | undefined,
+  options: { requestToken: boolean },
 ): Promise<Record<string, string> | null> {
   const treeSha =
     ref ||
     (await (async () => {
       const res: RepoResponse = await fetchForGitHub(
         `https://api.github.com/repos/${owner}/${repo}`,
+        options,
       ).then((res) => res.json());
       return res.default_branch;
     })());
   const response: TreeResponse = await fetchForGitHub(
     `https://api.github.com/repos/${owner}/${repo}/git/trees/${treeSha}?recursive=true`,
+    options,
   ).then((res) => res.json());
   if (response.truncated) {
     return null;
@@ -123,6 +150,7 @@ async function loadFilesFromGitHubTreesAPI(
         if (ignore(file.path)) return;
         result[file.path.slice(prefix.length)] = await fetchForGitHub(
           `https://raw.githubusercontent.com/${owner}/${repo}/${treeSha}/${file.path}`,
+          options,
         ).then((res) => res.text());
       }
     }),
@@ -148,17 +176,22 @@ function loadFilesFromGitHubContentsAPI(
 async function loadFilesFromGitHubContentsURL(
   url: string | URL,
 ): Promise<Record<string, string>> {
-  const response: ContentsResponse = await fetchForGitHub(url).then((res) =>
-    res.json(),
-  );
+  const fetchGhOption = {
+    requestToken: true,
+  };
+  const response: ContentsResponse = await fetchForGitHub(
+    url,
+    fetchGhOption,
+  ).then((res) => res.json());
   const result: Record<string, string> = {};
   await Promise.all(
     (Array.isArray(response) ? response : [response]).map(async (file) => {
       if (file.type === "file") {
         if (ignore(file.path)) return;
-        result[file.path] = await fetchForGitHub(file.download_url).then(
-          (res) => res.text(),
-        );
+        result[file.path] = await fetchForGitHub(
+          file.download_url,
+          fetchGhOption,
+        ).then((res) => res.text());
       } else if (file.type === "dir") {
         Object.assign(result, await loadFilesFromGitHubContentsURL(file.url));
       }
@@ -250,7 +283,10 @@ function fetchWithMessage(url: string | URL): Promise<Response> {
   }
 }
 
-function fetchForGitHub(url: string | URL): Promise<Response> {
+function fetchForGitHub(
+  url: string | URL,
+  options: { requestToken: boolean },
+): Promise<Response> {
   // debug
   // if (!githubToken) {
   //   await retryFetchForGitHubWithRequestToken(
@@ -273,18 +309,20 @@ function fetchForGitHub(url: string | URL): Promise<Response> {
 
     if (res.status !== 200) {
       if (`${res.status}`.startsWith("4")) {
-        const rlRes = await fetch("https://api.github.com/rate_limit");
-        if (rlRes.status !== 200) {
-          throw new Error(`Failed to fetch ${url}: ${rlRes.statusText}`);
+        if (options.requestToken) {
+          const rlRes = await fetch("https://api.github.com/rate_limit");
+          if (rlRes.status !== 200) {
+            throw new Error(`Failed to fetch ${url}: ${rlRes.statusText}`);
+          }
+          const rlJson: RateLimitResponse = await rlRes.json();
+          if (rlJson.rate.remaining > 0) {
+            throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
+          }
+          return retryFetchForGitHubWithRequestToken(
+            rlJson,
+            new Error(`Failed to fetch ${url}: ${res.statusText}`),
+          );
         }
-        const rlJson: RateLimitResponse = await rlRes.json();
-        if (rlJson.rate.remaining > 0) {
-          throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
-        }
-        return retryFetchForGitHubWithRequestToken(
-          rlJson,
-          new Error(`Failed to fetch ${url}: ${res.statusText}`),
-        );
       }
 
       throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
