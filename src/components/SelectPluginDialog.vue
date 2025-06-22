@@ -270,7 +270,6 @@ function handleClickDialog() {
   flex-direction: column;
   position: relative;
   gap: 8px;
-  padding-block: 1rem;
   margin: 1rem auto auto auto;
   min-width: 1100px;
   min-width: min(calc(100vw - 2em - 6px), 1100px);
@@ -288,7 +287,7 @@ function handleClickDialog() {
 .ep-select-plugin__head {
   flex-shrink: 0;
   border-bottom: 1px solid var(--ep-border-color);
-  padding: 0 1rem 0.5rem 1rem;
+  padding: 1rem 1rem 0.5rem;
 }
 
 .ep-select-plugin__filter {
@@ -311,6 +310,7 @@ function handleClickDialog() {
 
 .ep-select-plugin__filter-text input {
   width: 100%;
+  box-sizing: border-box;
 }
 
 .ep-select-plugin__lang-filter-items {
@@ -405,7 +405,7 @@ function handleClickDialog() {
 .ep-select-plugin__foot {
   flex-shrink: 0;
   border-top: 1px solid var(--ep-border-color);
-  padding: 0.5rem 1rem 0 1rem;
+  padding: 0.5rem 1rem 1rem;
 }
 
 .carbon--filter {

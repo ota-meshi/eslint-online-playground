@@ -4,7 +4,7 @@ import { customCompare } from "../utils/compare";
 import {
   loadFilesFromGitHub,
   parseGitHubURL,
-} from "../utils/load-files-from-github";
+} from "../utils/load-files/from-github";
 
 export type Example = {
   name: string;
