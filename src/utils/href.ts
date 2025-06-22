@@ -1,6 +1,6 @@
 import { decompress } from "./compress";
 import { loadExamples } from "../examples";
-import { loadFilesFromGitHub, parseGitHubURL } from "./load-files-from-github";
+import { loadFilesFromGitHub, parseGitHubURL } from "./load-files/from-github";
 import { loadingWith } from "./loading";
 
 type QueryAndHashData = { search?: string; hash?: string };
