@@ -47,8 +47,17 @@ const normalizeLevel = computed(() => props.level || 0);
 }
 
 .tree-item__parent-label::before {
-  content: "▾";
+  content: "";
   position: absolute;
   transform: translateX(-0.8rem);
+  --un-icon: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='currentColor' d='m24 12l-8 10l-8-10z'/%3E%3C/svg%3E");
+  -webkit-mask: var(--un-icon) no-repeat;
+  mask: var(--un-icon) no-repeat;
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  background-color: currentColor;
+  color: inherit;
+  width: 1em;
+  height: 1em;
 }
 </style>

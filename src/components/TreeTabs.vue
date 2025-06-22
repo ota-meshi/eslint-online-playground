@@ -112,7 +112,7 @@ defineExpose({ setChecked });
               class="ep-tree-tab__remove-button"
               @click="() => handleRemove(tab)"
             >
-              -
+              <div class="i-carbon:close" />
             </button>
           </div>
         </TreeItem>
