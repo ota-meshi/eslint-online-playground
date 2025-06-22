@@ -730,7 +730,9 @@ function selectOutput(nm: "console" | "warnings") {
     >
       <template #tools>
         <div class="ep__menu-tools">
-          <button class="ep__tool-button" @click="handleAddFile">+</button>
+          <button class="ep__tool-button" @click="handleAddFile">
+            <div class="i-carbon:add" />
+          </button>
         </div>
       </template>
       <template

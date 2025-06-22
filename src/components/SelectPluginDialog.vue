@@ -2,8 +2,6 @@
 import { ref, computed, watch } from "vue";
 import type { Plugin } from "../plugins";
 import { loadPlugins } from "../plugins";
-import GitHubIcon from "./GitHubIcon.vue";
-import NpmIcon from "./NpmIcon.vue";
 import { loadingWith } from "../utils/loading";
 
 const languageOrder = [
@@ -135,7 +133,7 @@ function handleClickDialog() {
     <div class="ep-select-plugin__head" @click.stop>
       <div class="ep-select-plugin__filter">
         <div class="ep-select-plugin__filter-left">
-          <span class="carbon--filter"></span>
+          <span class="i-carbon:filter"></span>
         </div>
         <div class="ep-select-plugin__filter-content">
           <div class="ep-select-plugin__filter-text">
@@ -229,7 +227,7 @@ function handleClickDialog() {
                 :href="plugin.meta.repo"
                 @click.stop
               >
-                <GitHubIcon alt="GitHub" />
+                <div alt="GitHub" class="i-icon-park-outline:github" />
               </a>
               <a
                 class="ep-select-plugin__link-icon"
@@ -237,7 +235,7 @@ function handleClickDialog() {
                 :href="`https://www.npmjs.com/package/${plugin.meta?.package || plugin.name}`"
                 @click.stop
               >
-                <NpmIcon alt="npm" />
+                <div alt="npm" class="i-fa-brands:npm" />
               </a>
             </div>
           </div>
@@ -328,6 +326,9 @@ function handleClickDialog() {
   color: var(--color-primary-900);
   cursor: pointer;
   user-select: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .ep-select-plugin__lang-filter-item--selected {
@@ -400,25 +401,12 @@ function handleClickDialog() {
 
 .ep-select-plugin__link-icon {
   display: flex;
+  font-size: 1.5em;
 }
 
 .ep-select-plugin__foot {
   flex-shrink: 0;
   border-top: 1px solid var(--ep-border-color);
   padding: 0.5rem 1rem 1rem;
-}
-
-.carbon--filter {
-  display: inline-block;
-  width: 1em;
-  height: 1em;
-  --svg: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpath fill='%23000' d='M18 28h-4a2 2 0 0 1-2-2v-7.59L4.59 11A2 2 0 0 1 4 9.59V6a2 2 0 0 1 2-2h20a2 2 0 0 1 2 2v3.59a2 2 0 0 1-.59 1.41L20 18.41V26a2 2 0 0 1-2 2M6 6v3.59l8 8V26h4v-8.41l8-8V6Z'/%3E%3C/svg%3E");
-  background-color: currentColor;
-  -webkit-mask-image: var(--svg);
-  mask-image: var(--svg);
-  -webkit-mask-repeat: no-repeat;
-  mask-repeat: no-repeat;
-  -webkit-mask-size: 100% 100%;
-  mask-size: 100% 100%;
 }
 </style>

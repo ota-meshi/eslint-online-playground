@@ -3,7 +3,6 @@ import { nextTick, ref, watch } from "vue";
 import ESLintPlayground from "./components/ESLintPlayground.vue";
 import SelectExampleDialog from "./components/SelectExampleDialog.vue";
 import SelectPluginDialog from "./components/SelectPluginDialog.vue";
-import GitHubIcon from "./components/GitHubIcon.vue";
 import ThemeSwitch from "./components/ThemeSwitch.vue";
 import { compress } from "./utils/compress";
 import { debounce } from "./utils/debounce";
@@ -153,7 +152,7 @@ if (typeof window !== "undefined") {
         target="_blank"
         href="https://github.com/ota-meshi/eslint-online-playground"
       >
-        <GitHubIcon alt="GitHub" />
+        <div alt="GitHub" class="i-icon-park-outline:github" />
       </a>
     </div>
   </header>
@@ -203,6 +202,7 @@ if (typeof window !== "undefined") {
 
 .github {
   display: flex;
+  font-size: 1.5em;
 }
 
 .footer {

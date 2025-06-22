@@ -2,6 +2,7 @@ import { createApp } from "vue";
 import "./style.css";
 import App from "./App.vue";
 import * as href from "./utils/href";
+import "virtual:uno.css";
 
 void main();
 
