@@ -401,7 +401,7 @@ function handleClickDialog() {
 
 .ep-select-plugin__link-icon {
   display: flex;
-  font-size: 1.5em;
+  font-size: 1.2rem;
 }
 
 .ep-select-plugin__foot {
