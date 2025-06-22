@@ -202,7 +202,7 @@ if (typeof window !== "undefined") {
 
 .github {
   display: flex;
-  font-size: 1.5em;
+  font-size: 1.2em;
 }
 
 .footer {
