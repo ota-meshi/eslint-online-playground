@@ -46,7 +46,7 @@
     "@types/eslint-scope": "^8.3.0",
     "@types/node": "^22.0.0",
     "@unocss/preset-icons": "^66.2.3",
-    "@vitejs/plugin-vue": "^5.0.5",
+    "@vitejs/plugin-vue": "^6.0.0",
     "@vitest/coverage-v8": "^3.0.4",
     "eslint": "^9.27.0",
     "eslint-config-prettier": "^10.0.0",
