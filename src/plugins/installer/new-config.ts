@@ -194,6 +194,7 @@ function margeImport(
               },
             },
           ],
+          attributes: [],
         });
         localNames[spec.local.name] = name;
         usedIds.add(name);
@@ -216,6 +217,7 @@ function margeImport(
               },
             },
           ],
+          attributes: [],
         });
         localNames[spec.local.name] = name;
         usedIds.add(name);
@@ -242,6 +244,7 @@ function margeImport(
               },
             },
           ],
+          attributes: [],
         });
         localNames[spec.local.name] = name;
         usedIds.add(name);

@@ -138,7 +138,7 @@ if (typeof window !== "undefined") {
   <header class="header">
     <div class="title">
       <a href="https://github.com/eslint-community/">
-        <img class="community-logo" src="/icon.svg" />
+        <img class="community-logo" src="../public/icon.svg" />
       </a>
       <a href="https://eslint.org/"> ESLint </a>
       Online Playground
