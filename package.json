@@ -32,7 +32,7 @@
     "@webcontainer/api": "^1.2.0",
     "ansi-regex": "^6.1.0",
     "eslint-scope": "^8.3.0",
-    "esrap": "^1.4.3",
+    "esrap": "^2.0.0",
     "fflate": "^0.8.2",
     "shiki": "^3.2.1",
     "shine-and-bright": "^0.3.0",
