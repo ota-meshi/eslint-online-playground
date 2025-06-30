@@ -44,6 +44,9 @@ async function baseParse<T>(
 }
 
 export async function print(node: ESTree.Node): Promise<string> {
-  const esrap = await import("esrap");
-  return esrap.print(node, {}).code;
+  const [esrap, ts] = await Promise.all([
+    import("esrap"),
+    import("esrap/languages/ts"),
+  ]);
+  return esrap.print(node as any, ts.default()).code;
 }
