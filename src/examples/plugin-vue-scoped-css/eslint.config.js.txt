@@ -1,0 +1,8 @@
+import js from "@eslint/js";
+import pluginVue from "eslint-plugin-vue";
+import vueScopedCSS from 'eslint-plugin-vue-scoped-css';
+export default [
+  js.configs.recommended,
+  ...pluginVue.configs["flat/recommended"],
+	...vueScopedCSS.configs['flat/recommended']
+];
