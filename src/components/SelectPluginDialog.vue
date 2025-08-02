@@ -12,6 +12,7 @@ const languageOrder = [
   "vue",
   "svelte",
   "astro",
+  "markdown",
   "yaml",
   "toml",
   "ejs",

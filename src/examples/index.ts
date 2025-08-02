@@ -39,7 +39,7 @@ async function loadExamplesWithoutCache(): Promise<Record<string, Example>> {
       },
     ),
     ...Object.entries(
-      import.meta.glob<{ default: string }>("./**/*.{txt,js,cds,csv}", {
+      import.meta.glob<{ default: string }>("./**/*.{txt,js,md,cds,csv}", {
         query: "?raw",
       }),
     ).map(([fileName, loadContent]) => ({
