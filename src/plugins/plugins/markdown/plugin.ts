@@ -17,8 +17,6 @@ export const eslintConfig: ESLintConfig<"markdown"> = {
         });
   },
   async *expression(names, helper) {
-    yield helper.spread(
-      await helper.x(`${names.markdown}.configs.recommended`),
-    );
+    yield await helper.x(`${names.markdown}.configs.recommended`);
   },
 };
