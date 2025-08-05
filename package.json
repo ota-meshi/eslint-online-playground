@@ -42,7 +42,7 @@
     "yaml": "^2.4.5"
   },
   "devDependencies": {
-    "@ota-meshi/eslint-plugin": "^0.17.4",
+    "@ota-meshi/eslint-plugin": "^0.18.0",
     "@types/eslint-scope": "^8.3.0",
     "@types/node": "^22.0.0",
     "@unocss/preset-icons": "^66.2.3",
