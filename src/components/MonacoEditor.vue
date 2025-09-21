@@ -166,7 +166,7 @@ function runCodeAction(codeAction: languages.CodeAction) {
 
   const operations: editor.ISingleEditOperation[] = [];
   for (const edit of codeAction.edit.edits) {
-    if (!("resource" in edit)) {
+    if (!("resource" in edit) || !("versionId" in edit)) {
       return;
     }
     if (edit.resource.toString() !== uri || modelVersion !== edit.versionId) {

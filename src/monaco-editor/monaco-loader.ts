@@ -25,9 +25,15 @@ export function loadMonaco(): Promise<Monaco> {
   return (
     monacoPromise ||
     (monacoPromise = (async () => {
-      const monaco: Monaco = await loadModuleFromMonaco(
+      const rawMonaco: Monaco | { m: Monaco } = await loadModuleFromMonaco(
         "vs/editor/editor.main",
       );
+      let monaco: Monaco;
+      if ("m" in rawMonaco) {
+        monaco = rawMonaco.m || rawMonaco;
+      } else {
+        monaco = rawMonaco;
+      }
 
       await setupEnhancedLanguages(monaco);
 
