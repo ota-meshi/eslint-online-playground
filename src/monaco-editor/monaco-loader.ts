@@ -109,16 +109,31 @@ function setAllValidations(
 /** Load the Monaco editor. */
 async function loadMonacoFromEsmCdn(): Promise<Monaco> {
   let error = new Error();
-  const urlList = ["https://cdn.jsdelivr.net/npm/monaco-editor/+esm"];
+  const urlList = [
+    {
+      script: "https://cdn.jsdelivr.net/npm/monaco-editor/+esm",
+      style: "https://cdn.jsdelivr.net/npm/monaco-editor/min/vs/style.min.css",
+    },
+  ];
 
   if (typeof monacoVersion !== "undefined") {
-    urlList.unshift(
-      `https://cdn.jsdelivr.net/npm/monaco-editor@${monacoVersion}/+esm`,
-    );
+    urlList.unshift({
+      script: `https://cdn.jsdelivr.net/npm/monaco-editor@${monacoVersion}/+esm`,
+      style: `https://cdn.jsdelivr.net/npm/monaco-editor@${
+        monacoVersion
+      }/min/vs/style.min.css`,
+    });
   }
   for (const url of urlList) {
     try {
-      const result = await importFromCDN(url);
+      const result = await importFromCDN(url.script);
+
+      if (typeof document !== "undefined") {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = url.style;
+        document.head.append(link);
+      }
       return result as Monaco;
     } catch (e: unknown) {
       // eslint-disable-next-line no-console -- OK
