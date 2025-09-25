@@ -25,10 +25,14 @@ export function loadMonaco(): Promise<Monaco> {
   return (
     monacoPromise ||
     (monacoPromise = (async () => {
-      const rawMonaco: Monaco | { m: Monaco } = await loadModuleFromMonaco(
-        "vs/editor/editor.main",
-      );
-      let monaco: Monaco;
+      let rawMonaco: Monaco | { m: Monaco }, monaco: Monaco;
+      try {
+        rawMonaco = await loadMonacoFromEsmCdn();
+      } catch {
+        rawMonaco = await loadModuleFromMonaco<Monaco | { m: Monaco }>(
+          "vs/editor/editor.main",
+        );
+      }
       if ("m" in rawMonaco) {
         monaco = rawMonaco.m || rawMonaco;
       } else {
@@ -100,6 +104,29 @@ function setAllValidations(
     ...monaco.languages.css.lessDefaults.options,
     validate,
   });
+}
+
+/** Load the Monaco editor. */
+async function loadMonacoFromEsmCdn(): Promise<Monaco> {
+  let error = new Error();
+  const urlList = ["https://cdn.jsdelivr.net/npm/monaco-editor/+esm"];
+
+  if (typeof monacoVersion !== "undefined") {
+    urlList.unshift(
+      `https://cdn.jsdelivr.net/npm/monaco-editor@${monacoVersion}/+esm`,
+    );
+  }
+  for (const url of urlList) {
+    try {
+      const result = await importFromCDN(url);
+      return result as Monaco;
+    } catch (e: unknown) {
+      // eslint-disable-next-line no-console -- OK
+      console.warn(`Failed to retrieve resource from ${url}`);
+      error = e as Error;
+    }
+  }
+  throw error;
 }
 
 async function loadModuleFromMonaco<T>(moduleName: string): Promise<T> {
