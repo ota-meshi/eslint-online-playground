@@ -60,7 +60,7 @@
     "eslint-plugin-toml": "^0.12.0",
     "eslint-plugin-vue": "^10.0.0",
     "eslint-plugin-yml": "^1.14.0",
-    "monaco-editor": "^0.53.0",
+    "monaco-editor": "^0.54.0",
     "typescript": "^5.5.2",
     "typescript-eslint": "^8.29.1",
     "unocss": "^66.2.3",
