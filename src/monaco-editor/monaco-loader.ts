@@ -112,16 +112,15 @@ async function loadMonacoFromEsmCdn(): Promise<Monaco> {
   const urlList = [
     {
       script: "https://cdn.jsdelivr.net/npm/monaco-editor/+esm",
-      style: "https://cdn.jsdelivr.net/npm/monaco-editor/min/vs/style.min.css",
+      style:
+        "https://cdn.jsdelivr.net/npm/monaco-editor/min/vs/editor/editor.main.css",
     },
   ];
 
   if (typeof monacoVersion !== "undefined") {
     urlList.unshift({
       script: `https://cdn.jsdelivr.net/npm/monaco-editor@${monacoVersion}/+esm`,
-      style: `https://cdn.jsdelivr.net/npm/monaco-editor@${
-        monacoVersion
-      }/min/vs/style.min.css`,
+      style: `https://cdn.jsdelivr.net/npm/monaco-editor@${monacoVersion}/min/vs/editor/editor.main.css`,
     });
   }
   for (const url of urlList) {
