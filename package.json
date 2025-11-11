@@ -31,7 +31,7 @@
     "@shikijs/monaco": "^3.2.1",
     "@webcontainer/api": "^1.2.0",
     "ansi-regex": "^6.1.0",
-    "eslint-scope": "^8.3.0",
+    "eslint-scope": "^9.0.0",
     "esrap": "^2.0.0",
     "fflate": "^0.8.2",
     "shiki": "^3.2.1",
