@@ -1,5 +1,6 @@
 <script lang="ts">
 export const name = "html-eslint";
+export default {};
 </script>
 <template>
   <div>
