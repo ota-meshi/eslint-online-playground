@@ -1,0 +1,16 @@
+// Unsorted imports
+import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import path from 'node:path'
+import axios from 'axios'
+import { z } from 'zod'
+
+// Unsorted object
+const config = {
+  port: 3000,
+  host: 'localhost',
+  debug: true,
+  apiKey: 'secret',
+}
+
+// Unsorted named exports
+export { path, config }
