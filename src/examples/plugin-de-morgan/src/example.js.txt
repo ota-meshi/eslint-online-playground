@@ -1,0 +1,14 @@
+// Negated conjunction: !(a && b) should be !a || !b
+if (!(a && b)) {
+  console.log('one')
+}
+
+// Negated disjunction: !(a || b) should be !a && !b
+if (!(a || b)) {
+  console.log('two')
+}
+
+// More complex example
+if (!(x > 0 && y < 10)) {
+  console.log('three')
+}

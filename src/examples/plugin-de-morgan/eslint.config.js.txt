@@ -1,0 +1,5 @@
+import deMorgan from 'eslint-plugin-de-morgan'
+
+export default [
+  deMorgan.configs.recommended,
+]
