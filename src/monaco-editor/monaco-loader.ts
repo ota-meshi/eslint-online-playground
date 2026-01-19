@@ -74,34 +74,34 @@ function setAllValidations(
   monaco: Monaco,
   validate: boolean,
   languageOptions?: {
-    json?: monaco.languages.json.DiagnosticsOptions;
+    json?: monaco.json.DiagnosticsOptions;
   },
 ) {
-  monaco.languages.typescript.javascriptDefaults.setDiagnosticsOptions({
-    ...monaco.languages.typescript.javascriptDefaults.getDiagnosticsOptions(),
+  monaco.typescript.javascriptDefaults.setDiagnosticsOptions({
+    ...monaco.typescript.javascriptDefaults.getDiagnosticsOptions(),
     noSemanticValidation: !validate,
     noSyntaxValidation: !validate,
   });
-  monaco.languages.typescript.typescriptDefaults.setDiagnosticsOptions({
-    ...monaco.languages.typescript.typescriptDefaults.getDiagnosticsOptions(),
+  monaco.typescript.typescriptDefaults.setDiagnosticsOptions({
+    ...monaco.typescript.typescriptDefaults.getDiagnosticsOptions(),
     noSemanticValidation: !validate,
     noSyntaxValidation: !validate,
   });
-  monaco.languages.json.jsonDefaults.setDiagnosticsOptions({
-    ...monaco.languages.json.jsonDefaults.diagnosticsOptions,
+  monaco.json.jsonDefaults.setDiagnosticsOptions({
+    ...monaco.json.jsonDefaults.diagnosticsOptions,
     validate,
     ...languageOptions?.json,
   });
-  monaco.languages.css.cssDefaults.setOptions({
-    ...monaco.languages.css.cssDefaults.options,
+  monaco.css.cssDefaults.setOptions({
+    ...monaco.css.cssDefaults.options,
     validate,
   });
-  monaco.languages.css.scssDefaults.setOptions({
-    ...monaco.languages.css.scssDefaults.options,
+  monaco.css.scssDefaults.setOptions({
+    ...monaco.css.scssDefaults.options,
     validate,
   });
-  monaco.languages.css.lessDefaults.setOptions({
-    ...monaco.languages.css.lessDefaults.options,
+  monaco.css.lessDefaults.setOptions({
+    ...monaco.css.lessDefaults.options,
     validate,
   });
 }
