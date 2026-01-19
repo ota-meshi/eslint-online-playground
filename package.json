@@ -59,7 +59,7 @@
     "eslint-plugin-security": "~3.0.1",
     "eslint-plugin-toml": "^1.0.0",
     "eslint-plugin-vue": "^10.0.0",
-    "eslint-plugin-yml": "^1.14.0",
+    "eslint-plugin-yml": "^3.0.0",
     "monaco-editor": "^0.55.0",
     "typescript": "^5.5.2",
     "typescript-eslint": "^8.29.1",
