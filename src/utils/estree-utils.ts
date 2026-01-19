@@ -113,7 +113,10 @@ export async function toValueFromESExpression(
   const eslintUtils: ESLintUtils = await import(
     "@eslint-community/eslint-utils"
   );
-  const result = eslintUtils.getStaticValue(object, scopeManager.globalScope);
+  const result = eslintUtils.getStaticValue(
+    object,
+    scopeManager.globalScope as unknown as Scope.Scope,
+  );
   if (result) {
     return result.value;
   }
