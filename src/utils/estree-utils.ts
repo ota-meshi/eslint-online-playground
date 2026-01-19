@@ -1,6 +1,7 @@
 import type * as ESTree from "estree";
 import type * as eslintUtils from "@eslint-community/eslint-utils";
 import type { ScopeManager as ScopeManagerConstructor } from "eslint-scope";
+import type { Scope } from "eslint";
 type ESLintUtils = typeof eslintUtils;
 type ScopeManager = InstanceType<typeof ScopeManagerConstructor>;
 
