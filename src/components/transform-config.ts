@@ -10,6 +10,7 @@ import {
 import { toYAMLContent } from "../utils/yaml-utils";
 import type * as eslintUtils from "@eslint-community/eslint-utils";
 import { prettyStringify } from "../utils/json-utils";
+import type { Scope } from "eslint";
 type ESLintUtils = typeof eslintUtils;
 
 export async function transformConfigFormat(
@@ -159,7 +160,7 @@ async function jsExpressionToYaml(
         }
         const keyValue = eslintUtils.getPropertyName(
           prop,
-          scopeManager.globalScope,
+          scopeManager.globalScope as unknown as Scope.Scope,
         );
         if (keyValue == null) return null;
         const keyNode = toYAMLContent(yaml, keyValue);
