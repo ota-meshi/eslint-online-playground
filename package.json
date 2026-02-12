@@ -48,7 +48,7 @@
     "@unocss/preset-icons": "^66.2.3",
     "@vitejs/plugin-vue": "^6.0.0",
     "@vitest/coverage-v8": "^4.0.0",
-    "eslint": "^9.27.0",
+    "eslint": "^10.0.0",
     "eslint-config-prettier": "^10.0.0",
     "eslint-plugin-jsdoc": "^62.0.0",
     "eslint-plugin-json-schema-validator": "^6.0.0",
