@@ -111,9 +111,8 @@ export async function toValueFromESExpression(
   object: ESTree.Expression,
   scopeManager: ScopeManager,
 ): Promise<unknown> {
-  const eslintUtils: ESLintUtils = await import(
-    "@eslint-community/eslint-utils"
-  );
+  const eslintUtils: ESLintUtils =
+    await import("@eslint-community/eslint-utils");
   const result = eslintUtils.getStaticValue(
     object,
     scopeManager.globalScope as unknown as Scope.Scope,

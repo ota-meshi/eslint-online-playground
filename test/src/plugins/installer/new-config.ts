@@ -37,9 +37,8 @@ describe("installPluginForFlatConfig with es-x", async () => {
   });
 });
 describe("installPluginForFlatConfig with jsdoc", async () => {
-  const plugin = await import(
-    "../../../../src/plugins/plugins/jsdoc/plugin.ts"
-  );
+  const plugin =
+    await import("../../../../src/plugins/plugins/jsdoc/plugin.ts");
   test("esm", async () => {
     const result = await installPluginForFlatConfig(esmConfigText, [plugin]);
     expect(result.configText).toMatchSnapshot();
@@ -50,9 +49,8 @@ describe("installPluginForFlatConfig with jsdoc", async () => {
   });
 });
 describe("installPluginForFlatConfig with stylistic", async () => {
-  const plugin = await import(
-    "../../../../src/plugins/plugins/stylistic/plugin.ts"
-  );
+  const plugin =
+    await import("../../../../src/plugins/plugins/stylistic/plugin.ts");
   test("esm", async () => {
     const result = await installPluginForFlatConfig(esmConfigText, [plugin]);
     expect(result.configText).toMatchSnapshot();
@@ -63,9 +61,8 @@ describe("installPluginForFlatConfig with stylistic", async () => {
   });
 });
 describe("installPluginForFlatConfig with typescript-eslint", async () => {
-  const plugin = await import(
-    "../../../../src/plugins/plugins/typescript-eslint/plugin.ts"
-  );
+  const plugin =
+    await import("../../../../src/plugins/plugins/typescript-eslint/plugin.ts");
   test("esm", async () => {
     const result = await installPluginForFlatConfig(esmConfigText, [plugin]);
     expect(result.configText).toMatchSnapshot();

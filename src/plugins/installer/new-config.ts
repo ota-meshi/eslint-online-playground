@@ -83,14 +83,14 @@ export async function installPluginForFlatConfig(
 
     const scopeManager = await analyzeScope(ast);
     const usedIds = new Set<string>();
-    scopeManager.globalScope.through.forEach((ref) =>
+    scopeManager.globalScope!.through.forEach((ref) =>
       usedIds.add(ref.identifier.name),
     );
-    scopeManager.globalScope.variables.forEach((variable) =>
+    scopeManager.globalScope!.variables.forEach((variable) =>
       usedIds.add(variable.name),
     );
-    scopeManager.globalScope.childScopes
-      .find((s) => s.type === "module")
+    scopeManager
+      .globalScope!.childScopes.find((s) => s.type === "module")
       ?.variables.forEach((variable) => usedIds.add(variable.name));
 
     const helper: BuildESLintConfigHelper = {
