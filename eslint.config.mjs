@@ -44,7 +44,7 @@ export default [
   {
     files: ["**/*.{ts,vue}"],
     rules: {
-      "@typescript-eslint/no-restricted-imports": [
+      "no-restricted-imports": [
         "error",
         {
           paths: [

@@ -353,7 +353,8 @@ function registerShikiHighlighterLanguage(
       ...needRegisterShikiHighlighterLanguageIds,
     ].map(
       (languageId) =>
-        CUSTOM_LANGUAGES[languageId]?.() ?? (languageId as BundledLanguage),
+        CUSTOM_LANGUAGES[languageId]?.() ??
+        Promise.resolve(languageId as BundledLanguage),
     );
     needRegisterShikiHighlighterLanguageIds.clear();
     const [shikiMonaco] = await Promise.all([

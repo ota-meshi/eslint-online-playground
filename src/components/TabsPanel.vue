@@ -45,8 +45,8 @@ defineExpose({ setChecked });
 
 <template>
   <div class="ep-tabs">
-    <template v-for="tab in tabs" :key="tab.name">
-      <label>
+    <template v-for="tab in tabs" :key="tab.value.name">
+      <label :data-key="tab.value.name">
         <input
           :ref="
             (el: unknown) => (radios[tab.value.name] = el as HTMLInputElement)

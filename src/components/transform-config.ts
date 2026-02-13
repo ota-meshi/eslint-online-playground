@@ -121,9 +121,8 @@ async function jsExpressionToYaml(
   | null
 > {
   const scopeManager = await analyzeScope(program);
-  const eslintUtils: ESLintUtils = await import(
-    "@eslint-community/eslint-utils"
-  );
+  const eslintUtils: ESLintUtils =
+    await import("@eslint-community/eslint-utils");
 
   return toYaml(node);
 

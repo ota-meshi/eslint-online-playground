@@ -8,6 +8,10 @@ const props = defineProps<{
   level?: number;
 }>();
 const normalizeLevel = computed(() => props.level || 0);
+
+defineSlots<{
+  default(props: { level: number; tab: Tab }): unknown;
+}>();
 </script>
 
 <template>
@@ -19,11 +23,7 @@ const normalizeLevel = computed(() => props.level || 0);
     >
     <div class="tree-item__nest">
       <template v-for="n in node.children" :key="n.name">
-        <TreeItem
-          v-slot="params: { level: number; tab: Tab }"
-          :node="n"
-          :level="normalizeLevel + 1"
-        >
+        <TreeItem v-slot="params" :node="n" :level="normalizeLevel + 1">
           <slot :level="params.level" :tab="params.tab" />
         </TreeItem>
       </template>
