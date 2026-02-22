@@ -1,5 +1,5 @@
 import eslintPluginJsonSchemaValidator from "eslint-plugin-json-schema-validator";
 
 export default [
-  ...eslintPluginJsonSchemaValidator.configs["flat/recommended"],
+  ...eslintPluginJsonSchemaValidator.configs.recommended,
 ];

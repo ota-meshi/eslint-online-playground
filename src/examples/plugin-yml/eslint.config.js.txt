@@ -2,5 +2,5 @@ import js from "@eslint/js";
 import eslintPluginYml from "eslint-plugin-yml";
 export default [
   js.configs.recommended,
-  ...eslintPluginYml.configs["flat/standard"],
+  ...eslintPluginYml.configs.standard,
 ];

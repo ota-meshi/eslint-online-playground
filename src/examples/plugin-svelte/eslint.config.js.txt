@@ -3,7 +3,7 @@ import sveltePlugin from "eslint-plugin-svelte";
 import svelteParser from "svelte-eslint-parser";
 export default [
   js.configs.recommended,
-  ...sveltePlugin.configs["flat/recommended"],
+  ...sveltePlugin.configs.recommended,
   {
     files: ["**/*.svelte.js", "*.svelte.js"],
     languageOptions: {

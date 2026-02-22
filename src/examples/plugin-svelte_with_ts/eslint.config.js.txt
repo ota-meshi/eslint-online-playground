@@ -5,7 +5,7 @@ import tseslint from "typescript-eslint";
 export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
-  ...sveltePlugin.configs["flat/recommended"],
+  ...sveltePlugin.configs.recommended,
   {
     files: ["**/*.svelte", "*.svelte"],
     languageOptions: {

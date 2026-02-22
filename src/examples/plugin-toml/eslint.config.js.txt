@@ -2,5 +2,5 @@ import js from "@eslint/js";
 import eslintPluginToml from "eslint-plugin-toml";
 export default [
   js.configs.recommended,
-  ...eslintPluginToml.configs["flat/standard"],
+  ...eslintPluginToml.configs.standard,
 ];

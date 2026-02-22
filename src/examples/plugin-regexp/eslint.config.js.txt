@@ -2,5 +2,5 @@ import js from "@eslint/js";
 import * as regexpPlugin from "eslint-plugin-regexp"
 export default [
   js.configs.recommended,
-  regexpPlugin.configs["flat/recommended"]
+  regexpPlugin.configs.recommended
 ];
