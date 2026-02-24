@@ -316,6 +316,8 @@ const CUSTOM_LANGUAGES: Partial<
   Record<Language, () => Promise<LanguageRegistration | LanguageRegistration[]>>
 > = {
   cds: () => import("./syntaxes/cds.tmLanguage").then((m) => m.grammar),
+  toml: () =>
+    importFromEsmSh<any>("@shikijs/langs/toml").then((m) => m.default || m),
 };
 
 const needRegisterShikiHighlighterLanguageIds = new Set<Language>();
