@@ -3,8 +3,8 @@ import type { editor } from "monaco-editor";
 import type { languages } from "monaco-editor";
 import { loadMonaco } from "./monaco-loader.js";
 
-export const DARK_THEME_NAME = "github-dark";
-export const LIGHT_THEME_NAME = "github-light";
+export const DARK_THEME_NAME = "dark-plus";
+export const LIGHT_THEME_NAME = "light-plus";
 
 export type CodeActionProvider = (
   model: editor.ITextModel,
