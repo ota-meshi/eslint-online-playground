@@ -334,7 +334,9 @@ async function registerShikiHighlighter(
 
   if (!models.length) {
     monaco.languages.onLanguageEncountered(languageId, () => {
-      void registerShikiHighlighterLanguage(monaco, highlighter, languageId);
+      setTimeout(() => {
+        void registerShikiHighlighterLanguage(monaco, highlighter, languageId);
+      }, 500);
     });
   } else {
     await registerShikiHighlighterLanguage(monaco, highlighter, languageId);
