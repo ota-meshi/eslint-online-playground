@@ -96,6 +96,9 @@
 .netlify-dark-badge {
   display: none;
 }
+.netlify-light-badge {
+  display: block;
+}
 
 .dark .netlify-dark-badge {
   display: block;
