@@ -8,7 +8,9 @@ type RepoResponse = { default_branch: string };
 type TreeFile = { type: "blob"; url: string; path: string };
 type TreeDir = { type: "tree"; url: string; path: string };
 type TreeResponse = { tree: (TreeFile | TreeDir)[]; truncated: boolean };
-type RateLimitResponse = { rate: { limit: number; remaining: number } };
+type RateLimitResponse = {
+  resources: { core: { limit: number; remaining: number } };
+};
 
 type UnGhRepoResponse = { repo: { defaultBranch: string } };
 type UnGhFile = { path: string };
@@ -251,7 +253,7 @@ function fetchForGitHub(
             throw new Error(`Failed to fetch ${url}: ${rlRes.statusText}`);
           }
           const rlJson: RateLimitResponse = await rlRes.json();
-          if (rlJson.rate.remaining > 0) {
+          if (rlJson.resources.core.remaining > 0) {
             throw new Error(`Failed to fetch ${url}: ${res.statusText}`);
           }
           return retryFetchForGitHubWithRequestToken(
@@ -275,7 +277,7 @@ function fetchForGitHub(
     dialog.style.flexDirection = "column";
     dialog.style.alignItems = "stretch";
     // Message element
-    dialog.innerHTML = `<div style="text-align: center; background-color: #fff9">Rate limit exceeded. (${rlRes.rate.remaining}/${rlRes.rate.limit})<br>
+    dialog.innerHTML = `<div style="text-align: center; background-color: #fff9">Rate limit exceeded. (${rlRes.resources.core.remaining}/${rlRes.resources.core.limit})<br>
 You may be able to continue processing by entering <a href="https://docs.github.com/ja/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens" target="_blank">GITHUB_TOKEN</a>.
 </div>
 `;
