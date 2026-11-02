@@ -42,7 +42,7 @@
     "yaml": "^2.4.5"
   },
   "devDependencies": {
-    "@ota-meshi/eslint-plugin": "^0.20.0",
+    "@ota-meshi/eslint-plugin": "^0.21.0",
     "@types/eslint-scope": "^9.0.0",
     "@types/node": "^26.0.0",
     "@typescript-eslint/parser": "^8.55.0",
